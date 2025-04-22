@@ -3,8 +3,6 @@ import type { PaymentDetails, SettleResponse, VerifyResponse } from "@/types";
 import { exact } from "@/schemes";
 import { toJsonSafe } from "./utils";
 
-const DEFAULT_FACILITATOR_URL = "https://facilitator.bitgpt.xyz"; // TODO: Review and replace this URL
-
 // TODO: Add JSDoc
 export async function createPaymentHandler(
   paymentDetails: PaymentDetails,
@@ -39,7 +37,7 @@ type FacilitatorResponse<T> = {
 };
 
 // TODO: Add JSDoc
-export function useFacilitator(url: string = DEFAULT_FACILITATOR_URL) {
+export function useFacilitator(url: string) {
   async function makeRequest<T>(
     endpoint: string,
     payload: string,
