@@ -19,11 +19,13 @@ app.use(
 
 This protocol builds on top of [x402](https://github.com/coinbase/x402), with minimal deviations from its schema to ensure the continuation and adoption of a true open standard.
 
+![playground sequence diagram explanations](./images/playground/explanation.png)
+
 ## Playground
 
 To detail and showcase our idea of the 402 protocol, we've built a public playground available at [play.bitgpt.xyz](https://play.bitgpt.xyz). It demonstrates how the 402 payment flow works in comparison to traditional human checkouts.
 
-In a typical crypto checkout, users go through multiple steps—connecting a wallet, signing a transaction, and broadcasting it.
+In a typical crypto checkout, users go through multiple steps: connecting a wallet, signing a transaction, and broadcasting it.
 
 ![human checkout](./images/playground/human-checkout.png)
 
@@ -40,11 +42,115 @@ The 402 flow can vary based on the payment schema and user-agent configuration. 
 - `exact`: Simple flow with known amount.
 - `upto`, `prepaid`, `streamed`, `subscription`, `postpaid`: More dynamic, require negotiation or ongoing interaction.
 
-![playground sequence diagram explanations](./images/playground/explanation.png)
-
 The playground is still under active development. While it currently mocks the protocol and checkout interface, more examples and features will be added soon, both here and in the soon-to-be-open-sourced repository.
 
 ![playground sequence diagram explanations](./images/playground/examples.png)
+
+## Protocol
+
+We decided to create `h402`, which simply stands for `HTTP 402` (since names starting with a number aren’t very computer-friendly, just `402` was not possible), based on the primitives provided by [x402](https://github.com/coinbase/x402).
+
+The reason for spinning off into a separate project comes down to a few key points
+- First, we needed to move fast; this protocol is and will be critical for our payment platform, and building independently allows us to iterate quickly
+- Second, maintaining a separate implementation gives us the freedom to make protocol decisions that aren’t influenced by the priorities of BASE (and by extension, USDC), whose development may naturally lean toward optimizing for their internal use cases or preferred chains, rather than creating a broadly compatible solution for other blockchains.
+
+Another major factor is the need to support features not currently handled by x402:
+- For example, x402 assumes the presence of permit-based tokens (EIP-2612), which USDC supports, but USDT doesn't
+- We also needed to implement post-broadcast validations for cryptocurrencies like Bitcoin
+- And most importantly, we required polling-based systems, which are essential both as fallback mechanisms for payment providers and for any setup that relies on standalone address verification, rather than a one-size-fits-all signed payload + broadcast approach
+
+> We're a fairly small team, so this repo is evolving rapidly—we'll be updating it weekly (or even daily) with new details, schemas, and examples.
+> In the meantime, if anything's missing or underspecified, you can check out the original x402 repository for reference.
+> Eventually, this message will disappear—because we genuinely believe this will become the leading implementation of the 402 protocol, or we will find a way to merge with x402.
+
+## Example Next application
+
+In the `example/` folder we've provided a simple demo of a Next webapp integrating both the facilitator (server) and the client to restrict access to a specific page under a 402 payment required response.
+
+It works utilizing this package and its functionalities and provides a quick example of how such an integration can be made, including the UI for the wallet connection & send.
+
+## Current schemas and types
+
+The only available schema for now is `exact`, the types are the following.
+
+We're currently working to update them up to a newer spec and improve, where needed, certain fields.
+
+```typescript
+
+/** Payment details */
+
+export type PaymentDetails = {
+  // Scheme of the payment protocol to use
+  scheme: string;
+  // Namespace for the receiving blockchain network
+  namespace: string;
+  // Chain of the blockchain to send payment on
+  chainId: string;
+  // Amount required to access the resource as token x decimals
+  amountRequired: bigint;
+  // Token contract
+  tokenAddress: string;
+  // Token decimals
+  tokenDecimals: number;
+  // Identifier of what the user pays for
+  resource: string;
+  // Description of the resource
+  description: string;
+  // Mime type of the rescource response
+  mimeType: string;
+  // Output schema of the resource response
+  outputSchema: object | null;
+  // Address to pay for accessing the resource
+  toAddress: string;
+  // Time in seconds it may be before the payment can be settaled
+  estimatedProcessingTime: number;
+  // Extra informations about the payment for the scheme
+  extra: Record<string, any> | null;
+};
+
+/** Payment Required Response */
+
+export type PaymentRequired = {
+  // Version of the 402 payment protocol
+  "402Version": number;
+  // List of payment details that the resource server accepts (A resource server may accept multiple tokens/chains)
+  accepts: PaymentDetails[];
+  // Message for error(s) that occured while processing payment
+  error: string | null;
+};
+
+/** Payment Payload */
+
+export type PaymentPayload<T> = {
+  // Version of the 402 payment protocol
+  version: number;
+  // Scheme of the payment protocol to use
+  scheme: string;
+  // Namespace for the receiving blockchain network
+  namespace: string;
+  // Chain of the blockchain to send payment on
+  chainId: string;
+  // Payload of the payment protocol
+  payload: T;
+  // Identifier of what the user pays for
+  resource: string;
+};
+
+/** Facilitator types */
+
+export type FacilitatorRequest = {
+  paymentHeader: string;
+  paymentDetails: PaymentDetails;
+};
+
+export type SettleResponse = {
+  success: boolean;
+  error?: string | undefined;
+  txHash?: string | undefined;
+  chainId?: string | undefined;
+};
+
+```
 
 ## Roadmap
 
