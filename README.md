@@ -5,12 +5,16 @@ HTTP 402 is the web-native standard for payments. Our mission is to design a fri
 This unlocks a previously unattainable economic layer for AI-native commerce, while simultaneously delivering a best-in-class user experience for humans.
 
 ```js
-app.use("/generate-image", monetize({
-  schema: "exact",
-  amount: 0.001,
-  token: "USDT",
-  chainId: 56, // BSC mainnet
-}))
+app.use(
+  "/generate-image",
+  monetize({
+    schema: "exact",
+    amount: 0.001,
+    token: "USDT",
+    chainId: 56, // BSC mainnet
+    namespace: "eip155",
+  })
+);
 ```
 
 This protocol builds on top of [x402](https://github.com/coinbase/x402), with minimal deviations from its schema to ensure the continuation and adoption of a true open standard.
@@ -49,6 +53,7 @@ Our vision for h402 is to establish a robust, open-source protocol for blockchai
 We're actively building a [payment platform](https://dash.bitgpt.xyz) to support both traditional merchants and autonomous agents. This platform will be based on the open protocol for seamless payment acceptance, remittance, and automation.
 
 Upcoming releases in Q2 2025 will include new protocol schemas:
+
 - `upto`
 - `prepaid`
 - `streamed`
@@ -69,10 +74,20 @@ Join our [Discord community](https://bitgpt.xyz/discord) to stay up to date, con
 - Support additional schemas
 - Support Solana, Bitcoin, Tron, and Ripple
 - Add unit tests
-- Complete this TODO list 😉
+- Add vulnerability protocol inside SECURITY.md
+- Add security best practices (be detailed about what goes with what), examples below:
+  - payload comes from the client and paymentDetails are from the server
+  - have verify and settle in a signle route as payload may be tampered with on the client
+- Document functions with JSDoc
+- Say somewhere the supported networks
+- Say that this is the v1 documentation
+- Add shceme specific docs and explain them seperatly and only put a link here
+- Probably change namespaces name to be more friendly ie "evm", "bitcoin", etc.
+- Review the first example in the README to be congruent with the required types
+- IMPORTANT: Change the imports in the package
+- IMPORTANT: Be sure that the package is accesible as @bit-gpt/h402 and not @bit-gpt/h402/dist/src
+- Improve structure.. Improve types.. Improve everything
 
 ## License
 
 The h402 protocol is licensed under the [Apache-2.0](https://github.com/coinbase/x402/blob/main/LICENSE.md) license.
-
-The schemas and verification logics are built on top of [x402](https://github.com/coinbase/x402).

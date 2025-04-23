@@ -4,7 +4,7 @@ import { exact } from "@/schemes";
 import { toJsonSafe } from "./utils";
 
 // TODO: Add JSDoc
-export async function createPaymentHandler(
+async function createPaymentHandler(
   paymentDetails: PaymentDetails,
   evmClient?: WalletClient
 ): Promise<string> {
@@ -37,7 +37,7 @@ type FacilitatorResponse<T> = {
 };
 
 // TODO: Add JSDoc
-export function useFacilitator(url: string) {
+function useFacilitator(url: string) {
   async function makeRequest<T>(
     endpoint: string,
     payload: string,
@@ -76,3 +76,5 @@ export function useFacilitator(url: string) {
       makeRequest<SettleResponse>("settle", payload, paymentDetails),
   };
 }
+
+export { createPaymentHandler, useFacilitator };
