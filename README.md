@@ -59,9 +59,9 @@ Another major factor is the need to support features not currently handled by x4
 - We also needed to implement post-broadcast validations for cryptocurrencies like Bitcoin
 - And most importantly, we required polling-based systems, which are essential both as fallback mechanisms for payment providers and for any setup that relies on standalone address verification, rather than a one-size-fits-all signed payload + broadcast approach
 
-> We're a fairly small team, so this repo is evolving rapidly—we'll be updating it weekly (or even daily) with new details, schemas, and examples.
+> We're a fairly small team, so this repo is evolving rapidly we'll be updating it weekly (or even daily) with new details, schemas, and examples.
 > In the meantime, if anything's missing or underspecified, you can check out the original x402 repository for reference.
-> Eventually, this message will disappear—because we genuinely believe this will become the leading implementation of the 402 protocol, or we will find a way to merge with x402.
+> Eventually, this message will disappear because we genuinely believe this will become the leading implementation of the 402 protocol, or we will find a way to merge with x402.
 
 ## Example Next application
 
