@@ -1,4 +1,7 @@
-import { PaymentPayload as ImportedPaymentPayloadType, Hex } from "@/types";
+import {
+  PaymentPayload as ImportedPaymentPayloadType,
+  Hex,
+} from "../../../types/index.js";
 
 export type NativeTransferParameters = {
   from: Hex;
