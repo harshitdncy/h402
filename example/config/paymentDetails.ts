@@ -1,17 +1,17 @@
-import { type PaymentDetails } from "@bit-gpt/h402/dist/src/types";
+import { type PaymentDetails } from "@bit-gpt/h402";
 
 export const paymentDetails: PaymentDetails = {
   scheme: "evm",
   namespace: "eip155",
-  chainId: "1",
-  amountRequired: BigInt("1000000000000000"),
-  tokenAddress: "0x0000000000000000000000000000000000000000",
+  chainId: "56",
+  amountRequired: BigInt("10000000000000000"), // 0.01 USDT
+  tokenAddress: "0x55d398326f99059fF775485246999027B3197955",
   tokenDecimals: 18,
   resource: "example-resource",
   description: "Access to protected content",
   mimeType: "application/json",
   outputSchema: null,
-  toAddress: "0x1234567890123456789012345678901234567890",
+  toAddress: "0xc60d20FB910794df939eA1B758B367d7114733ae",
   estimatedProcessingTime: 60,
-  extra: null
+  extra: null,
 };

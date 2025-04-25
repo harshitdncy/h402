@@ -1,7 +1,7 @@
 {
   "name": "@bit-gpt/h402",
   "version": "0.0.2",
-  "main": "dist/index.js",
+  "main": "dist/src/index.js",
   "description": "BitGPT's 402 Payment Protocol",
   "scripts": {
     "build": "tsc"
@@ -15,7 +15,17 @@
     "url": "https://github.com/bit-gpt/402/issues"
   },
   "homepage": "https://github.com/bit-gpt/402#readme",
-  "types": "dist/index.d.ts",
+  "types": "dist/src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "default": "./dist/src/index.js"
+    },
+    "./utils": {
+      "types": "./dist/src/utils/index.d.ts",
+      "default": "./dist/src/utils/index.js"
+    }
+  },
   "files": [
     "dist"
   ],

@@ -3,15 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
   },
   "dependencies": {
-    "@bit-gpt/h402": "^0.0.1",
-    "@reown/appkit": "^1.7.3",
-    "@reown/appkit-adapter-wagmi": "^1.7.3",
+    "@bit-gpt/h402": "latest",
     "@tanstack/react-query": "^5.74.4",
     "next": "15.3.1",
     "pino-pretty": "^13.0.0",

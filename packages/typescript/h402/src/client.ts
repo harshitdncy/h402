@@ -6,11 +6,12 @@ import type {
 } from "./types/index.js";
 import { exact } from "./schemes/index.js";
 import { toJsonSafe } from "./utils/index.js";
+import type { WalletClient } from "./types/index.js";
 
 // TODO: Add JSDoc
 async function createPaymentHandler(
   paymentDetails: PaymentDetails,
-  evmClient?: evm.WalletClient
+  evmClient?: WalletClient
 ): Promise<string> {
   if (!paymentDetails?.namespace) {
     throw new Error("Payment details namespace is required");

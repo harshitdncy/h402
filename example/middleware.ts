@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { useFacilitator } from "@bit-gpt/h402/dist/src";
+import { useFacilitator } from "@bit-gpt/h402";
 import { paymentDetails } from "./config/paymentDetails";
 
 export async function middleware(request: NextRequest) {
@@ -11,11 +11,11 @@ export async function middleware(request: NextRequest) {
       return NextResponse.json({ error: "Payment Required" }, { status: 402 });
     }
 
-    const { verifyPayload, settle } = useFacilitator(
+    const { verify, settle } = useFacilitator(
       "http://localhost:3000/api/facilitator"
     );
 
-    const { data: verifyData, error: verifyError } = await verifyPayload(
+    const { data: verifyData, error: verifyError } = await verify(
       paymentHeader,
       paymentDetails
     );

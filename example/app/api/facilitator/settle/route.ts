@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { settle } from "@bit-gpt/h402/dist/src/facilitator";
-import { createSignerClient } from "@bit-gpt/h402/dist/src/shared/evm/wallet";
-import { SettleResponse } from "@bit-gpt/h402/dist/src/types";
+import { settle } from "@bit-gpt/h402/facilitator";
+import { createSignerClient } from "@bit-gpt/h402/shared";
+import { SettleResponse } from "@bit-gpt/h402";
 
 export async function POST(request: NextRequest) {
   const body = await request.json();

@@ -1,4 +1,4 @@
-import type { Hex, PaymentDetails } from "../../../types/index.js";
+import type { Hex, PaymentDetails, WalletClient } from "../../../types/index.js";
 import {
   AuthorizationParameters,
   NativeTransferParameters,
@@ -23,7 +23,7 @@ const ERC20_ABI = [
 
 // TODO: Add JSDoc
 async function signNativeTransfer(
-  client: evm.WalletClient,
+  client: WalletClient,
   { from, to, value }: Pick<NativeTransferParameters, "from" | "to" | "value">,
   { chainId }: PaymentDetails
 ): Promise<{ signature: Hex; nonce: number }> {
@@ -49,7 +49,7 @@ async function signNativeTransfer(
 
 // TODO: Add JSDoc
 async function signTokenTransfer(
-  client: evm.WalletClient,
+  client: WalletClient,
   { from, to, value }: Pick<TokenTransferParameters, "from" | "to" | "value">,
   { tokenAddress, chainId }: PaymentDetails
 ): Promise<{ signature: Hex; nonce: number; data: Hex }> {
@@ -81,7 +81,7 @@ async function signTokenTransfer(
 
 // TODO: Add JSDoc
 async function signAuthorization(
-  client: evm.WalletClient,
+  client: WalletClient,
   { from, to, value }: Pick<AuthorizationParameters, "from" | "to" | "value">,
   { tokenAddress, chainId, estimatedProcessingTime }: PaymentDetails
 ): Promise<{

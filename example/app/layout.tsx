@@ -1,8 +1,7 @@
+import "./globals.css";
+
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
-import { default as ReownContextProvider } from "@/providers/reown/context";
-import { cookies } from "next/headers";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -19,21 +18,17 @@ export const metadata: Metadata = {
   description: "BitGPT 402 Example App using Next.js",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const cookieString = decodeURIComponent(cookies().toString());
-
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ReownContextProvider cookies={cookieString}>
-          {children}
-        </ReownContextProvider>
+        {children}
       </body>
     </html>
   );

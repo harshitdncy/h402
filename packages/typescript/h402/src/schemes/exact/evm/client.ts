@@ -10,6 +10,7 @@ import type {
   PaymentDetails,
   PaymentPayload,
   Hex,
+  WalletClient,
 } from "../../../types/index.js";
 import { config } from "../../../index.js";
 
@@ -27,7 +28,7 @@ const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 
 // TODO: Add JSDoc
 async function createPayment(
-  client: evm.WalletClient,
+  client: WalletClient,
   paymentDetails: PaymentDetails
 ): Promise<PaymentPayload<Payload>> {
   if (!client?.account?.address) {
@@ -118,7 +119,7 @@ async function createPayment(
 
 // TODO: Add JSDoc
 async function createPaymentHeader(
-  client: evm.WalletClient,
+  client: WalletClient,
   paymentDetails: PaymentDetails
 ): Promise<string> {
   const payment = await createPayment(client, paymentDetails);
