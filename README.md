@@ -176,27 +176,28 @@ Join our [Discord community](https://bitgpt.xyz/discord) to stay up to date, con
 
 ## TODO
 
-- Expand this README with detailed schema documentation, code examples, and functionality breakdowns
-- Add real-world examples
-- Provide a one-liner for frontend integration
-- Add SDKs for languages beyond TypeScript
-- Release public facilitator APIs for open use
-- Support additional schemas
-- Support Solana, Bitcoin, Tron, and Ripple
-- Add unit tests
-- Add vulnerability protocol inside SECURITY.md
-- Add security best practices (be detailed about what goes with what), examples below:
-  - payload comes from the client and paymentDetails are from the server
-  - have verify and settle in a signle route as payload may be tampered with on the client
-- Document functions with JSDoc
-- Say somewhere the supported networks
-- Say that this is the v1 documentation
-- Add shceme specific docs and explain them seperatly and only put a link here
-- Probably change namespaces name to be more friendly ie "evm", "bitcoin", etc.
-- Review the first example in the README to be congruent with the required types
-- IMPORTANT: Change the imports in the package
-- IMPORTANT: Be sure that the package is accesible as @bit-gpt/h402 and not @bit-gpt/h402/dist/src
-- Improve structure.. Improve types.. Improve everything
+- [] V1 release
+- [] Expand this README with detailed schema documentation, code examples, and functionality breakdowns
+- [] Add real-world examples
+- [] Provide a one-liner for frontend integration
+- [] Add SDKs for languages beyond TypeScript
+- [] Release public facilitator APIs for open use
+- [] Support additional schemas
+- [] Support Solana, Bitcoin, Tron, and Ripple
+- [] Add unit tests
+- [] Add vulnerability protocol inside SECURITY.md
+- [] Add security best practices (be detailed about what goes with what), examples below:
+  - [] payload comes from the client and paymentDetails are from the server
+  - [] have verify and settle in a signle route as payload may be tampered with on the client
+- [] Document functions with JSDoc
+- [] Say somewhere the supported networks
+- [] Say that this is the v1 documentation
+- [] Add shceme specific docs and explain them seperatly and only put a link here
+- [] Probably change namespaces name to be more friendly ie "evm", "bitcoin", etc.
+- [] Review the first example in the README to be congruent with the required types
+- [] IMPORTANT: Change the imports in the package
+- [] IMPORTANT: Be sure that the package is accesible as @bit-gpt/h402 and not @bit-gpt/h402/dist/src
+- [] Improve structure.. Improve types.. Improve everything
 
 ## License
 
