@@ -152,6 +152,10 @@ export type SettleResponse = {
 
 ```
 
+## FAQs
+
+See [FAQs.md](./FAQs.md)
+
 ## Roadmap
 
 Our vision for h402 is to establish a robust, open-source protocol for blockchain-native payments, not just as a solution for the ecosystem, but to fulfill a real need we face ourselves in standardizing agent-based blockchain transactions.
