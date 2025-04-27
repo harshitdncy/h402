@@ -1,0 +1,52 @@
+{
+  "name": "@bit-gpt/h402",
+  "version": "0.0.2",
+  "type": "module",
+  "main": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
+  "description": "BitGPT's 402 Payment Protocol",
+  "scripts": {
+    "build": "tsc"
+  },
+  "repository": "https://github.com/bit-gpt/402.git",
+  "keywords": [],
+  "author": "BitGPT",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/bit-gpt/402/issues"
+  },
+  "homepage": "https://github.com/bit-gpt/402#readme",
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "import": "./dist/src/index.js",
+      "default": "./dist/src/index.js"
+    },
+    "./types": {
+      "types": "./dist/src/types/index.d.ts",
+      "import": "./dist/src/types/index.js",
+      "default": "./dist/src/types/index.js"
+    },
+    "./facilitator": {
+      "types": "./dist/src/facilitator/index.d.ts",
+      "import": "./dist/src/facilitator/index.js",
+      "default": "./dist/src/facilitator/index.js"
+    },
+    "./next": {
+      "types": "./dist/src/middlewares/next/index.d.ts",
+      "import": "./dist/src/middlewares/next/index.js",
+      "default": "./dist/src/middlewares/next/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "devDependencies": {
+    "@types/node": "^22.14.1"
+  },
+  "dependencies": {
+    "next": "^15.3.1",
+    "typescript": "^5.8.3",
+    "viem": "^2.27.2"
+  }
+}
