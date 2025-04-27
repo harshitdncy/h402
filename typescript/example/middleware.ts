@@ -2,6 +2,11 @@ import { h402Middleware } from "@bit-gpt/h402/next";
 import { paymentDetails } from "./config/paymentDetails";
 import { NextResponse } from "next/server";
 import { openai } from "@/lib/openai";
+import path from "path";
+import { readFile } from "fs/promises";
+import { writeFile } from "fs/promises";
+
+const TX_HASH_DB_FILE = path.join(process.cwd(), "data", "txHash.json")
 
 export const middleware = h402Middleware({
   routes: ["/create-image"],
@@ -10,7 +15,7 @@ export const middleware = h402Middleware({
   facilitatorUrl: "http://localhost:3000/api/facilitator",
   onSuccess: async (request, facilitatorResponse) => {
     const prompt = request.nextUrl.searchParams.get("prompt");
-    const txHash = facilitatorResponse.txHash;
+    const txHash = facilitatorResponse.data.txHash!;
 
     const errorRedirectUrl = new URL("/");
 
@@ -21,6 +26,17 @@ export const middleware = h402Middleware({
     if (prompt.length > 30) {
       return NextResponse.redirect(errorRedirectUrl, { status: 400 });
     }
+
+    const txHashDbRaw = await readFile(TX_HASH_DB_FILE, "utf-8").catch(() => "[]")
+    const txHashDb = JSON.parse(txHashDbRaw) as string [];
+
+    if (txHashDb.includes(txHash)) {
+      return NextResponse.redirect(errorRedirectUrl, { status: 400});
+    }
+
+    txHashDb.push(txHash);
+
+    await writeFile(TX_HASH_DB_FILE, JSON.stringify(txHashDb), { encoding: "utf-8" });
 
     const imageResponse = await openai.images.generate({
       model: "dall-e-2",

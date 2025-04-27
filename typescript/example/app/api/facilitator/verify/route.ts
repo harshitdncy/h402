@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(verificationResult);
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       {
         isValid: false,

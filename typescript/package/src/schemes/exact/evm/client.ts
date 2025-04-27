@@ -30,7 +30,7 @@ async function _createPayment(
 
   const from = client.account.address as Hex;
   const to = paymentDetails.payToAddress as Hex;
-  const value = paymentDetails.amountRequired;
+  const value = paymentDetails.amountRequired as bigint;
 
   const basePayment = {
     version: config["h402Version"],

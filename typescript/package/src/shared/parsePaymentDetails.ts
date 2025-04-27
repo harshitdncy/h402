@@ -31,7 +31,7 @@ export async function parsePaymentDetailsForAmount(
 
     return {
       ...paymentDetails,
-      amountRequired: paymentDetails.amountRequired * BigInt(10 ** decimals),
+      amountRequired: BigInt(Math.floor(Number(paymentDetails.amountRequired) * 10 ** decimals)),
     };
   }
 
@@ -44,7 +44,9 @@ export async function parsePaymentDetailsForAmount(
 
     return {
       ...paymentDetails,
-      amountRequired: paymentDetails.amountRequired * BigInt(10 ** decimals),
+      amountRequired: BigInt(
+      Math.floor(Number(paymentDetails.amountRequired) * 10 ** decimals)
+      ),
     };
   } catch (error) {
     throw new Error(

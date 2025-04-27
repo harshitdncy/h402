@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
       success: true,
       content: "This is the secret protected content that requires payment!",
     } as SettleResponse);
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { success: false, error: "Payment settlement failed" } as SettleResponse,
       { status: 400 }

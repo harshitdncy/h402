@@ -8,6 +8,7 @@ import {
   createPublicClient,
   http,
   WalletClient,
+  PublicActions
 } from "viem";
 import { bsc } from "viem/chains";
 import { connect, disconnect } from "wagmi/actions";
@@ -18,7 +19,7 @@ import { injected } from "wagmi/connectors";
 import { config } from "@/config/wagmi";
 
 export default function Home() {
-  const [walletClient, setWalletClient] = useState<WalletClient | null>(null);
+  const [walletClient, setWalletClient] = useState<WalletClient & PublicActions | null>(null);
   const [paymentStatus, setPaymentStatus] = useState<string>("not_paid");
   const [statusMessage, setStatusMessage] = useState<string>("");
   const [connectedAddress, setConnectedAddress] = useState<string>("");
@@ -55,7 +56,7 @@ export default function Home() {
         throw new Error("Please switch to BSC network");
       }
 
-      setWalletClient(extendedClient as unknown as WalletClient);
+      setWalletClient(extendedClient);
       setConnectedAddress(result.accounts[0]);
       setStatusMessage("Wallet connected! You can now proceed with payment.");
     } catch (error) {
@@ -74,7 +75,7 @@ export default function Home() {
       setWalletClient(null);
       setConnectedAddress("");
       setStatusMessage("Wallet disconnected");
-    } catch (error) {
+    } catch {
       setStatusMessage("Failed to disconnect wallet");
     }
   };
@@ -99,7 +100,7 @@ export default function Home() {
         transport: http(),
       });
 
-      const chainId = await walletClient.getChainId();
+      const chainId = await walletClient.chain?.id;
       if (chainId !== bsc.id) {
         throw new Error("Please switch to BSC network");
       }

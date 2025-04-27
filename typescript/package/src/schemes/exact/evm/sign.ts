@@ -36,7 +36,7 @@ async function signNativeTransfer(
     const request = await client.prepareTransactionRequest({
       account: from,
       to,
-      value: value as bigint,
+      value,
       chain: evm.getChain(networkId),
     });
 

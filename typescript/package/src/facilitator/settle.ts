@@ -9,7 +9,7 @@ import { utils } from "./index.js";
  *
  * @param {string} payload - The encoded payment payload to settle
  * @param {PaymentDetails} paymentDetails - The payment details for the transaction
- * @param {Hex} privateKey - The private key used to sign and broadcast the transaction
+ * @param {string} privateKey - The private key used to sign and broadcast the transaction
  * @returns {Promise<{ txHash: string } | { errorMessage: string }>} A promise that resolves to either a transaction hash or an error message
  *
  * @description
@@ -24,12 +24,16 @@ import { utils } from "./index.js";
 async function settle(
   payload: string,
   paymentDetails: PaymentDetails,
-  privateKey: Hex
+  privateKey: string
 ): Promise<{ txHash: string } | { errorMessage: string }> {
   try {
+    if (!privateKey.startsWith("0x")) {
+      return { errorMessage: "Invalid private key" };
+    }
+
     const client = utils.createSignerClient(
       paymentDetails.networkId,
-      privateKey
+      privateKey as Hex
     );
 
     paymentDetails = await parsePaymentDetailsForAmount(

@@ -6,7 +6,7 @@ type PaymentDetails = {
   // Network of the blockchain to send payment on
   networkId: string;
   // Amount required to access the resource in atomic units
-  amountRequired: bigint;
+  amountRequired: number | bigint;
   // Format of the amount required
   amountRequiredFormat: "atomic" | "formatted";
   // Address to pay for accessing the resource
