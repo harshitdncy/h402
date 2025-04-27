@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
 import { NextRequest } from "next/server";
 import { utils } from "../index.js";
-import { FacilitatorResponse, PaymentDetails, VerifyResponse, SettleResponse } from "../../types/index.js";
+import {
+  FacilitatorResponse,
+  PaymentDetails,
+  VerifyResponse,
+  SettleResponse,
+} from "../../types/index.js";
 
 /**
  * Configuration options for the h402 middleware

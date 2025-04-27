@@ -2,22 +2,18 @@ import { h402Middleware } from "@bit-gpt/h402/next";
 import { paymentDetails } from "./config/paymentDetails";
 import { NextResponse } from "next/server";
 import { openai } from "@/lib/openai";
-import path from "path";
-import { readFile } from "fs/promises";
-import { writeFile } from "fs/promises";
-
-const TX_HASH_DB_FILE = path.join(process.cwd(), "data", "txHash.json")
 
 export const middleware = h402Middleware({
-  routes: ["/create-image"],
+  routes: ["/image"],
   paywallRoute: "/",
   paymentDetails,
-  facilitatorUrl: "http://localhost:3000/api/facilitator",
+  facilitatorUrl: process.env.FACILITATOR_URL!,
   onSuccess: async (request, facilitatorResponse) => {
     const prompt = request.nextUrl.searchParams.get("prompt");
     const txHash = facilitatorResponse.data.txHash!;
+    const baseUrl = request.nextUrl.origin;
 
-    const errorRedirectUrl = new URL("/");
+    const errorRedirectUrl = new URL("/", baseUrl);
 
     if (!prompt) {
       return NextResponse.redirect(errorRedirectUrl, { status: 400 });
@@ -27,19 +23,20 @@ export const middleware = h402Middleware({
       return NextResponse.redirect(errorRedirectUrl, { status: 400 });
     }
 
-    const txHashDbRaw = await readFile(TX_HASH_DB_FILE, "utf-8").catch(() => "[]")
-    const txHashDb = JSON.parse(txHashDbRaw) as string [];
+    const saveTxResponse = await fetch(baseUrl+"/api/handle-tx", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ txHash }),
+    });
 
-    if (txHashDb.includes(txHash)) {
-      return NextResponse.redirect(errorRedirectUrl, { status: 400});
+    if (!saveTxResponse.ok) {
+      return NextResponse.redirect(errorRedirectUrl, { status: 400 });
     }
 
-    txHashDb.push(txHash);
-
-    await writeFile(TX_HASH_DB_FILE, JSON.stringify(txHashDb), { encoding: "utf-8" });
-
     const imageResponse = await openai.images.generate({
-      model: "dall-e-2",
+      model: "gpt-image-1",
       prompt: prompt,
       n: 1,
       size: "1024x1024",
@@ -49,16 +46,18 @@ export const middleware = h402Middleware({
       return NextResponse.redirect(errorRedirectUrl, { status: 500 });
     }
 
-    const imageUrl = imageResponse.data[0].url;
+    const b64EncodedImage = imageResponse.data[0].b64_json;
 
-    if (!imageUrl) {
+    if (!b64EncodedImage) {
       return NextResponse.redirect(errorRedirectUrl, { status: 500 });
     }
 
-    return NextResponse.redirect(imageUrl, { status: 302 });
+    const url = new URL(`/image?b64=${b64EncodedImage}`, baseUrl);
+
+    return NextResponse.redirect(url, { status: 302 });
   },
 });
 
 export const config = {
-  matcher: "/create-image",
+  matcher: "/image",
 };

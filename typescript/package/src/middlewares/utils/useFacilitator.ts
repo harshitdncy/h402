@@ -19,7 +19,7 @@ function useFacilitator(url: string) {
       },
       body: JSON.stringify({
         payload,
-        details: toJsonSafe(paymentDetails),
+        paymentDetails: toJsonSafe(paymentDetails),
       }),
     });
 

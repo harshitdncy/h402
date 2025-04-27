@@ -136,8 +136,8 @@ function validatePaymentPayload(obj: any): PaymentPayload<exact.evm.Payload> {
       if (
         !obj.payload.transactionHash ||
         typeof obj.payload.transactionHash !== "string" ||
-        !obj.payload.signature ||
-        !obj.payload.signature.startsWith("0x")
+        !obj.payload.signedMessage ||
+        !obj.payload.signedMessage.startsWith("0x")
       ) {
         throw new Error("Invalid sign and send transaction payload values");
       }

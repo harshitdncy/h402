@@ -14,7 +14,7 @@ import { bsc } from "viem/chains";
 import { connect, disconnect } from "wagmi/actions";
 import { createPayment } from "@bit-gpt/h402";
 import { paymentDetails } from "@/config/paymentDetails";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { injected } from "wagmi/connectors";
 import { config } from "@/config/wagmi";
 
@@ -24,6 +24,7 @@ export default function Home() {
   const [statusMessage, setStatusMessage] = useState<string>("");
   const [connectedAddress, setConnectedAddress] = useState<string>("");
   const [imagePrompt, setImagePrompt] = useState<string>("");
+  const router = useRouter();
 
   const handleConnect = async () => {
     try {
@@ -119,8 +120,8 @@ export default function Home() {
         evmClient: walletClient,
       });
 
-      redirect(
-        `/create-image?h402-payment=${encodeURIComponent(
+      router.push(
+        `/image?h402-payment=${encodeURIComponent(
           paymentHeader
         )}&prompt=${encodeURIComponent(imagePrompt)}`
       );
