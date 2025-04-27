@@ -50,8 +50,9 @@ jobs:
           private-key: ${{ secrets.APP_PRIVATE_KEY }}
           permission-contents: write
           permission-metadata: read
-          repositories: |
-            manifests
+          owner: ${{ github.repository_owner }}
+          #repositories: |
+          #  manifests
       
       - name: Repository Dispatch
         uses: peter-evans/repository-dispatch@v3
