@@ -42,3 +42,29 @@ jobs:
             npm-token=NPM_TOKEN
         env:
           NPM_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/create-github-app-token@v2
+        id: app-token
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          permission-contents: write
+          permission-metadata: read
+          repositories: |
+            manifests
+      
+      - name: Repository Dispatch
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          repository: bit-gpt/manifests
+          event-type: deploy
+          client-payload: |
+            {
+              "ref": "${{ github.ref }}",
+              "path": "h402/example/overlays/dev",
+              "sha": "${{ github.sha }}",
+              "images": {
+                "example": "${{ secrets.REGISTRY_URL }}/h402/example:${{ github.sha }}"
+              }
+            }
