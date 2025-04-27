@@ -8,7 +8,7 @@ export const middleware = h402Middleware({
   paywallRoute: "/",
   paymentDetails,
   facilitatorUrl: "http://localhost:3000/api/facilitator",
-  onSucess: async (request, facilitatorResponse) => {
+  onSuccess: async (request, facilitatorResponse) => {
     const prompt = request.nextUrl.searchParams.get("prompt");
     const txHash = facilitatorResponse.txHash;
 

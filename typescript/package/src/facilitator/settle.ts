@@ -1,4 +1,4 @@
-import { PublicActions } from "viem/_types/clients/decorators/public.js";
+import { PublicActions } from "viem";
 import { exact } from "../schemes/index.js";
 import { parsePaymentDetailsForAmount } from "../shared/parsePaymentDetails.js";
 import { PaymentDetails, Hex } from "../types/index.js";

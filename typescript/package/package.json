@@ -2,8 +2,8 @@
   "name": "@bit-gpt/h402",
   "version": "0.0.3",
   "type": "module",
-  "main": "./dist/src/index.js",
-  "types": "./dist/src/index.d.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "description": "BitGPT's 402 Payment Protocol",
   "scripts": {
     "build": "tsc"
@@ -21,24 +21,24 @@
   "homepage": "https://github.com/bit-gpt/402#readme",
   "exports": {
     ".": {
-      "types": "./dist/src/index.d.ts",
-      "import": "./dist/src/index.js",
-      "default": "./dist/src/index.js"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
     },
     "./types": {
-      "types": "./dist/src/types/index.d.ts",
-      "import": "./dist/src/types/index.js",
-      "default": "./dist/src/types/index.js"
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/types/index.js",
+      "default": "./dist/types/index.js"
     },
     "./facilitator": {
-      "types": "./dist/src/facilitator/index.d.ts",
-      "import": "./dist/src/facilitator/index.js",
-      "default": "./dist/src/facilitator/index.js"
+      "types": "./dist/facilitator/index.d.ts",
+      "import": "./dist/facilitator/index.js",
+      "default": "./dist/facilitator/index.js"
     },
     "./next": {
-      "types": "./dist/src/middlewares/next/index.d.ts",
-      "import": "./dist/src/middlewares/next/index.js",
-      "default": "./dist/src/middlewares/next/index.js"
+      "types": "./dist/middlewares/next/index.d.ts",
+      "import": "./dist/middlewares/next/index.js",
+      "default": "./dist/middlewares/next/index.js"
     }
   },
   "files": [
