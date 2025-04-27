@@ -1,7 +1,7 @@
 import { PaymentDetails } from "@bit-gpt/h402/types";
 
 export const paymentDetails: PaymentDetails = {
-  scheme: "evm",
+  scheme: "exact",
   namespace: "eip155",
   networkId: "56",
   amountRequired: 0.01,
