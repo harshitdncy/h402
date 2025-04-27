@@ -1,0 +1,44 @@
+name: Deploy Example
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'typescript/example/**'
+
+jobs:
+  build:
+    runs-on: [self-hosted]
+
+    permissions:
+      contents: read
+      packages: read
+
+    steps:
+      -
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+    
+      -
+        name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ secrets.REGISTRY_URL }}
+          username: ${{ secrets.REGISTRY_USER }}
+          password: ${{ secrets.REGISTRY_PWD }}
+
+      - uses: actions/checkout@v4
+
+      - uses: docker/build-push-action@v6 
+        with:
+          context: "{{defaultContext}}:typescript/example"
+          tags: |
+            ${{ secrets.REGISTRY_URL }}/h402/example:latest
+            ${{ secrets.REGISTRY_URL }}/h402/example:${{ github.sha }}
+          push: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          secret-envs: |
+            npm-token=NPM_TOKEN
+        env:
+          NPM_TOKEN: ${{ secrets.GITHUB_TOKEN }}
