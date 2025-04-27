@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { settle } from "@bit-gpt/h402/facilitator";
-import { SettleResponse } from "@bit-gpt/h402/types";
+import { Hex, SettleResponse } from "@bit-gpt/h402/types";
 
 export async function POST(request: NextRequest) {
   const body = await request.json();
@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
     const settleResult = await settle(
       payload,
       paymentDetails,
-      process.env.PRIVATE_KEY
+      process.env.PRIVATE_KEY as Hex
     );
 
     if ("errorMessage" in settleResult) {
