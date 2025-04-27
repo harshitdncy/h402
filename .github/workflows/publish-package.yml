@@ -25,7 +25,7 @@ jobs:
           scope: "@bit-gpt"
       - run: |
           #!/bin/bash
-          cd ./packages/typescript/h402
+          cd ./typescript/package
           npm ci
           npm run build
           npm publish
