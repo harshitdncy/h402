@@ -23,11 +23,15 @@ jobs:
           node-version-file: ".nvmrc"
           registry-url: "https://npm.pkg.github.com"
           scope: "@bit-gpt"
-      - run: |
-          #!/bin/bash
+      - name: Create .npmrc
+        run: |
+          cd ./typescript/package
+          echo "engine-strict=true" > .npmrc
+          echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> .npmrc
+          echo "@bit-gpt:registry=https://npm.pkg.github.com" >> .npmrc
+      - name: Build and publish
+        run: |
           cd ./typescript/package
           npm ci
           npm run build
           npm publish
-        env:
-          NPM_TOKEN: ${{ secrets.GITHUB_TOKEN }}

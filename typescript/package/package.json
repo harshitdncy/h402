@@ -8,7 +8,10 @@
   "scripts": {
     "build": "tsc"
   },
-  "repository": "https://github.com/bit-gpt/402.git",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bit-gpt/402.git"
+  },
   "keywords": [],
   "author": "BitGPT",
   "license": "Apache-2.0",
