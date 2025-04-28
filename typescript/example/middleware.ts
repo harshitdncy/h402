@@ -32,7 +32,7 @@ export const middleware = h402Middleware({
       return NextResponse.redirect(errorRedirectUrl, { status: 302 });
     }
 
-    const saveTxResponse = await fetch(baseUrl + "/api/handle-tx", {
+    const saveTxResponse = await fetch(process.env.API_URL! + "/api/handle-tx", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
