@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import path from "path";
-import { readFile, writeFile } from "fs/promises";
+import { readFile, writeFile, mkdir } from "fs/promises";
 
-const TX_HASH_DB_FILE = path.join(process.cwd(), "data", "txHash.json");
+const DATA_DIR = path.join(process.cwd(), "data");
+const TX_HASH_DB_FILE = path.join(DATA_DIR, "txHash.json");
 
 export async function POST(req: NextRequest) {
   const { txHash } = await req.json();
@@ -11,13 +12,35 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Missing txHash" }, { status: 400 });
   }
 
-  const txHashDbRaw = await readFile(TX_HASH_DB_FILE, "utf-8").catch(
-    () => "[]"
-  );
-  const txHashDb = JSON.parse(txHashDbRaw) as string[];
+  try {
+    await mkdir(DATA_DIR, { recursive: true });
+  } catch (error) {
+    console.error("Failed to create data directory:", error);
+    return NextResponse.json(
+      { error: "Failed to create data directory" },
+      { status: 500 }
+    );
+  }
+
+  let txHashDb: string[];
+  try {
+    const txHashDbRaw = await readFile(TX_HASH_DB_FILE, "utf-8").catch(
+      () => "[]"
+    );
+    txHashDb = JSON.parse(txHashDbRaw);
+
+    if (!Array.isArray(txHashDb)) {
+      txHashDb = [];
+    }
+  } catch (error) {
+    txHashDb = [];
+  }
 
   if (txHashDb.includes(txHash)) {
-    return NextResponse.json({ error: "Duplicate txHash" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Transaction already used" },
+      { status: 400 }
+    );
   }
 
   txHashDb.push(txHash);

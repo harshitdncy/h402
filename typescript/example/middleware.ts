@@ -12,7 +12,8 @@ export const middleware = h402Middleware({
     return NextResponse.rewrite(request.nextUrl.origin, { status: 402 });
   },
   onSuccess: async (request, facilitatorResponse) => {
-    console.log("facilitatorResponse", facilitatorResponse);
+    console.log("onSuccess called with response:", facilitatorResponse);
+    console.log("Current URL:", request.nextUrl.toString());
 
     const prompt = request.nextUrl.searchParams.get("prompt");
     const txHash = facilitatorResponse.data?.txHash;
@@ -20,32 +21,34 @@ export const middleware = h402Middleware({
 
     const errorRedirectUrl = new URL("/", baseUrl);
 
-    if (!prompt) {
+    if (!prompt || prompt.length > 30 || !txHash) {
+      console.log("Invalid input, redirecting to error page");
       return NextResponse.redirect(errorRedirectUrl, { status: 302 });
     }
 
-    if (prompt.length > 30) {
+    try {
+      console.log("Attempting to save transaction:", txHash);
+      const saveTxResponse = await fetch(baseUrl + "/api/handle-tx", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ txHash }),
+      });
+
+      console.log("Save transaction response:", saveTxResponse.status);
+
+      if (!saveTxResponse.ok) {
+        console.log("Failed to save transaction, redirecting to error page");
+        return NextResponse.redirect(errorRedirectUrl, { status: 302 });
+      }
+
+      console.log("Transaction saved successfully, continuing with request");
+    } catch (error) {
+      console.error("Error saving transaction:", error);
       return NextResponse.redirect(errorRedirectUrl, { status: 302 });
     }
-
-    if (!txHash) {
-      return NextResponse.redirect(errorRedirectUrl, { status: 302 });
-    }
-
-    const saveTxResponse = await fetch(baseUrl + "/api/handle-tx", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ txHash }),
-    });
-
-    if (!saveTxResponse.ok) {
-      return NextResponse.redirect(errorRedirectUrl, { status: 302 });
-    }
-
-    return NextResponse.next();
-  }
+  },
 });
 
 export const config = {

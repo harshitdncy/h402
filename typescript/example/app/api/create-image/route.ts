@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { openai } from "@/lib/openai";
+import path from "path";
+import fs from "fs/promises";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
@@ -9,50 +11,38 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Prompt is required" }, { status: 400 });
   }
 
-  const imageResponse = await openai.images.generate({
-    model: "gpt-image-1",
-    // model: "dall-e-2", 
-    prompt: prompt,
-    n: 1,
-    size: "1024x1024",
-  });
+  const filename = `${crypto.randomUUID()}.png`;
+  const uploadsDir = path.join(process.cwd(), "public", "uploads");
+  const filepath = path.join(uploadsDir, filename);
 
-  if (!imageResponse.data || !imageResponse.data[0].b64_json) {
-    return NextResponse.json({ error: "No image data" }, { status: 500 });
+  try {
+    await fs.mkdir(uploadsDir, { recursive: true });
+  } catch (error) {
+    console.error("Failed to create uploads directory:", error);
+    return NextResponse.json(
+      { error: "Failed to create uploads directory" },
+      { status: 500 }
+    );
   }
 
-  // Return HTML that displays the base64 image fullscreen
-  const html = `
-    <!DOCTYPE html>
-    <html>
-      <head>
-        <style>
-          body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: black;
-          }
-          img {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
-          }
-        </style>
-      </head>
-      <body>
-        <img src="data:image/png;base64,${imageResponse.data[0].b64_json}" />
-      </body>
-    </html>
-  `;
+  openai.images
+    .generate({
+      model: "dall-e-3",
+      prompt: prompt,
+      n: 1,
+      size: "1024x1024",
+    })
+    .then(async (imageResponse) => {
+      if (imageResponse.data?.[0]?.url) {
+        const response = await fetch(imageResponse.data[0].url);
+        const buffer = await response.arrayBuffer();
 
-  return new NextResponse(html, {
-    headers: {
-      "Content-Type": "text/html",
-    },
-  });
+        await fs.writeFile(filepath, Buffer.from(buffer));
+      }
+    })
+    .catch(console.error);
+
+  return NextResponse.redirect(
+    new URL(`/image?filename=${filename}`, request.url)
+  );
 }
