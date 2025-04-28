@@ -1,9 +1,9 @@
-FROM node:22-alpine3.21 as base
+FROM node:22-alpine3.21 AS base
 RUN apk add --no-cache \
         python3 \
         build-base
 
-FROM base as build
+FROM base AS build
 WORKDIR /app
 COPY ./ /app
 RUN mv .npmrc.example .npmrc
