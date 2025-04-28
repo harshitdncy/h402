@@ -343,6 +343,7 @@ The playground is still under active development. While it currently mocks the p
 - [ ] Provide an HTML page that users can serve when returning a 402 status code to humans served directly by our package
 - [ ] Improve packages so that they enable users to implement 402 with one LOC for both Client and Server
 - [ ] Add SDKs for languages beyond TypeScript
+- [ ] Add support for WalletConnect and other implementations
 
 ### Examples
 
