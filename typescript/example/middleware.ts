@@ -17,15 +17,17 @@ export const middleware = h402Middleware({
     if (!prompt || prompt.length > 30 || !txHash) {
       return NextResponse.rewrite(errorRedirectUrl, { status: 302 });
     }
-
     try {
-      const saveTxResponse = await fetch(baseUrl + "/api/handle-tx", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ txHash }),
-      });
+      const saveTxResponse = await fetch(
+        process.env.API_URL! + "/api/handle-tx",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ txHash }),
+        }
+      );
 
       if (!saveTxResponse.ok) {
         return NextResponse.redirect(errorRedirectUrl, { status: 302 });
