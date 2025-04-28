@@ -21,15 +21,15 @@ export const middleware = h402Middleware({
     const errorRedirectUrl = new URL("/", baseUrl);
 
     if (!prompt) {
-      return NextResponse.redirect(errorRedirectUrl, { status: 303 });
+      return NextResponse.redirect(errorRedirectUrl, { status: 302 });
     }
 
     if (prompt.length > 30) {
-      return NextResponse.redirect(errorRedirectUrl, { status: 303 });
+      return NextResponse.redirect(errorRedirectUrl, { status: 302 });
     }
 
     if (!txHash) {
-      return NextResponse.redirect(errorRedirectUrl, { status: 303 });
+      return NextResponse.redirect(errorRedirectUrl, { status: 302 });
     }
 
     const saveTxResponse = await fetch(baseUrl + "/api/handle-tx", {
@@ -41,13 +41,11 @@ export const middleware = h402Middleware({
     });
 
     if (!saveTxResponse.ok) {
-      return NextResponse.redirect(errorRedirectUrl, { status: 303 });
+      return NextResponse.redirect(errorRedirectUrl, { status: 302 });
     }
 
-    const url = new URL(`/api/create-image?prompt=${prompt}`, baseUrl);
-
-    return NextResponse.redirect(url, { status: 302 });
-  },
+    return NextResponse.next();
+  }
 });
 
 export const config = {

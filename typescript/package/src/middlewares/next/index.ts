@@ -81,7 +81,7 @@ export function h402Middleware(config: H402Config) {
       return NextResponse.next();
     }
 
-    const payment = request.nextUrl.searchParams.get("h402-payment");
+    const payment = request.nextUrl.searchParams.get("402base64");
 
     if (!payment) {
       return handleError("Payment Required", request);
@@ -109,12 +109,6 @@ export function h402Middleware(config: H402Config) {
       if (onSuccess) {
         onSuccess(request, settleResponse);
       }
-    }
-
-    if (request.nextUrl.searchParams.has("h402-payment")) {
-      const cleanUrl = request.nextUrl.clone();
-      cleanUrl.searchParams.delete("h402-payment");
-      return NextResponse.redirect(cleanUrl);
     }
 
     return NextResponse.next();

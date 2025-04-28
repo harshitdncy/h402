@@ -345,6 +345,7 @@ The playground is still under active development. While it currently mocks the p
 - [ ] Improve packages so that they enable users to implement 402 with one LOC for both Client and Server
 - [ ] Add SDKs for languages beyond TypeScript
 - [ ] Add support for WalletConnect and other implementations
+- [ ] `await settle` after onSuccess?
 
 ### Examples
 

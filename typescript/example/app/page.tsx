@@ -123,7 +123,7 @@ export default function Home() {
       });
 
       router.push(
-        `/api/create-image?h402-payment=${encodeURIComponent(
+        `/api/create-image?402base64=${encodeURIComponent(
           paymentHeader
         )}&prompt=${encodeURIComponent(imagePrompt)}`
       );
