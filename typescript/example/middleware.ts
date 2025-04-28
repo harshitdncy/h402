@@ -20,15 +20,7 @@ export const middleware = h402Middleware({
 
     const errorRedirectUrl = new URL("/", baseUrl);
 
-    if (!prompt) {
-      return NextResponse.redirect(errorRedirectUrl, { status: 302 });
-    }
-
-    if (prompt.length > 30) {
-      return NextResponse.redirect(errorRedirectUrl, { status: 302 });
-    }
-
-    if (!txHash) {
+    if (!prompt || prompt.length > 30 || !txHash) {
       return NextResponse.redirect(errorRedirectUrl, { status: 302 });
     }
 

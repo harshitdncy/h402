@@ -27,7 +27,7 @@ interface H402Config {
   onSuccess?: (
     request: NextRequest,
     facilitatorResponse: FacilitatorResponse<VerifyResponse | SettleResponse>
-  ) => void;
+  ) => Promise<NextResponse | void>;
 }
 
 /**
@@ -94,7 +94,10 @@ export function h402Middleware(config: H402Config) {
     }
 
     if (onSuccess) {
-      onSuccess(request, verifyResponse);
+      const response = await onSuccess(request, verifyResponse);
+      if (response) {
+        return response;
+      }
     }
 
     const paymentType = verifyResponse.data?.type;
@@ -107,7 +110,10 @@ export function h402Middleware(config: H402Config) {
       }
 
       if (onSuccess) {
-        onSuccess(request, settleResponse);
+        const response = await onSuccess(request, settleResponse);
+        if (response) {
+          return response;
+        }
       }
     }
 
