@@ -69,7 +69,7 @@ export function h402Middleware(config: H402Config) {
 
   const defaultErrorHandler = (request: NextRequest) => {
     const redirectUrl = new URL(paywallRoute, request.url);
-    return NextResponse.redirect(redirectUrl, { status: 402 });
+    return NextResponse.rewrite(redirectUrl, { status: 402 });
   };
 
   const handleError = (error: string, request: NextRequest) =>

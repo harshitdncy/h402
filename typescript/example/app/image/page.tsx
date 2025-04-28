@@ -2,41 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
+import Image from "next/image";
 
 export default function ImagePage() {
-  const searchParams = useSearchParams();
-  const filename = searchParams.get("filename");
   const [status, setStatus] = useState<"loading" | "error" | "success">(
     "loading"
   );
   const [error, setError] = useState<string>("");
-
-  useEffect(() => {
-    if (!filename) {
-      setStatus("error");
-      setError("No filename provided");
-      return;
-    }
-
-    const checkImage = async () => {
-      try {
-        const response = await fetch(`/uploads/${filename}`);
-        if (response.ok) {
-          setStatus("success");
-        } else if (response.status === 404) {
-          setTimeout(checkImage, 2000);
-        } else {
-          setStatus("error");
-          setError("Failed to load image");
-        }
-      } catch (error) {
-        setStatus("error");
-        setError("Failed to load image");
-      }
-    };
-
-    checkImage();
-  }, [filename]);
 
   if (status === "error") {
     return (
@@ -61,9 +34,47 @@ export default function ImagePage() {
   }
 
   return (
+    <Suspense fallback={<div>Loadning..</div>} >
+      <ImageComponent setStatus={(status) => setStatus(status)} setError={(error) => setError(error)} />
+    </Suspense>
+  );
+}
+
+function ImageComponent({ setStatus, setError }: { setStatus: (status: "loading" | "error" | "success") => void; setError: (error: string) => void }) {
+  const searchParams = useSearchParams();
+  const filename = searchParams.get("filename");
+
+  useEffect(() => {
+    if (!filename) {
+      setStatus("error");
+      setError("No filename provided")
+    }
+
+    const checkImage = async () => {
+      try {
+        const response = await fetch(`/uploads/${filename}`);
+
+        if (response.ok) {
+          setStatus("success");
+        } else if (response.status === 404) {
+          setTimeout(checkImage, 2000);
+        } else {
+          setStatus("error");
+          setError("Failed to load image");
+        }
+      } catch {
+        setStatus("error");
+        setError("Failed to load image");
+      }
+    }
+
+    checkImage();
+  }, [filename, setStatus, setError])
+
+  return (
     <div className="flex items-center justify-center min-h-screen bg-black">
-      <img
-        src={`/image?filename=${filename}`}
+      <Image
+        src={`/uploads/${filename}`}
         alt="Generated image"
         className="max-w-full max-h-screen object-contain"
       />

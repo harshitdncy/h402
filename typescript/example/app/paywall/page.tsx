@@ -18,7 +18,7 @@ import { useRouter } from "next/navigation";
 import { injected } from "wagmi/connectors";
 import { config } from "@/config/wagmi";
 
-export default function Home() {
+export default function Paywall() {
   const [walletClient, setWalletClient] = useState<
     (WalletClient & PublicActions) | null
   >(null);
@@ -123,7 +123,7 @@ export default function Home() {
       });
 
       router.push(
-        `/api/create-image?402base64=${encodeURIComponent(
+        `/?402base64=${encodeURIComponent(
           paymentHeader
         )}&prompt=${encodeURIComponent(imagePrompt)}`
       );

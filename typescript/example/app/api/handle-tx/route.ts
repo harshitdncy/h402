@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
     if (!Array.isArray(txHashDb)) {
       txHashDb = [];
     }
-  } catch (error) {
+  } catch {
     txHashDb = [];
   }
 

@@ -3,14 +3,10 @@ import { paymentDetails } from "./config/paymentDetails";
 import { NextResponse } from "next/server";
 
 export const middleware = h402Middleware({
-  routes: ["/api/create-image"],
-  paywallRoute: "/",
+  routes: ["/"],
+  paywallRoute: "/paywall",
   paymentDetails,
   facilitatorUrl: process.env.FACILITATOR_URL!,
-  onError: (error, request) => {
-    console.log("error", error);
-    return NextResponse.rewrite(request.nextUrl.origin, { status: 402 });
-  },
   onSuccess: async (request, facilitatorResponse) => {
     console.log("onSuccess called with response:", facilitatorResponse);
     console.log("Current URL:", request.nextUrl.toString());
@@ -23,7 +19,7 @@ export const middleware = h402Middleware({
 
     if (!prompt || prompt.length > 30 || !txHash) {
       console.log("Invalid input, redirecting to error page");
-      return NextResponse.redirect(errorRedirectUrl, { status: 302 });
+      return NextResponse.rewrite(errorRedirectUrl, { status: 302 });
     }
 
     try {
@@ -48,9 +44,13 @@ export const middleware = h402Middleware({
       console.error("Error saving transaction:", error);
       return NextResponse.redirect(errorRedirectUrl, { status: 302 });
     }
+
+    // request.nextUrl.searchParams.delete("402base64")
+
+    // return NextResponse.next();
   },
 });
 
 export const config = {
-  matcher: "/api/create-image",
+  matcher: "/",
 };
