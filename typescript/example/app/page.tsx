@@ -152,11 +152,11 @@ export default function Home() {
     <div className="flex flex-col items-center justify-center min-h-full">
       <div className="w-full max-w-[800px] mx-auto p-8">
         <h1 className="text-2xl font-semibold mb-2">
-          h402 Image Generation Example
+          402 pay Image Generation Example
         </h1>
         <p className="text-gray-500 dark:text-gray-400 text-base mb-8">
           Connect your wallet, enter a prompt, and pay a small fee to generate
-          an AI image using HTTP 402 payment protocol.
+          an AI image using the HTTP 402 payment protocol.
         </p>
 
         {!walletClient ? (
