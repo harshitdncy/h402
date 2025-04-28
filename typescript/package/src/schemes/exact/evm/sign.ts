@@ -84,7 +84,7 @@ async function signTokenTransfer(
 
     const request = await client.prepareTransactionRequest({
       account: from,
-      to: tokenAddress as Hex,
+      to: tokenAddress.toLowerCase() as Hex,
       data,
       chain: evm.getChain(networkId),
     });
@@ -144,7 +144,7 @@ async function signAuthorization(
       Math.floor(Date.now() / 1000 + estimatedProcessingTime)
     );
     const { domain } = await client.getEip712Domain({
-      address: tokenAddress as Hex,
+      address: tokenAddress.toLowerCase() as Hex,
     });
 
     const data = {
@@ -162,7 +162,7 @@ async function signAuthorization(
         name: domain.name,
         version: domain.version,
         chainId: parseInt(networkId),
-        verifyingContract: tokenAddress as Hex,
+        verifyingContract: tokenAddress.toLowerCase() as Hex,
       },
       primaryType: "TransferWithAuthorization" as const,
       message: {

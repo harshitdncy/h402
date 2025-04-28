@@ -25,13 +25,15 @@ export async function parsePaymentDetailsForAmount(
 
   if (
     paymentDetails.amountRequiredFormat === "formatted" &&
-    paymentDetails.tokenAddress === evm.ZERO_ADDRESS
+    paymentDetails.tokenAddress.toLowerCase() === evm.ZERO_ADDRESS.toLowerCase()
   ) {
     const decimals = evm.chains[paymentDetails.networkId].nativeTokenDecimals;
 
     return {
       ...paymentDetails,
-      amountRequired: BigInt(Math.floor(Number(paymentDetails.amountRequired) * 10 ** decimals)),
+      amountRequired: BigInt(
+        Math.floor(Number(paymentDetails.amountRequired) * 10 ** decimals)
+      ),
     };
   }
 
@@ -45,7 +47,7 @@ export async function parsePaymentDetailsForAmount(
     return {
       ...paymentDetails,
       amountRequired: BigInt(
-      Math.floor(Number(paymentDetails.amountRequired) * 10 ** decimals)
+        Math.floor(Number(paymentDetails.amountRequired) * 10 ** decimals)
       ),
     };
   } catch (error) {

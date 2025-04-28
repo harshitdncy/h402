@@ -19,6 +19,7 @@ import {
   decodeEventLog,
   keccak256,
   toBytes,
+  Log,
 } from "viem";
 
 const BLOCK_TIME = 2; // Average block time in seconds
@@ -468,14 +469,20 @@ async function verifySignAndSendTransactionPayload(
           errorMessage: "Insufficient transfer amount",
         };
       }
-      if (txData.to !== (paymentDetails.payToAddress as Hex)) {
+      if (
+        txData.to?.toLowerCase() !==
+        (paymentDetails.payToAddress as Hex).toLowerCase()
+      ) {
         return {
           isValid: false,
           errorMessage: "Invalid recipient address",
         };
       }
     } else {
-      if (txData.to !== (paymentDetails.tokenAddress as Hex)) {
+      if (
+        txData.to?.toLowerCase() !==
+        (paymentDetails.tokenAddress as Hex).toLowerCase()
+      ) {
         return {
           isValid: false,
           errorMessage: "Invalid token contract address",
@@ -507,7 +514,10 @@ async function verifySignAndSendTransactionPayload(
         }
 
         const [recipient, amount] = decodedInput.args;
-        if (recipient !== (paymentDetails.payToAddress as Hex)) {
+        if (
+          recipient.toLowerCase() !==
+          (paymentDetails.payToAddress as Hex).toLowerCase()
+        ) {
           return {
             isValid: false,
             errorMessage: "Invalid transfer recipient",
@@ -528,7 +538,8 @@ async function verifySignAndSendTransactionPayload(
 
       const transferEvent = txReceipt.logs.find(
         (log) =>
-          log.address === (paymentDetails.tokenAddress as Hex) &&
+          log.address.toLowerCase() ===
+            (paymentDetails.tokenAddress as Hex).toLowerCase() &&
           log.topics[0] ===
             keccak256(toBytes("Transfer(address,address,uint256)"))
       );
@@ -557,7 +568,8 @@ async function verifySignAndSendTransactionPayload(
       });
 
       if (
-        decodedEvent.args.to !== (paymentDetails.payToAddress as Hex) ||
+        decodedEvent.args.to.toLowerCase() !==
+          (paymentDetails.payToAddress as Hex).toLowerCase() ||
         decodedEvent.args.value < paymentDetails.amountRequired
       ) {
         return {
