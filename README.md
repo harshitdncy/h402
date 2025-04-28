@@ -337,6 +337,7 @@ The playground is still under active development. While it currently mocks the p
 ### Protocol
 
 - [ ] Change namespaces name to be more friendly e.g. "evm", "bitcoin", etc.
+- [ ] Support for single-chain and cross-chain swaps
 
 ### Packages
 
