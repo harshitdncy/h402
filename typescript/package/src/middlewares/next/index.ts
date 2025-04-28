@@ -104,10 +104,10 @@ export function h402Middleware(config: H402Config) {
       }
 
       if (onSuccess) {
-        return await (onSuccess as OnSuccessHandler)(request, settleResponse);
+        return await onSuccess(request, settleResponse);
       }
     } else if (onSuccess) {
-      return await (onSuccess as OnSuccessHandler)(request, verifyResponse);
+      return await onSuccess(request, verifyResponse);
     }
 
     request.nextUrl.searchParams.delete("402base64");
