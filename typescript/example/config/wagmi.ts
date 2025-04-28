@@ -1,12 +1,17 @@
-import { Config, createConfig, http } from "@wagmi/core";
-import { base } from "viem/chains";
-import { injected, coinbaseWallet } from "@wagmi/connectors";
+import { Config, createConfig, http } from "wagmi";
+import { bsc } from "viem/chains";
+import { injected, coinbaseWallet, metaMask,walletConnect } from "wagmi/connectors";
 
 const config = createConfig({
-  chains: [base],
-  connectors: [coinbaseWallet({ appName: "BitGPT H402" }), injected()],
+  chains: [bsc],
+  connectors: [
+    metaMask(),
+    coinbaseWallet({ appName: "BitGPT H402" }),
+    walletConnect({ projectId: "233c440b08a2b78d6b3e76370b979bed" }),
+    injected({ shimDisconnect: true })
+  ],
   transports: {
-    [base.id]: http(),
+    [bsc.id]: http(),
   },
 }) as Config;
 
