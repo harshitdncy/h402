@@ -3,6 +3,8 @@ name: Deploy Example
 on:
   workflow_dispatch:
   push:
+    branches:
+      - main
     paths:
       - 'typescript/example/**'
 
