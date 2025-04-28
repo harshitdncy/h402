@@ -16,7 +16,11 @@ import { StaticImageData } from "next/image";
 import { WalletType } from "../hooks/useWallet";
 
 // Wallet options for selection
-const WALLET_OPTIONS: { id: WalletType; label: string; icon: StaticImageData }[] = [
+const WALLET_OPTIONS: {
+  id: WalletType;
+  label: string;
+  icon: StaticImageData;
+}[] = [
   { id: "trust", icon: trustIcon, label: "Trust Wallet" },
   { id: "walletconnect", icon: walletConnectIcon, label: "WalletConnect" },
   { id: "rabby", icon: rabbyIcon, label: "Rabby Wallet" },
