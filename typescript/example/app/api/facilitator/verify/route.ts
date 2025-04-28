@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verify } from "@bit-gpt/h402/facilitator";
-import { VerifyResponse } from "@bit-gpt/h402/types";
+import { FacilitatorResponse, VerifyResponse } from "@bit-gpt/h402/types";
 
 export async function POST(request: NextRequest) {
   const body = await request.json();
@@ -9,9 +9,12 @@ export async function POST(request: NextRequest) {
   if (!payload || !paymentDetails) {
     return NextResponse.json(
       {
-        isValid: false,
-        errorMessage: "payload and paymentDetails required",
-      } as VerifyResponse,
+        data: {
+          isValid: false,
+          errorMessage: "payload and paymentDetails required",
+        },
+        error: "payload and paymentDetails required",
+      } as FacilitatorResponse<VerifyResponse>,
       { status: 400 }
     );
   }
@@ -23,13 +26,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(verificationResult, { status: 400 });
     }
 
-    return NextResponse.json(verificationResult);
+    return NextResponse.json({
+      data: verificationResult,
+      error: undefined,
+    } as FacilitatorResponse<VerifyResponse>);
   } catch {
     return NextResponse.json(
       {
-        isValid: false,
-        errorMessage: "Payment verification failed",
-      } as VerifyResponse,
+        data: {
+          isValid: false,
+          errorMessage: "Payment verification failed",
+        },
+        error: "Payment verification failed",
+      } as FacilitatorResponse<VerifyResponse>,
       { status: 400 }
     );
   }
