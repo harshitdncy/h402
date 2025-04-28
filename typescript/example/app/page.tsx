@@ -8,7 +8,7 @@ import {
   createPublicClient,
   http,
   WalletClient,
-  PublicActions
+  PublicActions,
 } from "viem";
 import { bsc } from "viem/chains";
 import { connect, disconnect } from "wagmi/actions";
@@ -19,7 +19,9 @@ import { injected } from "wagmi/connectors";
 import { config } from "@/config/wagmi";
 
 export default function Home() {
-  const [walletClient, setWalletClient] = useState<WalletClient & PublicActions | null>(null);
+  const [walletClient, setWalletClient] = useState<
+    (WalletClient & PublicActions) | null
+  >(null);
   const [paymentStatus, setPaymentStatus] = useState<string>("not_paid");
   const [statusMessage, setStatusMessage] = useState<string>("");
   const [connectedAddress, setConnectedAddress] = useState<string>("");
@@ -121,7 +123,7 @@ export default function Home() {
       });
 
       router.push(
-        `/image?h402-payment=${encodeURIComponent(
+        `/api/create-image?h402-payment=${encodeURIComponent(
           paymentHeader
         )}&prompt=${encodeURIComponent(imagePrompt)}`
       );

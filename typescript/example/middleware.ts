@@ -1,16 +1,21 @@
 import { h402Middleware } from "@bit-gpt/h402/next";
 import { paymentDetails } from "./config/paymentDetails";
 import { NextResponse } from "next/server";
-import { openai } from "@/lib/openai";
 
 export const middleware = h402Middleware({
-  routes: ["/image"],
+  routes: ["/api/create-image"],
   paywallRoute: "/",
   paymentDetails,
   facilitatorUrl: process.env.FACILITATOR_URL!,
+  onError: (error, request) => {
+    console.log("error", error);
+    return NextResponse.rewrite(request.nextUrl.origin, { status: 402 });
+  },
   onSuccess: async (request, facilitatorResponse) => {
+    console.log("facilitatorResponse", facilitatorResponse);
+
     const prompt = request.nextUrl.searchParams.get("prompt");
-    const txHash = facilitatorResponse.data.txHash!;
+    const txHash = facilitatorResponse.data?.txHash;
     const baseUrl = request.nextUrl.origin;
 
     const errorRedirectUrl = new URL("/", baseUrl);
@@ -23,7 +28,11 @@ export const middleware = h402Middleware({
       return NextResponse.redirect(errorRedirectUrl, { status: 400 });
     }
 
-    const saveTxResponse = await fetch(baseUrl+"/api/handle-tx", {
+    if (!txHash) {
+      return NextResponse.redirect(errorRedirectUrl, { status: 400 });
+    }
+
+    const saveTxResponse = await fetch(baseUrl + "/api/handle-tx", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -35,29 +44,12 @@ export const middleware = h402Middleware({
       return NextResponse.redirect(errorRedirectUrl, { status: 400 });
     }
 
-    const imageResponse = await openai.images.generate({
-      model: "gpt-image-1",
-      prompt: prompt,
-      n: 1,
-      size: "1024x1024",
-    });
-
-    if (!imageResponse.data) {
-      return NextResponse.redirect(errorRedirectUrl, { status: 500 });
-    }
-
-    const b64EncodedImage = imageResponse.data[0].b64_json;
-
-    if (!b64EncodedImage) {
-      return NextResponse.redirect(errorRedirectUrl, { status: 500 });
-    }
-
-    const url = new URL(`/image?b64=${b64EncodedImage}`, baseUrl);
+    const url = new URL(`/api/create-image?prompt=${prompt}`, baseUrl);
 
     return NextResponse.redirect(url, { status: 302 });
   },
 });
 
 export const config = {
-  matcher: "/image",
+  matcher: "/api/create-image",
 };

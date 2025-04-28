@@ -1,28 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
+import path from "path";
+import fs from "fs";
 
 export function GET(request: NextRequest) {
-  const params = request.nextUrl.searchParams;
-  const b64 = params.get("b64");
+  const searchParams = request.nextUrl.searchParams;
+  const filename = searchParams.get("filename");
 
-  if (!b64) {
-    return new NextResponse("Bad Request", {
-      status: 400,
-    });
+  if (!filename) {
+    console.log()
+    return new NextResponse("Bad Request", { status: 400 });
   }
 
-  const buffer = Buffer.from(b64, "base64");
+  const filepath = path.join(__dirname, "uploads", filename);
 
-  if (!buffer) {
-    return new NextResponse("Bad Request", {
-      status: 400,
-    });
+  if (!fs.existsSync(filepath)) {
+    return new NextResponse("Not Found", { status: 404 });
   }
 
-  return new NextResponse(buffer, {
+  return new NextResponse(fs.readFileSync(filepath), {
     status: 200,
     headers: {
       "Content-Type": "image/png",
-      "Content-Length": buffer.length.toString(),
     },
   });
 }
