@@ -25,7 +25,7 @@ interface H402Config {
   /** The payment details required for verification and settlement */
   paymentDetails: PaymentDetails;
   /** The URL of the facilitator endpoint */
-  facilitatorUrl: string;
+  facilitatorUrl?: string;
   /** The error handler to use for the middleware */
   onError?: (error: string, request: NextRequest) => NextResponse;
   /** The success handler to use for the middleware */
@@ -65,7 +65,9 @@ export function h402Middleware(config: H402Config) {
     routes,
     paywallRoute,
   } = config;
-  const { verify, settle } = utils.useFacilitator(facilitatorUrl);
+  const { verify, settle } = utils.useFacilitator(
+    facilitatorUrl ?? "https://facilitator.bitgpt.xyz"
+  );
 
   const defaultErrorHandler = (request: NextRequest) => {
     const redirectUrl = new URL(paywallRoute, request.url);
@@ -104,10 +106,10 @@ export function h402Middleware(config: H402Config) {
       }
 
       if (onSuccess) {
-        return await onSuccess(request, settleResponse);
+        return await (onSuccess as OnSuccessHandler)(request, settleResponse);
       }
     } else if (onSuccess) {
-      return await onSuccess(request, verifyResponse);
+      return await (onSuccess as OnSuccessHandler)(request, verifyResponse);
     }
 
     request.nextUrl.searchParams.delete("402base64");

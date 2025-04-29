@@ -1,12 +1,13 @@
 {
   "name": "@bit-gpt/h402",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "description": "BitGPT's 402 Payment Protocol",
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "clean": "rm -rf dist"
   },
   "repository": {
     "type": "git",

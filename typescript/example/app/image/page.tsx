@@ -66,7 +66,7 @@ function ImageComponent({
           setStatus("error");
           setError("Image not found after multiple attempts");
         }
-      } catch (error) {
+      } catch {
         setStatus("error");
         setError("Failed to load image");
       }
