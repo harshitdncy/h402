@@ -7,8 +7,17 @@ cd typescript/package/
 CURRENT_VERSION=$(node -p "require('./package.json').version")
 IFS='.' read -ra VERSION_PARTS <<< "$CURRENT_VERSION"
 
-# Determine which number to increment based on argument (defaults to patch/third)
-INCREMENT=${1:-patch}
+# Ask for increment type if not provided
+echo "Current version: $CURRENT_VERSION"
+echo "Select version increment type (major|minor|patch)"
+read -p "Enter choice: " INCREMENT
+echo
+
+case $choice in
+  1) INCREMENT="major" ;;
+  2) INCREMENT="minor" ;;
+  *) INCREMENT="patch" ;;
+esac
 
 case $INCREMENT in
   major)
@@ -23,15 +32,10 @@ case $INCREMENT in
   patch)
     ((VERSION_PARTS[2]++))
     ;;
-  *)
-    echo "Invalid increment type. Use: major, minor, or patch"
-    exit 1
-    ;;
 esac
 
 NEW_VERSION="${VERSION_PARTS[0]}.${VERSION_PARTS[1]}.${VERSION_PARTS[2]}"
 
-echo "Current version: $CURRENT_VERSION"
 echo "New version will be: $NEW_VERSION"
 echo ""
 echo "The following actions will be performed:"
