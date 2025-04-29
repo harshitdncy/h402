@@ -44,6 +44,7 @@ export const middleware = h402Middleware({
         return NextResponse.redirect(errorRedirectUrl, { status: 302 });
       }
     } catch (error) {
+      console.log("saveTxResponse", "error", error);
       return NextResponse.redirect(errorRedirectUrl, { status: 302 });
     }
 
