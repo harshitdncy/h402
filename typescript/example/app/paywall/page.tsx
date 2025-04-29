@@ -93,11 +93,9 @@ export default function Paywall() {
         evmClient: walletClient,
       });
 
-      router.push(
-        `/?402base64=${encodeURIComponent(
-          paymentHeader
-        )}&prompt=${encodeURIComponent(imagePrompt)}`
-      );
+      window.location.href = `/?402base64=${encodeURIComponent(
+        paymentHeader
+      )}&prompt=${encodeURIComponent(imagePrompt)}`;
     } catch (error) {
       console.error("Payment failed:", error);
       setPaymentStatus("failed");
