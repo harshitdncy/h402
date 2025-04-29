@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import Image from "next/image";
@@ -37,6 +37,8 @@ function ImageComponent({
   const searchParams = useSearchParams();
   const filename = searchParams.get("filename");
   const [showLoadingText, setShowLoadingText] = useState(false);
+  const attemptRef = useRef(1);
+  const hasStartedFetchingRef = useRef(false);
 
   useEffect(() => {
     if (status === "loading") {
@@ -48,20 +50,26 @@ function ImageComponent({
   }, [status]);
 
   useEffect(() => {
-    if (!filename) {
-      setStatus("error");
-      setError("No filename provided");
+    if (!filename || hasStartedFetchingRef.current) {
+      if (!filename) {
+        setStatus("error");
+        setError("No filename provided");
+      }
       return;
     }
 
-    const checkImage = async (attempt = 1) => {
+    hasStartedFetchingRef.current = true;
+
+    const checkImage = async () => {
       try {
         const response = await fetch(`/uploads/${filename}`);
+        const maximumAttempts = 60;
 
         if (response.ok) {
           setStatus("success");
-        } else if (response.status === 404 && attempt < 10) {
-          setTimeout(() => checkImage(attempt + 1), 2000);
+        } else if (response.status === 404 && attemptRef.current < maximumAttempts) {
+          attemptRef.current += 1;
+          setTimeout(checkImage, 2000);
         } else {
           setStatus("error");
           setError("Image not found after multiple attempts");
@@ -73,7 +81,7 @@ function ImageComponent({
     };
 
     checkImage();
-  }, [filename, setStatus, setError]);
+  }, [filename]);
 
   if (status === "error") {
     return (

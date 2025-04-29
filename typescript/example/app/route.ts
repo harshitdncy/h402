@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
 
   openai.images
     .generate({
-      model: "dall-e-3",
+      model: "gpt-image-1",
       prompt: prompt,
       n: 1,
       size: "1024x1024",
@@ -38,6 +38,9 @@ export async function GET(request: NextRequest) {
         const buffer = await response.arrayBuffer();
 
         await fs.writeFile(filepath, Buffer.from(buffer));
+      } else if (imageResponse.data?.[0]?.b64_json) {
+        const base64Image = imageResponse.data[0].b64_json;
+        await fs.writeFile(filepath, Buffer.from(base64Image, 'base64'));
       }
     })
     .catch(console.error);
