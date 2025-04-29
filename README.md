@@ -359,6 +359,11 @@ The playground is still under active development. While it currently mocks the p
   - [ ] Real DB implementation that simulate a payment environment, since certain implementations cannot be stateless
   - [ ] More information and comments on stateless vs stateful implementations for these type of payments (signed payload vs txHash)
 
+### Updates checklist
+
+- [ ] Facilitator support
+- [ ] Verify/settle
+- [ ] Scheme-specific documentation
 
 ## License
 
