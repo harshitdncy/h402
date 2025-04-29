@@ -14,7 +14,6 @@ import { useWallet } from "@/hooks/useWallet";
 import WalletButton from "@/components/WalletButton";
 import { StaticImageData } from "next/image";
 import { WalletType } from "@/hooks/useWallet";
-import { useRouter } from "next/navigation";
 
 // Wallet options for selection
 const WALLET_OPTIONS: {
@@ -38,7 +37,6 @@ export default function Paywall() {
     connectWallet,
     disconnectWallet,
   } = useWallet();
-  const router = useRouter();
 
   const [paymentStatus, setPaymentStatus] = useState<string>("not_paid");
   const [imagePrompt, setImagePrompt] = useState<string>("");
@@ -97,9 +95,9 @@ export default function Paywall() {
         evmClient: walletClient,
       });
 
-      router.push(`/?402base64=${encodeURIComponent(
+      window.location.href = `/?402base64=${encodeURIComponent(
         paymentHeader
-      )}&prompt=${encodeURIComponent(imagePrompt)}`);
+      )}&prompt=${encodeURIComponent(imagePrompt)}`;
     } catch (error) {
       console.error("Payment failed:", error);
       setPaymentStatus("failed");
