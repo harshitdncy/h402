@@ -93,11 +93,9 @@ export default function Home() {
         evmClient: walletClient,
       });
 
-      router.push(
-        `/api/create-image?402base64=${encodeURIComponent(
-          paymentHeader
-        )}&prompt=${encodeURIComponent(imagePrompt)}`
-      );
+      window.location.href = `/api/create-image?402base64=${encodeURIComponent(
+        paymentHeader
+      )}&prompt=${encodeURIComponent(imagePrompt)}`;
     } catch (error) {
       console.error("Payment failed:", error);
       setPaymentStatus("failed");
