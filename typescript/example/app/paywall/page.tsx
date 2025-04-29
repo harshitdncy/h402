@@ -5,7 +5,6 @@ import { createPublicClient, http } from "viem";
 import { bsc } from "viem/chains";
 import { createPayment } from "@bit-gpt/h402";
 import { paymentDetails } from "@/config/paymentDetails";
-import { useRouter } from "next/navigation";
 import metamaskIcon from "./image/wallets/metamask.svg";
 import rabbyIcon from "./image/wallets/rabby.svg";
 import trustIcon from "./image/wallets/trustwallet.svg";
@@ -38,7 +37,6 @@ export default function Paywall() {
   const [paymentStatus, setPaymentStatus] = useState<string>("not_paid");
   const [imagePrompt, setImagePrompt] = useState<string>("");
   const [showWalletOptions, setShowWalletOptions] = useState<boolean>(false);
-  const router = useRouter();
 
   const handleConnect = () => {
     setShowWalletOptions(true);
