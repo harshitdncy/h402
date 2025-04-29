@@ -8,6 +8,9 @@ on:
     paths:
       - 'typescript/example/**'
 
+env:
+  DEPLOY_NAME: example
+
 jobs:
   build:
     runs-on: [self-hosted]
@@ -33,10 +36,10 @@ jobs:
 
       - uses: docker/build-push-action@v6 
         with:
-          context: "{{defaultContext}}:typescript/example"
+          context: "{{defaultContext}}:typescript/${{ env.DEPLOY_NAME }}"
           tags: |
-            ${{ secrets.REGISTRY_URL }}/h402/example:latest
-            ${{ secrets.REGISTRY_URL }}/h402/example:${{ github.sha }}
+            ${{ secrets.REGISTRY_URL }}/h402/${{ env.DEPLOY_NAME }}:latest
+            ${{ secrets.REGISTRY_URL }}/h402/${{ env.DEPLOY_NAME }}:${{ github.sha }}
           push: true
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -67,9 +70,9 @@ jobs:
           client-payload: |
             {
               "ref": "${{ github.ref }}",
-              "path": "h402/example/overlays/dev",
+              "path": "h402/overlays/dev",
               "sha": "${{ github.sha }}",
               "images": {
-                "example": "${{ secrets.REGISTRY_URL }}/h402/example:${{ github.sha }}"
+                "${{ env.DEPLOY_NAME }}": "${{ secrets.REGISTRY_URL }}/h402/${{ env.DEPLOY_NAME }}:${{ github.sha }}"
               }
             }

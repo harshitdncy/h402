@@ -68,7 +68,7 @@ jobs:
           client-payload: |
             {
               "ref": "${{ github.ref }}",
-              "path": "h402/${{ env.DEPLOY_NAME }}/overlays/dev",
+              "path": "h402/overlays/dev",
               "sha": "${{ github.sha }}",
               "images": {
                 "${{ env.DEPLOY_NAME }}": "${{ secrets.REGISTRY_URL }}/h402/${{ env.DEPLOY_NAME }}:${{ github.sha }}"
