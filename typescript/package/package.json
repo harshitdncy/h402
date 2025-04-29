@@ -4,7 +4,7 @@
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "description": "BitGPT's 402 Payment Protocol",
+  "description": "BitGPT's 402 open protocol for blockchain-native payments",
   "scripts": {
     "build": "tsc",
     "clean": "rm -rf dist"
