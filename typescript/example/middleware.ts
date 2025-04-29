@@ -19,7 +19,7 @@ export const middleware = h402Middleware({
     
     try {
       const saveTxResponse = await fetch(
-        process.env.API_URL! + "/api/handle-tx",
+        `${baseUrl}/api/handle-tx`,
         {
           method: "POST",
           headers: {
