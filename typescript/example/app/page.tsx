@@ -1,84 +1,55 @@
 "use client";
 
 import { useState } from "react";
-import {
-  createWalletClient,
-  custom,
-  publicActions,
-  createPublicClient,
-  http,
-  WalletClient,
-  PublicActions,
-} from "viem";
+import { createPublicClient, http } from "viem";
 import { bsc } from "viem/chains";
-import { connect, disconnect } from "wagmi/actions";
 import { createPayment } from "@bit-gpt/h402";
 import { paymentDetails } from "@/config/paymentDetails";
 import { useRouter } from "next/navigation";
-import { injected } from "wagmi/connectors";
-import { config } from "@/config/wagmi";
+import metamaskIcon from "./image/wallets/metamask.svg";
+import rabbyIcon from "./image/wallets/rabby.svg";
+import trustIcon from "./image/wallets/trustwallet.svg";
+import walletConnectIcon from "./image/wallets/walletConnect.svg";
+import coinbaseIcon from "./image/wallets/coinbase.svg";
+import { useWallet } from "../hooks/useWallet";
+import WalletButton from "../components/WalletButton";
+import { StaticImageData } from "next/image";
+import { WalletType } from "../hooks/useWallet";
+
+// Wallet options for selection
+const WALLET_OPTIONS: { id: WalletType; label: string; icon: StaticImageData }[] = [
+  { id: "trust", icon: trustIcon, label: "Trust Wallet" },
+  { id: "walletconnect", icon: walletConnectIcon, label: "WalletConnect" },
+  { id: "rabby", icon: rabbyIcon, label: "Rabby Wallet" },
+  { id: "metamask", icon: metamaskIcon, label: "MetaMask" },
+  { id: "coinbase", icon: coinbaseIcon, label: "Coinbase Wallet" },
+];
 
 export default function Home() {
-  const [walletClient, setWalletClient] = useState<
-    (WalletClient & PublicActions) | null
-  >(null);
+  const {
+    walletClient,
+    connectedAddress,
+    statusMessage,
+    setStatusMessage,
+    connectWallet,
+    disconnectWallet,
+  } = useWallet();
+
   const [paymentStatus, setPaymentStatus] = useState<string>("not_paid");
-  const [statusMessage, setStatusMessage] = useState<string>("");
-  const [connectedAddress, setConnectedAddress] = useState<string>("");
   const [imagePrompt, setImagePrompt] = useState<string>("");
+  const [showWalletOptions, setShowWalletOptions] = useState<boolean>(false);
   const router = useRouter();
 
-  const handleConnect = async () => {
-    try {
-      setStatusMessage("Connecting wallet...");
-
-      const result = await connect(config, {
-        connector: injected(),
-        chainId: bsc.id,
-      });
-
-      if (!result.accounts?.[0]) {
-        throw new Error("Please select an account in your wallet");
-      }
-
-      const client = createWalletClient({
-        account: result.accounts[0],
-        chain: bsc,
-        transport: custom(window.ethereum),
-      }).extend(publicActions);
-
-      const [address] = await client.getAddresses();
-      if (!address) {
-        throw new Error("Cannot access wallet account");
-      }
-
-      const extendedClient = client.extend(publicActions);
-
-      const chainId = await extendedClient.getChainId();
-      if (chainId !== bsc.id) {
-        throw new Error("Please switch to BSC network");
-      }
-
-      setWalletClient(extendedClient);
-      setConnectedAddress(result.accounts[0]);
-      setStatusMessage("Wallet connected! You can now proceed with payment.");
-    } catch (error) {
-      console.error("Connection error:", error);
-      setStatusMessage(
-        error instanceof Error ? error.message : "Failed to connect wallet"
-      );
-      setWalletClient(null);
-      setConnectedAddress("");
-    }
+  const handleConnect = () => {
+    setShowWalletOptions(true);
   };
 
   const handleDisconnect = async () => {
     try {
-      await disconnect(config);
-      setWalletClient(null);
-      setConnectedAddress("");
+      await disconnectWallet();
       setStatusMessage("Wallet disconnected");
-    } catch {
+    } catch (error) {
+      console.error("Disconnect error:", error);
       setStatusMessage("Failed to disconnect wallet");
     }
   };
@@ -168,12 +139,36 @@ export default function Home() {
               <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
                 Make sure you are on the BSC network
               </p>
-              <button
-                onClick={handleConnect}
-                className="w-full px-4 py-2.5 bg-[#2E74FF] hover:bg-[#2361DB] text-white rounded-lg transition-colors duration-200 font-medium"
-              >
-                Connect Wallet
-              </button>
+
+              {showWalletOptions ? (
+                <div className="space-y-3">
+                  <p className="text-sm text-gray-700 dark:text-gray-300 mb-2">
+                    Select a wallet:
+                  </p>
+                  {WALLET_OPTIONS.map((option) => (
+                    <WalletButton
+                      key={option.id}
+                      id={option.id}
+                      icon={option.icon}
+                      label={option.label}
+                      onClick={connectWallet}
+                    />
+                  ))}
+                  <button
+                    onClick={() => setShowWalletOptions(false)}
+                    className="w-full px-4 py-2 mt-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors duration-200 font-medium"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={handleConnect}
+                  className="w-full px-4 py-2.5 bg-[#2E74FF] hover:bg-[#2361DB] text-white rounded-lg transition-colors duration-200 font-medium"
+                >
+                  Connect Wallet
+                </button>
+              )}
             </div>
           </div>
         ) : (
