@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      content: "This is the secret protected content that requires payment!",
+      txHash: settleResult.txHash,
     } as SettleResponse);
   } catch {
     return NextResponse.json(

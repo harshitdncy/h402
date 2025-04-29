@@ -2,6 +2,7 @@
 
 .npmrc
 data/txHash.json
+/public/uploads/*
 
 # dependencies
 /node_modules
