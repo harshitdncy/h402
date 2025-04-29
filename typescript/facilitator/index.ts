@@ -167,17 +167,20 @@ app.post("/verify", async (req: any, res: any) => {
     const paymentDetails = req.body.paymentDetails;
 
     if (!payload || !paymentDetails) {
-      res.status(400).json({ error: "payload and paymentDetails required" });
+      return res.status(400).json({ error: "payload and paymentDetails required" });
     }
 
     const verificationResult = await verify(payload, paymentDetails);
     if (!verificationResult.isValid && "errorMessage" in verificationResult) {
-      res.status(400).json({ verificationResult });
+      return res.status(400).json({ verificationResult });
     }
 
-    res.json({ data: verificationResult, error: undefined } as FacilitatorResponse<VerifyResponse>);
+    return res.json({
+      data: verificationResult,
+      error: undefined,
+    } as FacilitatorResponse<VerifyResponse>);
   } catch {
-    res.status(400).json({ error: "Invalid request" });
+    return res.status(400).json({ error: "Invalid request" });
   }
 });
 
@@ -187,23 +190,24 @@ app.post("/settle", async (req: any, res: any) => {
     const paymentDetails = req.body.paymentDetails;
 
     if (!payload || !paymentDetails) {
-      res.status(400).json({ error: "payload and paymentDetails required" });
+      return res.status(400).json({ error: "payload and paymentDetails required" });
     }
 
     if (!process.env.PRIVATE_KEY) {
-      res.status(400).json({ error: "PRIVATE_KEY is not set" });
+      return res.status(400).json({ error: "PRIVATE_KEY is not set" });
     }
 
     const settleResult = await settle(payload, paymentDetails, PRIVATE_KEY as Hex);
 
     if ("errorMessage" in settleResult) {
-      res.status(400).json({ error: settleResult.errorMessage, success: false } as SettleResponse);
+      return res
+        .status(400)
+        .json({ error: settleResult.errorMessage, success: false } as SettleResponse);
     }
 
-    // @ts-expect-error TS thinks that txHash is not in the SettleResponse type
-    res.json({ success: true, txHash: settleResult.txHash } as SettleResponse);
+    return res.json({ success: true, txHash: settleResult.txHash } as SettleResponse);
   } catch {
-    res.status(400).json({ error: "Invalid request" });
+    return res.status(400).json({ error: "Invalid request" });
   }
 });
 
