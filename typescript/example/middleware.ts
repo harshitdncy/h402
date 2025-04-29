@@ -16,6 +16,7 @@ export const middleware = h402Middleware({
     if (!prompt || prompt.length > 30 || !txHash) {
       return NextResponse.rewrite(errorRedirectUrl, { status: 302 });
     }
+    
     try {
       const saveTxResponse = await fetch(
         process.env.API_URL! + "/api/handle-tx",
