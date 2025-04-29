@@ -8,6 +8,11 @@ import {
   SettleResponse,
 } from "../../types/index.js";
 
+type OnSuccessHandler = (
+  request: NextRequest,
+  response: FacilitatorResponse<VerifyResponse | SettleResponse>
+) => Promise<NextResponse>;
+
 /**
  * Configuration options for the h402 middleware
  * @interface H402Config
@@ -20,14 +25,11 @@ interface H402Config {
   /** The payment details required for verification and settlement */
   paymentDetails: PaymentDetails;
   /** The URL of the facilitator endpoint */
-  facilitatorUrl: string;
+  facilitatorUrl?: string;
   /** The error handler to use for the middleware */
   onError?: (error: string, request: NextRequest) => NextResponse;
   /** The success handler to use for the middleware */
-  onSuccess?: (
-    request: NextRequest,
-    facilitatorResponse: FacilitatorResponse<VerifyResponse | SettleResponse>
-  ) => Promise<NextResponse | void>;
+  onSuccess?: OnSuccessHandler;
 }
 
 /**
@@ -63,12 +65,13 @@ export function h402Middleware(config: H402Config) {
     routes,
     paywallRoute,
   } = config;
-  const { verify, settle } = utils.useFacilitator(facilitatorUrl);
+  const { verify, settle } = utils.useFacilitator(
+    facilitatorUrl ?? "https://facilitator.bitgpt.xyz"
+  );
 
   const defaultErrorHandler = (request: NextRequest) => {
     const redirectUrl = new URL(paywallRoute, request.url);
-
-    return NextResponse.redirect(redirectUrl, { status: 402 });
+    return NextResponse.rewrite(redirectUrl, { status: 402 });
   };
 
   const handleError = (error: string, request: NextRequest) =>
@@ -93,13 +96,6 @@ export function h402Middleware(config: H402Config) {
       return handleError(verifyResponse.error, request);
     }
 
-    if (onSuccess) {
-      const response = await onSuccess(request, verifyResponse);
-      if (response) {
-        return response;
-      }
-    }
-
     const paymentType = verifyResponse.data?.type;
 
     if (paymentType === "payload") {
@@ -110,12 +106,13 @@ export function h402Middleware(config: H402Config) {
       }
 
       if (onSuccess) {
-        const response = await onSuccess(request, settleResponse);
-        if (response) {
-          return response;
-        }
+        return await (onSuccess as OnSuccessHandler)(request, settleResponse);
       }
+    } else if (onSuccess) {
+      return await (onSuccess as OnSuccessHandler)(request, verifyResponse);
     }
+
+    request.nextUrl.searchParams.delete("402base64");
 
     return NextResponse.next();
   };

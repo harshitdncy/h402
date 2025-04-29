@@ -1,7 +1,8 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 .npmrc
-data/
+data/txHash.json
+/public/uploads/*
 
 # dependencies
 /node_modules

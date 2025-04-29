@@ -5,18 +5,23 @@ import { createPublicClient, http } from "viem";
 import { bsc } from "viem/chains";
 import { createPayment } from "@bit-gpt/h402";
 import { paymentDetails } from "@/config/paymentDetails";
-import metamaskIcon from "./image/wallets/metamask.svg";
-import rabbyIcon from "./image/wallets/rabby.svg";
-import trustIcon from "./image/wallets/trustwallet.svg";
-import walletConnectIcon from "./image/wallets/walletConnect.svg";
-import coinbaseIcon from "./image/wallets/coinbase.svg";
-import { useWallet } from "../hooks/useWallet";
-import WalletButton from "../components/WalletButton";
+import metamaskIcon from "@/assets/wallets/metamask.svg";
+import rabbyIcon from "@/assets/wallets/rabby.svg";
+import trustIcon from "@/assets/wallets/trustwallet.svg";
+import walletConnectIcon from "@/assets/wallets/walletConnect.svg";
+import coinbaseIcon from "@/assets/wallets/coinbase.svg";
+import { useWallet } from "@/hooks/useWallet";
+import WalletButton from "@/components/WalletButton";
 import { StaticImageData } from "next/image";
-import { WalletType } from "../hooks/useWallet";
+import { WalletType } from "@/hooks/useWallet";
+import { useRouter } from "next/navigation";
 
 // Wallet options for selection
-const WALLET_OPTIONS: { id: WalletType; label: string; icon: StaticImageData }[] = [
+const WALLET_OPTIONS: {
+  id: WalletType;
+  label: string;
+  icon: StaticImageData;
+}[] = [
   { id: "trust", icon: trustIcon, label: "Trust Wallet" },
   { id: "walletconnect", icon: walletConnectIcon, label: "WalletConnect" },
   { id: "rabby", icon: rabbyIcon, label: "Rabby Wallet" },
@@ -24,7 +29,7 @@ const WALLET_OPTIONS: { id: WalletType; label: string; icon: StaticImageData }[]
   { id: "coinbase", icon: coinbaseIcon, label: "Coinbase Wallet" },
 ];
 
-export default function Home() {
+export default function Paywall() {
   const {
     walletClient,
     connectedAddress,
@@ -33,6 +38,7 @@ export default function Home() {
     connectWallet,
     disconnectWallet,
   } = useWallet();
+  const router = useRouter();
 
   const [paymentStatus, setPaymentStatus] = useState<string>("not_paid");
   const [imagePrompt, setImagePrompt] = useState<string>("");
@@ -91,9 +97,9 @@ export default function Home() {
         evmClient: walletClient,
       });
 
-      window.location.href = `/api/create-image?402base64=${encodeURIComponent(
+      router.push(`/?402base64=${encodeURIComponent(
         paymentHeader
-      )}&prompt=${encodeURIComponent(imagePrompt)}`;
+      )}&prompt=${encodeURIComponent(imagePrompt)}`);
     } catch (error) {
       console.error("Payment failed:", error);
       setPaymentStatus("failed");

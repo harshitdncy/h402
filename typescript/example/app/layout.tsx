@@ -27,7 +27,7 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#2e74ff] w-dvw h-dvh text-black dark:text-white p-4`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#2e74ff] w-dvw h-dvh text-black dark:text-white`}
       >
         <header className="flex justify-between items-center -mb-20 mr-2">
           <div className="text-2xl font-bold text-white"></div>
