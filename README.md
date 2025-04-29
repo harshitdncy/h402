@@ -341,14 +341,16 @@ The playground is still under active development. While it currently mocks the p
 
 - [ ] Change namespaces name to be more friendly e.g. "evm", "bitcoin", etc.
 - [ ] Support for single-chain and cross-chain swaps
+- [ ] How to handle failed attempts after action on non-permit protocols? Example: image generation fails after already-broadcasted tx
 
 ### Packages
 
 - [ ] Provide an HTML page that users can serve when returning a 402 status code to humans served directly by our package
 - [ ] Improve packages so that they enable users to implement 402 with one LOC for both Client and Server
 - [ ] Add SDKs for languages beyond TypeScript
+- [ ] Add handling for failed action when settle and permits are available
 - [x] Add support for WalletConnect and other implementations
-- [ ] `await settle` after onSuccess?
+- [x] `await settle` after onSuccess?
 
 ### Examples
 
