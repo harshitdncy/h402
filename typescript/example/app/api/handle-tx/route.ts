@@ -5,6 +5,17 @@ import { readFile, writeFile, mkdir } from "fs/promises";
 const DATA_DIR = path.join(process.cwd(), "data");
 const TX_HASH_DB_FILE = path.join(DATA_DIR, "txHash.json");
 
+async function initializeTxHashDb() {
+  try {
+    await mkdir(DATA_DIR, { recursive: true });
+    await writeFile(TX_HASH_DB_FILE, "[]", { encoding: "utf-8" });
+    return [];
+  } catch (error) {
+    console.error("Failed to initialize txHash database:", error);
+    throw error;
+  }
+}
+
 export async function POST(req: NextRequest) {
   const { txHash } = await req.json();
 
@@ -12,28 +23,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Missing txHash" }, { status: 400 });
   }
 
-  try {
-    await mkdir(DATA_DIR, { recursive: true });
-  } catch (error) {
-    console.error("Failed to create data directory:", error);
-    return NextResponse.json(
-      { error: "Failed to create data directory" },
-      { status: 500 }
-    );
-  }
-
   let txHashDb: string[];
   try {
-    const txHashDbRaw = await readFile(TX_HASH_DB_FILE, "utf-8").catch(
-      () => "[]"
-    );
+    const txHashDbRaw = await readFile(TX_HASH_DB_FILE, "utf-8");
     txHashDb = JSON.parse(txHashDbRaw);
 
     if (!Array.isArray(txHashDb)) {
-      txHashDb = [];
+      txHashDb = await initializeTxHashDb();
     }
   } catch {
-    txHashDb = [];
+    txHashDb = await initializeTxHashDb();
   }
 
   if (txHashDb.includes(txHash)) {
