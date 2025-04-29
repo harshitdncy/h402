@@ -14,7 +14,7 @@ export const middleware = h402Middleware({
     const errorRedirectUrl = new URL("/", baseUrl);
 
     if (!prompt || prompt.length > 30 || !txHash) {
-      return NextResponse.redirect(errorRedirectUrl, { status: 302 });
+      return NextResponse.rewrite(errorRedirectUrl, { status: 302 });
     }
     try {
       const saveTxResponse = await fetch(baseUrl + "/api/handle-tx", {
