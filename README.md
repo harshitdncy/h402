@@ -325,13 +325,14 @@ The playground is still under active development. While it currently mocks the p
 ### Schemes
 
 - [ ] Add scheme specific documentation and explain them separately
-- [x] Add `upto`
+- [x] Add `exact`
 - [ ] Add `upto`
 - [ ] Add `prepaid`
 - [ ] Add `streamed`
 - [ ] Add `subscription`
 - [ ] Add `postpaid`
 - [ ] Support Solana
+- [ ] Support Sui
 - [ ] Support Bitcoin
 - [ ] Support Ripple
 - [ ] Support Tron
