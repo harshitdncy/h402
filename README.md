@@ -313,7 +313,7 @@ The playground is still under active development. While it currently mocks the p
 ### General
 
 - [ ] Expand this README with detailed scheme documentation, code examples, and functionality breakdowns
-- [ ] Add real-world examples
+- [x] Add real-world examples
 - [ ] Add unit tests
 - [ ] Add vulnerability protocol inside SECURITY.md
 - [ ] Add security best practices (detailed about what goes with what), such as
@@ -325,6 +325,7 @@ The playground is still under active development. While it currently mocks the p
 ### Schemes
 
 - [ ] Add scheme specific documentation and explain them separately
+- [x] Add `upto`
 - [ ] Add `upto`
 - [ ] Add `prepaid`
 - [ ] Add `streamed`
@@ -332,7 +333,8 @@ The playground is still under active development. While it currently mocks the p
 - [ ] Add `postpaid`
 - [ ] Support Solana
 - [ ] Support Bitcoin
-- [ ] Support other questionable chains such as Tron and Ripple
+- [ ] Support Ripple
+- [ ] Support Tron
 
 ### Protocol
 
@@ -344,7 +346,7 @@ The playground is still under active development. While it currently mocks the p
 - [ ] Provide an HTML page that users can serve when returning a 402 status code to humans served directly by our package
 - [ ] Improve packages so that they enable users to implement 402 with one LOC for both Client and Server
 - [ ] Add SDKs for languages beyond TypeScript
-- [ ] Add support for WalletConnect and other implementations
+- [x] Add support for WalletConnect and other implementations
 - [ ] `await settle` after onSuccess?
 
 ### Examples
