@@ -6,7 +6,10 @@ on:
     branches:
       - main
     paths:
-      - 'typescript/example/**'
+      - 'typescript/facilitator/**'
+
+env:
+  DEPLOY_NAME: facilitator
 
 jobs:
   build:
@@ -33,19 +36,17 @@ jobs:
 
       - uses: docker/build-push-action@v6 
         with:
-          context: "{{defaultContext}}:typescript/example"
+          context: "{{defaultContext}}:typescript/${{ env.DEPLOY_NAME }}"
           tags: |
-            ${{ secrets.REGISTRY_URL }}/h402/example:latest
-            ${{ secrets.REGISTRY_URL }}/h402/example:${{ github.sha }}
+            ${{ secrets.REGISTRY_URL }}/h402/${{ env.DEPLOY_NAME }}:latest
+            ${{ secrets.REGISTRY_URL }}/h402/${{ env.DEPLOY_NAME }}:${{ github.sha }}
           push: true
           cache-from: type=gha
           cache-to: type=gha,mode=max
           secret-envs: |
             npm-token=NPM_TOKEN
-            openai-api-key=OPENAI_API_KEY
         env:
           NPM_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
       - uses: actions/create-github-app-token@v2
         id: app-token
@@ -67,9 +68,9 @@ jobs:
           client-payload: |
             {
               "ref": "${{ github.ref }}",
-              "path": "h402/example/overlays/dev",
+              "path": "h402/${{ env.DEPLOY_NAME }}/overlays/dev",
               "sha": "${{ github.sha }}",
               "images": {
-                "example": "${{ secrets.REGISTRY_URL }}/h402/example:${{ github.sha }}"
+                "${{ env.DEPLOY_NAME }}": "${{ secrets.REGISTRY_URL }}/h402/${{ env.DEPLOY_NAME }}:${{ github.sha }}"
               }
             }
