@@ -7,6 +7,8 @@ export const middleware = h402Middleware({
   paywallRoute: "/paywall",
   paymentDetails,
   onSuccess: async (request, facilitatorResponse) => {
+    console.log("onSuccess", facilitatorResponse);
+
     const prompt = request.nextUrl.searchParams.get("prompt");
     const txHash = facilitatorResponse.data?.txHash;
     const baseUrl = request.nextUrl.origin;
@@ -14,6 +16,14 @@ export const middleware = h402Middleware({
     const errorRedirectUrl = new URL("/", baseUrl);
 
     if (!prompt || prompt.length > 30 || !txHash) {
+      console.log("onSuccess", "redirecting to error page");
+      console.log({
+        prompt,
+        txHash,
+        baseUrl,
+        errorRedirectUrl
+      });
+
       return NextResponse.rewrite(errorRedirectUrl, { status: 302 });
     }
     
@@ -30,6 +40,7 @@ export const middleware = h402Middleware({
       );
 
       if (!saveTxResponse.ok) {
+        console.log("saveTxResponse", "not ok");
         return NextResponse.redirect(errorRedirectUrl, { status: 302 });
       }
     } catch (error) {
