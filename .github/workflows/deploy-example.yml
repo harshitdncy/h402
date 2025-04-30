@@ -55,10 +55,8 @@ jobs:
           cache-to: type=gha,mode=max
           secret-envs: |
             npm-token=NPM_TOKEN
-            openai-api-key=OPENAI_API_KEY
         env:
           NPM_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
       - uses: actions/create-github-app-token@v2
         id: app-token

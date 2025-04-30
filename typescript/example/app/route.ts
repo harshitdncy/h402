@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { openai } from "@/lib/openai";
 import path from "path";
 import fs from "fs/promises";
+import { getHost } from "@/lib/utils";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
@@ -46,6 +47,6 @@ export async function GET(request: NextRequest) {
     .catch(console.error);
 
   return NextResponse.redirect(
-    new URL(`/image?filename=${filename}`, process.env.PUBLIC_URL!)
+    new URL(`/image?filename=${filename}`, getHost(request))
   );
 }

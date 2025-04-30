@@ -12,16 +12,14 @@ export const middleware = h402Middleware({
     const requestHeaders = new Headers(request.headers)
     const prompt = request.nextUrl.searchParams.get("prompt");
     const txHash = facilitatorResponse.data?.txHash;
-    const baseUrl = request.nextUrl.origin;
 
-    const errorRedirectUrl = new URL("/", baseUrl);
+    const errorRedirectUrl = new URL("/", request.url);
 
     if (!prompt || prompt.length > 30 || !txHash) {
       console.log("onSuccess", "redirecting to error page");
       console.log({
         prompt,
         txHash,
-        baseUrl,
         errorRedirectUrl
       });
 

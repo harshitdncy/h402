@@ -13,9 +13,7 @@ RUN --mount=type=cache,target=/root/.npm \
     NPM_TOKEN=$(cat /run/secrets/npm-token) \
     npm ci
 
-RUN --mount=type=secret,id=openai-api-key,target=/run/secrets/openai-api-key \
-    OPENAI_API_KEY=$(cat /run/secrets/openai-api-key) \
-    npm run build
+RUN npm run build
 
 EXPOSE 3000/tcp
 ENTRYPOINT [ "npm", "run", "start" ]
