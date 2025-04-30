@@ -83,7 +83,7 @@ jobs:
               "path": "h402/overlays/dev",
               "sha": "${{ github.sha }}",
               "images": {
-                "${{ env.DEPLOY_NAME }}": "${{ secrets.REGISTRY_URL }}/h402/${{ env.DEPLOY_NAME }}:${{ github.sha }}"
+                "${{ env.DEPLOY_NAME }}": "${{ secrets.REGISTRY_URL }}/h402/${{ env.DEPLOY_NAME }}:${{ github.sha }}",
                 "${{ env.DEPLOY_NAME }}-nginx": "${{ secrets.REGISTRY_URL }}/h402/${{ env.DEPLOY_NAME }}-nginx:${{ github.sha }}"
               }
             }
