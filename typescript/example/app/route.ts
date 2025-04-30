@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  openai.images
+  openai().images
     .generate({
       model: "gpt-image-1",
       prompt: prompt,

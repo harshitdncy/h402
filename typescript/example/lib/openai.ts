@@ -1,6 +1,14 @@
 import 'server-only'
 import { OpenAI } from "openai";
 
-export const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY!,
-});
+let client: OpenAI | undefined;
+
+export const openai = (): OpenAI => {
+    if (client === undefined) {
+        client = new OpenAI({
+            apiKey: process.env.OPENAI_API_KEY!,
+        })
+    }
+
+    return client
+}
