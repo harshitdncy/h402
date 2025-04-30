@@ -107,10 +107,8 @@ function ImageComponent({
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-black relative">
-      <Image
+      <img
         src={`/uploads/${filename}`}
-        fill
-        priority
         alt="AI Generated Image"
         className="absolute max-w-full max-h-full object-contain"
         sizes="100vw"
