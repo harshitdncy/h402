@@ -47,6 +47,6 @@ export async function GET(request: NextRequest) {
     .catch(console.error);
 
   return NextResponse.redirect(
-    new URL(`/image?filename=${filename}`, getHost(request))
+    new URL(`/image?filename=${filename}`, `${request.nextUrl.protocol}//${getHost(request)}`)
   );
 }
