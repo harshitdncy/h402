@@ -22,7 +22,8 @@ RUN --mount=type=cache,target=/app/.pnpm-store \
 
 COPY ./typescript/package /app/typescript/package
 COPY ./typescript/example /app/typescript/example
-RUN pnpm --filter '@bit-gpt/h402' build && \
+RUN pnpm --filter '@bit-gpt/h402' build
+RUN --mount=type=cache,target=/app/typescript/example/.next/cache \
     pnpm --filter example build
  
 FROM node:22-alpine3.21 as prod 
