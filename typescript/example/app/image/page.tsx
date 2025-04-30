@@ -3,7 +3,6 @@
 import { useEffect, useState, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
-import Image from "next/image";
 
 export default function ImagePage() {
   const [status, setStatus] = useState<"loading" | "error" | "success">(
