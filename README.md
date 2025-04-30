@@ -100,13 +100,7 @@ The monorepo contains the following workspaces:
    pnpm install
    ```
 
-2. Build the main package:
-
-   ```bash
-   pnpm build:package
-   ```
-
-3. Run the example application:
+2. Run the example application:
    ```bash
    pnpm dev:example
    ```
