@@ -36,6 +36,16 @@ jobs:
 
       - uses: docker/build-push-action@v6 
         with:
+          tags: |
+            ${{ secrets.REGISTRY_URL }}/h402/${{ env.DEPLOY_NAME }}-nginx:latest
+            ${{ secrets.REGISTRY_URL }}/h402/${{ env.DEPLOY_NAME }}-nginx:${{ github.sha }}
+          push: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          context: "{{defaultContext}}:typescript/${{ env.DEPLOY_NAME}}/nginx"
+
+      - uses: docker/build-push-action@v6 
+        with:
           context: "{{defaultContext}}:typescript/${{ env.DEPLOY_NAME }}"
           tags: |
             ${{ secrets.REGISTRY_URL }}/h402/${{ env.DEPLOY_NAME }}:latest
@@ -74,5 +84,6 @@ jobs:
               "sha": "${{ github.sha }}",
               "images": {
                 "${{ env.DEPLOY_NAME }}": "${{ secrets.REGISTRY_URL }}/h402/${{ env.DEPLOY_NAME }}:${{ github.sha }}"
+                "${{ env.DEPLOY_NAME }}-nginx": "${{ secrets.REGISTRY_URL }}/h402/${{ env.DEPLOY_NAME }}-nginx:${{ github.sha }}"
               }
             }
