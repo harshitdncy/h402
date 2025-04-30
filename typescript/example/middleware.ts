@@ -9,6 +9,7 @@ export const middleware = h402Middleware({
   onSuccess: async (request, facilitatorResponse) => {
     console.log("onSuccess", facilitatorResponse);
 
+    const requestHeaders = new Headers(request.headers)
     const prompt = request.nextUrl.searchParams.get("prompt");
     const txHash = facilitatorResponse.data?.txHash;
     const baseUrl = request.nextUrl.origin;
@@ -50,7 +51,11 @@ export const middleware = h402Middleware({
 
     request.nextUrl.searchParams.delete("402base64");
 
-    return NextResponse.next();
+    return NextResponse.next({
+      request: {
+        headers: requestHeaders,
+      }
+    });
   },
 });
 
