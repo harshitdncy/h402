@@ -4,8 +4,6 @@ HTTP 402 is the web-native standard for payments. Our mission is to design a fri
 
 This unlocks a previously unattainable economic layer for AI-native commerce, while simultaneously delivering a best-in-class user experience for humans.
 
-We've released [402pay](https://402pay.com) powered by the HTTP 402 protocol to showcase what is possible.
-
 ```js
 // This is an example of how our package can be integrated
 // You can check out the sections below to find more implementation options
