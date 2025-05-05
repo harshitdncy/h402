@@ -1,5 +1,7 @@
 # HTTP 402 protocol
 
+![402 preview](./images/site/preview.png)
+
 HTTP 402 is the web-native standard for payments. Our mission is to design a frictionless machine-to-machine protocol that allows agents to pay for APIs, compute resources, and data using simple HTTP requests and native blockchain transactions scaling to billions of sub-cent microtransactions.
 
 This unlocks a previously unattainable economic layer for AI-native commerce, while simultaneously delivering a best-in-class user experience for humans.
@@ -12,11 +14,10 @@ This unlocks a previously unattainable economic layer for AI-native commerce, wh
 app.use(
   "/generate-image",
   monetize({
-    scheme: "exact",
-    amount: 0.001,
-    token: "USDT",
-    chainId: 56, // BSC mainnet
-    namespace: "eip155",
+    amount: 0.001,    // defaults to scheme exact
+    token: "USDT",    // certain tokenAddresses are baked in the protocol for easier dev implementation
+    chainId: 56,      // BSC mainnet
+    namespace: "evm",
   })
 );
 ```
@@ -52,16 +53,7 @@ This unlocks a previously unattainable economic layer for AI-native commerce, wh
 
 We decided to create `h402`, which simply stands for `HTTP 402`, based on the open schemes provided by [x402](https://github.com/coinbase/x402).
 
-The reason for spinning off into a separate project comes down to a few key points
-
-- First, we needed to move fast; this protocol is and will be critical for our payment platform, and building independently allows us to iterate quickly
-- Second, maintaining a separate implementation gives us the freedom to make protocol decisions that aren’t influenced by the priorities of BASE (and by extension, USDC), whose development may naturally lean toward optimizing for their internal use cases or preferred chains, rather than creating a broadly compatible solution for other blockchains.
-
-Another major factor is the need to support features not currently handled by x402:
-
-- For example, x402 assumes the presence of permit-based tokens (EIP-2612), which USDC supports, but USDT doesn't
-- We also needed to implement post-broadcast validations for cryptocurrencies like Bitcoin
-- And most importantly, we required polling-based systems, which are essential both as fallback mechanisms for payment providers and for any setup that relies on standalone address verification, rather than a one-size-fits-all signed payload + broadcast approach
+The reason for spinning off into a separate project comes down to a few key points, you can read them in our [FAQs.md](./FAQs.md) or at our website [h402.xyz](https://h402.xyz).
 
 > We're a fairly small team, so this repo is evolving rapidly we'll be updating it weekly (or even daily) with new details, schemes, and examples.
 > In the meantime, if anything's missing or underspecified, you can check out the original x402 repository for reference.
@@ -164,7 +156,7 @@ type PaymentDetails = {
   // Amount required to access the resource in atomic units
   amountRequired: number | bigint;
   // Format of the amount required
-  amountRequiredFormat: "atomic" | "formatted";
+  amountRequiredFormat: "smallestUnit" | "humanReadable";
   // Address to pay for accessing the resource
   payToAddress: string;
   // Token contract
@@ -178,14 +170,13 @@ type PaymentDetails = {
   // Output schema of the resource response
   outputSchema: object | null;
   // Time in seconds it may be before the payment can be settaled
-  estimatedProcessingTime: number;
+  requiredDeadlineSeconds: number;
   // Extra informations about the payment for the scheme
   extra: Record<string, any> | null;
-  /** TODO: FIELDS FOR COMPATIBILITY WITH OTHER PROTOCOLS 
+
+  // Fields for support to other standards
   // Maximum amount required to access the resource in amount ** 10 ** decimals
-  maxAmountRequired?: bigint | null;
-  // Time in seconds it may be before the payment can be settaled
-  requiredDeadlineSeconds?: number | null; */
+  maxAmountRequired?: bigint | null; // converts into amountRequired
 };
 
 type PaymentRequired = {
@@ -195,9 +186,10 @@ type PaymentRequired = {
   accepts: PaymentDetails[];
   // Message for error(s) that occured while processing payment
   error: string | null;
-  /** TODO: FIELDS FOR COMPATIBILITY WITH OTHER PROTOCOLS 
+
+  // Fields for support to other standards
   // Version of the x402 payment protocol
-  x402Version?: number | null; */
+  x402Version?: number | null;
 };
 
 type PaymentPayload<T> = {
