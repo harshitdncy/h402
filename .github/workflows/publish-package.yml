@@ -20,19 +20,24 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
       - uses: actions/setup-node@v4
         with:
           node-version-file: ".nvmrc"
           registry-url: "https://npm.pkg.github.com"
           scope: "@bit-gpt"
+          cache: "pnpm"
 
       - name: Build and publish
         run: |
           cd ./typescript/package
-          cp .npmrc.example .npmrc
-          npm ci
-          npm run build
-          npm publish
+          pnpm --filter '@bit-gpt/h402' i
+          pnpm --filter '@bit-gpt/h402' build
+          pnpm publish --filter '@bit-gpt/h402' 
         env:
           NPM_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
