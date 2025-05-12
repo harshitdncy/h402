@@ -159,9 +159,21 @@ importers:
       '@solana/kit':
         specifier: ^2.1.0
         version: 2.1.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.8.3)(ws@8.18.1(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+      '@solana/signers':
+        specifier: ^2.1.0
+        version: 2.1.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.8.3)
+      '@solana/transactions':
+        specifier: ^2.1.0
+        version: 2.1.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.8.3)
+      '@types/express':
+        specifier: ^5.0.1
+        version: 5.0.1
       bs58:
         specifier: ^6.0.0
         version: 6.0.0
+      express:
+        specifier: ^4.21.2
+        version: 4.21.2
       next:
         specifier: 15.3.1
         version: 15.3.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
