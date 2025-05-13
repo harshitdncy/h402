@@ -4,9 +4,12 @@ on:
   workflow_dispatch:
   release:
     types: [published]
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'typescript/package/**'    
   push:
-    tags:
-      - "*"
     paths:
       - 'typescript/package/**'
 
@@ -16,7 +19,7 @@ jobs:
 
     permissions:
       contents: read
-      packages: write
+      packages: read
 
     steps:
       - uses: actions/checkout@v4
@@ -32,7 +35,7 @@ jobs:
           scope: "@bit-gpt"
           cache: "pnpm"
 
-      - name: Build and publish
+      - name: Build
         run: |
           cd ./typescript/package
           pnpm --filter '@bit-gpt/h402' i
@@ -41,3 +44,16 @@ jobs:
         env:
           NPM_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+  publish:
+    runs-on: [self-hosted]
+    if: ${{ startsWith(github.ref, 'refs/tags/') }}
+
+    permissions:
+      packages: write
+    
+    steps:
+      - name: Publish
+        run: |
+          pnpm publish --filter '@bit-gpt/h402' --no-git-checks 
+        env:
+          NPM_TOKEN: ${{ secrets.GITHUB_TOKEN }}

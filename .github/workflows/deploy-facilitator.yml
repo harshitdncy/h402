@@ -2,9 +2,12 @@ name: Deploy Facilitator
 
 on:
   workflow_dispatch:
-  push:
+  pull_request:
     branches:
       - main
+    paths:
+      - 'typescript/facilitator/**'
+  push:
     paths:
       - 'typescript/facilitator/**'
 
@@ -49,6 +52,11 @@ jobs:
         env:
           NPM_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+  deploy:
+    runs-on: [self-hosted]
+    if: ${{ github.ref == 'refs/heads/main' }}
+
+    steps:
       - uses: actions/create-github-app-token@v2
         id: app-token
         with:
