@@ -10,7 +10,6 @@ RUN --mount=type=cache,target=/root/.npm \
 
 WORKDIR /app
 COPY ./package.json /app/package.json
-COPY ./.npmrc /app/.npmrc
 COPY ./pnpm-lock.yaml /app/pnpm-lock.yaml
 COPY ./pnpm-workspace.yaml /app/pnpm-workspace.yaml
 COPY ./typescript/package/package.json /app/typescript/package/package.json
@@ -25,7 +24,7 @@ COPY ./typescript/facilitator /app/typescript/facilitator
 RUN pnpm --filter '@bit-gpt/h402' build && \
     pnpm --filter facilitator build
  
-FROM node:22-alpine3.21 as prod 
+FROM node:22-alpine3.21 AS prod 
 COPY --from=build /app/pnpm-lock.yaml /app/pnpm-lock.yaml
 COPY --from=build /app/pnpm-workspace.yaml /app/pnpm-workspace.yaml
 COPY --from=build /app/package.json /app/package.json

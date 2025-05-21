@@ -54,6 +54,7 @@ jobs:
 
   deploy:
     runs-on: [self-hosted]
+    needs: [build]
     if: ${{ github.ref == 'refs/heads/main' }}
 
     steps:
