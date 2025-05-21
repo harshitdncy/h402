@@ -148,99 +148,6 @@ The only available scheme for now is `exact`, the types are the following.
 
 All the types can be found [here](https://github.com/bit-gpt/h402/tree/main/typescript/package/src/types)
 
-### Protocol
-
-```typescript
-type PaymentRequirements = {
-  // Scheme of the payment protocol to use
-  scheme: string;
-  // Namespace for the receiving blockchain network
-  namespace: string | null;
-  // Network of the blockchain to send payment on
-  networkId: string;
-  // Amount required to access the resource in atomic units
-  amountRequired: number | bigint;
-  // Format of the amount required
-  amountRequiredFormat: "smallestUnit" | "humanReadable";
-  // Address to pay for accessing the resource
-  payToAddress: string;
-  // Token contract
-  tokenAddress: string;
-  // Identifier of what the user pays for
-  resource: string;
-  // Description of the resource
-  description: string;
-  // Mime type of the rescource response
-  mimeType: string;
-  // Output schema of the resource response
-  outputSchema: object | null;
-  // Time in seconds it may be before the payment can be settaled
-  requiredDeadlineSeconds: number;
-  // Extra informations about the payment for the scheme
-  extra: Record<string, any> | null;
-
-  // Fields for support to other standards
-  // Maximum amount required to access the resource in amount ** 10 ** decimals
-  maxAmountRequired?: bigint | null; // converts into amountRequired
-};
-
-type PaymentRequired = {
-  // Version of the h402 payment protocol
-  version: number;
-  // List of payment details that the resource server accepts (A resource server may accept multiple tokens/chains)
-  accepts: PaymentRequirements[];
-  // Message for error(s) that occured while processing payment
-  error: string | null;
-
-  // Fields for support to other standards
-  // Version of the x402 payment protocol
-  x402Version?: number | null;
-};
-
-type PaymentPayload<T> = {
-  // Version of the h402 payment protocol
-  version: number;
-  // Scheme of the payment protocol to use
-  scheme: string;
-  // Namespace for the receiving blockchain network
-  namespace: string;
-  // Netowrk of the blockchain to send payment on
-  networkId: string;
-  // Payload of the payment protocol
-  payload: T;
-  // Identifier of what the user pays for
-  resource: string;
-};
-```
-
-### Facilitator
-
-```typescript
-type FacilitatorRequest = {
-  paymentHeader: string;
-  paymentRequirements: PaymentRequirements;
-};
-
-type FacilitatorResponse<T> = {
-  data: T;
-  error?: string;
-};
-
-type SettleResponse = {
-  success: boolean;
-  error?: string | undefined;
-  txHash?: string | undefined;
-  chainId?: string | undefined;
-};
-
-type VerifyResponse = {
-  isValid: boolean;
-  type?: "payload" | "transaction";
-  txHash?: string;
-  errorMessage?: string | undefined;
-};
-```
-
 ## FAQs
 
 See [FAQs.md](./FAQs.md) or our website [h402.xyz](https://h402.xyz)
@@ -255,28 +162,7 @@ Join our [Discord community](https://bitgpt.xyz/discord) to stay up to date, con
 
 ## Playground
 
-To detail and showcase our idea of the 402 protocol, we've built a public playground available at [play.bitgpt.xyz](https://play.bitgpt.xyz). It demonstrates how the 402 payment flow works in comparison to traditional human checkouts.
-
-In a typical crypto checkout, users go through multiple steps: connecting a wallet, signing a transaction, and broadcasting it.
-
-![human checkout](./images/playground/human-checkout.png)
-
-While this flow mirrors traditional credit card payments, it’s unsuitable for machine-based transactions. Agents require a native protocol built for programmatic interaction, not one retrofitted from human-centric experiences.
-
-Our playground illustrates the 402 flow from the agent's perspective: initiating payments on the user's behalf, negotiating terms, and requesting final confirmation from the user.
-
-This interface is demo-only; in real-world use, these interactions occur purely via HTTP between the agent (acting for the user) and the server (BitGPT or any service provider).
-
-![playground sequence diagram](./images/playground/agent-sequence-diagram.png)
-
-The 402 flow can vary based on the payment scheme and user-agent configuration. For instance, in the absence of a default payment method, the user must manually select one.
-
-- `exact`: Simple flow with known amount.
-- `upto`, `prepaid`, `streamed`, `subscription`, `postpaid`: More dynamic, require negotiation or ongoing interaction.
-
-The playground is still under active development. While it currently mocks the protocol and checkout interface, more examples and features will be added soon, both here and in the soon-to-be-open-sourced repository.
-
-![playground sequence diagram explanations](./images/playground/examples.png)
+See [PLAYGROUND.md](./PLAYGROUND).
 
 ## License
 
