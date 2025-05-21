@@ -162,7 +162,7 @@ Join our [Discord community](https://bitgpt.xyz/discord) to stay up to date, con
 
 ## Playground
 
-See [PLAYGROUND.md](./PLAYGROUND).
+See [PLAYGROUND.md](./PLAYGROUND.md).
 
 ## License
 
