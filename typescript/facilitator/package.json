@@ -5,6 +5,9 @@
   "scripts": {
     "dev": "tsx index.ts",
     "build": "tsc",
+    "start": "docker compose -f 'docker-compose.yml' up -d --build",
+    "start:redis": "docker compose -f 'docker-compose.yml' up -d --build 'redis'",
+    "start:worker": "docker compose -f 'docker-compose.yml' up -d --build 'worker'",
     "format": "prettier -c .prettierrc --write \"**/*.{ts,js,cjs,json,md}\"",
     "format:check": "prettier -c .prettierrc --check \"**/*.{ts,js,cjs,json,md}\"",
     "lint": "eslint . --ext .ts --fix",
