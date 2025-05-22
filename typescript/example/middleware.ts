@@ -8,7 +8,7 @@ export const middleware = h402NextMiddleware({
     }
   },
   paywallRoute: "/paywall",
-  facilitatorUrl: process.env.FACILITATOR_URL || "http://localhost:3001",
+  facilitatorUrl: process.env.FACILITATOR_URL || "https://facilitator.bitgpt.xyz",
 });
 
 export const config = {
