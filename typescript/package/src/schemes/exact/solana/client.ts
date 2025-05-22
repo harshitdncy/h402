@@ -23,7 +23,7 @@ import {
   SYSTEM_PROGRAM_ADDRESS,
 } from "@solana-program/system";
 
-import { PaymentPayload, PaymentRequirements } from "../../../types/protocol";
+import { PaymentPayload, PaymentRequirements } from "../../../types/protocol.js";
 import { SolanaClient } from "../../../types/payment.js";
 import { getAssociatedTokenAddress } from "../../../shared/solana/tokenAddress.js";
 import { createAddressSigner } from "../../../shared/solana/signers.js";

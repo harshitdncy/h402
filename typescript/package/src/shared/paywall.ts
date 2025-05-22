@@ -1,4 +1,4 @@
-import { PaymentRequirements } from "../types";
+import { PaymentRequirements } from "../types/index.js";
 
 interface GetPaywallHtmlParams {
   paymentRequirements: PaymentRequirements[];

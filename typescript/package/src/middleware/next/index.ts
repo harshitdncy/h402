@@ -1,11 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server.js";
 import { MiddlewareConfig, PaymentRequirements } from "../../types/protocol.js";
-import { getPaywallHtml } from "../../shared/paywall";
+import { getPaywallHtml } from "../../shared/paywall.js";
 import { toJsonSafe } from "../../shared/index.js";
 import { VerifyResponse, FacilitatorResponse } from "../../types/index.js";
-import { useFacilitator } from "../utils";
+import { useFacilitator } from "../utils/index.js";
 import { safeBase64Decode } from "../../shared/base64.js";
-import { enrichPaymentRequirements } from "../../shared/enrichPaymentRequirements";
+import { enrichPaymentRequirements } from "../../shared/enrichPaymentRequirements.js";
 
 /**
  * Enhanced h402NextMiddleware that supports multiple payment options via X-PAYMENT header

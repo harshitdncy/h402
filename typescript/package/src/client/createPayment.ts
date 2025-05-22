@@ -1,8 +1,8 @@
 import { PublicActions } from "viem";
-import { PaymentRequirements } from "../types";
+import { PaymentRequirements } from "../types/index.js";
 import { evm, solana } from "../shared/index.js";
 import { exact } from "../schemes/index.js";
-import { parsePaymentRequirementsForAmount } from "../shared/parsePaymentRequirements";
+import { parsePaymentRequirementsForAmount } from "../shared/parsePaymentRequirements.js";
 import { PaymentClient, CreatePaymentFunction } from "../types/payment.js";
 
 /**

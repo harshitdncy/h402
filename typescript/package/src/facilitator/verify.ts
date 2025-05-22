@@ -4,7 +4,7 @@ import {
   VerifyResponse,
   exact as ExactType,
   PaymentPayload,
-} from "../types";
+} from "../types/index.js";
 import { PublicActions } from "viem";
 import { evm } from "../shared/index.js";
 import { utils } from "./index.js";

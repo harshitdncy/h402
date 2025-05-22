@@ -1,4 +1,4 @@
-import { PaymentRequirements } from "./protocol";
+import { PaymentRequirements } from "./protocol.js";
 
 type FacilitatorRequest = {
   paymentHeader: string;

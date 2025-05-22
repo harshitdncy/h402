@@ -1,15 +1,15 @@
 import {
   PaymentRequirements,
   EnrichedPaymentRequirements,
-} from "../types/protocol";
+} from "../types/protocol.js";
 import {
   getTokenDecimals as getSolanaTokenDecimals,
   getTokenSymbol as getSolanaTokenSymbol,
-} from "./solana/tokenMetadata";
+} from "./solana/tokenMetadata.js";
 import {
   getTokenDecimals as getEvmTokenDecimals,
   getTokenSymbol as getEvmTokenSymbol,
-} from "./evm/tokenMetadata";
+} from "./evm/tokenMetadata.js";
 
 /**
  * Enrich payment requirements with token metadata (decimals and symbol)

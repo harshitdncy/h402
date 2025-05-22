@@ -4,7 +4,7 @@ import {
   signature as solanaKitSignature,
   TransactionVersion,
 } from "@solana/kit";
-import { getClusterUrl } from "./clusterEndpoints";
+import { getClusterUrl } from "./clusterEndpoints.js";
 
 /**
  * Options for fetching a transaction
