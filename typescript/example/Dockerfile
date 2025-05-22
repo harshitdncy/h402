@@ -35,6 +35,8 @@ COPY --from=build /app/typescript/example/data /app/typescript/example/data
 COPY --from=build /app/typescript/example/package.json /app/typescript/example/package.json
 COPY --from=build /app/typescript/example/node_modules /app/typescript/example/node_modules
 
+COPY --from=build /app/typescript/example/public/assets /app/typescript/example/public/assets
+
 RUN npm i -g pnpm@^10.10
 
 WORKDIR /app/typescript/example
