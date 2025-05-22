@@ -29,6 +29,7 @@ COPY --from=build /app/pnpm-lock.yaml /app/pnpm-lock.yaml
 COPY --from=build /app/pnpm-workspace.yaml /app/pnpm-workspace.yaml
 COPY --from=build /app/package.json /app/package.json
 COPY --from=build /app/node_modules /app/node_modules
+
 COPY --from=build /app/typescript/facilitator/dist /app/typescript/facilitator/dist
 COPY --from=build /app/typescript/facilitator/package.json /app/typescript/facilitator/package.json
 COPY --from=build /app/typescript/facilitator/node_modules /app/typescript/facilitator/node_modules
@@ -36,6 +37,7 @@ COPY --from=build /app/typescript/facilitator/node_modules /app/typescript/facil
 # pnpm node_modules
 COPY --from=build /app/typescript/package/dist /app/typescript/package/dist
 COPY --from=build /app/typescript/package/package.json /app/typescript/package/package.json
+COPY --from=build /app/typescript/package/node_modules /app/typescript/package/node_modules
 
 RUN npm i -g pnpm@^10.10
 
