@@ -15,6 +15,7 @@ server {
   location @next {
     proxy_pass http://next;
     proxy_set_header Host $host;
+    proxy_set_header x-scheme $scheme;
   }
 
   location /uploads {

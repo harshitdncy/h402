@@ -29,6 +29,7 @@ import { getAssociatedTokenAddress } from "../../../shared/solana/tokenAddress.j
 import { createAddressSigner } from "../../../shared/solana/signers.js";
 import bs58 from "bs58";
 import { exact } from "../../../types/index.js";
+import { getFacilitator } from "../../../shared/next.js";
 
 async function buildPaymentTransaction(
   requirements: PaymentRequirements,
@@ -36,7 +37,7 @@ async function buildPaymentTransaction(
 ): Promise<
   CompilableTransactionMessage & TransactionMessageWithBlockhashLifetime
 > {
-  const rpc = createSolanaRpc('http://localhost:3001/solana-rpc');
+  const rpc = createSolanaRpc(`${getFacilitator()}/solana-rpc`);
   const latestBlockhash = (await rpc.getLatestBlockhash().send()).value;
   const payerSigner = createAddressSigner(address(payerPublicKey));
   const payTo = address(requirements.payToAddress);
@@ -95,7 +96,7 @@ async function sendAndCreatePayload(
   const transaction = compileTransaction(message);
 
   // Use facilitator proxy RPC so that requests are made from a server
-  const rpc = createSolanaRpc("http://localhost:3001/solana-rpc");
+  const rpc = createSolanaRpc(`${getFacilitator()}/solana-rpc`);
 
   let txSignature: string;
   const waitForConfirmation = async (sig: string) => {

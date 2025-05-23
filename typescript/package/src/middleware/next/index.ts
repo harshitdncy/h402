@@ -6,6 +6,7 @@ import { VerifyResponse, FacilitatorResponse } from "../../types/index.js";
 import { useFacilitator } from "../utils/index.js";
 import { safeBase64Decode } from "../../shared/base64.js";
 import { enrichPaymentRequirements } from "../../shared/enrichPaymentRequirements.js";
+import { getUrl } from "../../shared/next.js";
 
 /**
  * Enhanced h402NextMiddleware that supports multiple payment options via X-PAYMENT header
@@ -41,10 +42,10 @@ export function h402NextMiddleware(config: MiddlewareConfig) {
   ) => {
     // Check if a paywall route is configured
     if (config.paywallRoute) {
-      const redirectUrl = new URL(config.paywallRoute, request.url);
+      const redirectUrl = new URL(config.paywallRoute, getUrl(request));
 
       // Set the return URL
-      redirectUrl.searchParams.set("returnUrl", request.url);
+      redirectUrl.searchParams.set("returnUrl", getUrl(request));
 
       // Enrich payment requirements with metadata
       const enrichedRequirements = await enrichPaymentRequirements(
@@ -58,7 +59,7 @@ export function h402NextMiddleware(config: MiddlewareConfig) {
       );
 
       // Extract and pass along the prompt parameter if it exists in the original request
-      const originalUrl = new URL(request.url);
+      const originalUrl = new URL(getUrl(request));
       const prompt = originalUrl.searchParams.get("prompt");
       if (prompt) {
         redirectUrl.searchParams.set("prompt", prompt);
@@ -74,7 +75,7 @@ export function h402NextMiddleware(config: MiddlewareConfig) {
     return new NextResponse(
       getPaywallHtml({
         paymentRequirements: enrichedRequirements,
-        currentUrl: request.url,
+        currentUrl: getUrl(request),
       }),
       {
         status: 402,
