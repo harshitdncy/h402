@@ -1,4 +1,4 @@
-import {safeBase64Decode, safeBase64Encode,} from "../../../../shared";
+import {safeBase64Decode, safeBase64Encode} from "../../../../shared/base64.js";
 import {EvmPaymentPayload} from "../../../../types";
 
 function encodePaymentPayload(

@@ -7,7 +7,7 @@ import { PublicActions } from "viem";
 import { evm } from "../shared/index.js";
 import { utils } from "./index.js";
 import { parsePaymentRequirementsForAmount } from "../shared/parsePaymentRequirements.js";
-import { safeBase64Decode } from "../shared";
+import { safeBase64Decode } from "../shared/base64.js";
 
 /**
  * Verifies a payment payload against the provided payment details.

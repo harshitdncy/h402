@@ -21,7 +21,7 @@ import {
   SolanaClient,
   SolanaPaymentPayload
 } from "../../../types";
-import {getAssociatedTokenAddress} from "../../../shared/solana";
+import {getAssociatedTokenAddress} from "../../../shared/solana/tokenAddress.js";
 import {createAddressSigner} from "../../../shared/solana/signers.js";
 import bs58 from "bs58";
 import {getFacilitator} from "../../../shared/next.js";

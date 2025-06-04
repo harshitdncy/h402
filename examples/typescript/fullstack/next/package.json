@@ -9,7 +9,6 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@bit-gpt/h402": "workspace:*",
     "h402-next": "workspace:*",
     "next": "15.3.1",
     "openai": "^4.96.2",
