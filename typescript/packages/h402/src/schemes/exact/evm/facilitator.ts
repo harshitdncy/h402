@@ -20,7 +20,7 @@ import {
   toBytes,
   Log, Hex,
 } from "viem";
-import {h402Version} from "../../../index";
+import {h402Version} from "../../../index.js";
 
 const BLOCK_TIME = 2; // Average block time in seconds
 const SAFETY_BLOCKS = 3; // Number of blocks for safety margin
