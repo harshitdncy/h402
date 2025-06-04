@@ -6,10 +6,10 @@ on:
     branches:
       - main
     paths:
-      - 'typescript/example/**'
+      - 'examples/typescript/fullstack/next/**'
   push:
     paths:
-      - 'typescript/example/**'
+      - 'examples/typescript/fullstack/next/**'
 
 env:
   DEPLOY_NAME: example
@@ -45,11 +45,11 @@ jobs:
           push: true
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          context: "{{defaultContext}}:typescript/${{ env.DEPLOY_NAME}}/nginx"
+          context: "{{defaultContext}}:examples/typescript/fullstack/next/nginx"
 
       - uses: docker/build-push-action@v6 
         with:
-          file: "typescript/${{ env.DEPLOY_NAME }}/Dockerfile" 
+          file: "examples/typescript/fullstack/next/Dockerfile" 
           context: "{{defaultContext}}"
           tags: |
             ${{ secrets.REGISTRY_URL }}/h402/${{ env.DEPLOY_NAME }}:latest

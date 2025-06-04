@@ -6,10 +6,10 @@ on:
     branches:
       - main
     paths:
-      - 'typescript/facilitator/**'
+      - 'typescript/packages/facilitator/**'
   push:
     paths:
-      - 'typescript/facilitator/**'
+      - 'typescript/packages/facilitator/**'
 
 env:
   DEPLOY_NAME: facilitator
@@ -39,7 +39,7 @@ jobs:
 
       - uses: docker/build-push-action@v6 
         with:
-          file: "typescript/${{ env.DEPLOY_NAME }}/Dockerfile"
+          file: "typescript/packages/${{ env.DEPLOY_NAME }}/Dockerfile"
           context: "{{defaultContext}}"
           tags: |
             ${{ secrets.REGISTRY_URL }}/h402/${{ env.DEPLOY_NAME }}:latest

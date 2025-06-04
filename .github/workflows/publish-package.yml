@@ -8,10 +8,10 @@ on:
     branches:
       - main
     paths:
-      - 'typescript/package/**'    
+      - 'typescript/packages/h402/**'    
   push:
     paths:
-      - 'typescript/package/**'
+      - 'typescript/packages/h402/**'
 
 jobs:
   build:
@@ -37,7 +37,7 @@ jobs:
 
       - name: Build
         run: |
-          cd ./typescript/package
+          cd ./typescript/packages/h402
           pnpm --filter '@bit-gpt/h402' i
           pnpm --filter '@bit-gpt/h402' build
           pnpm publish --filter '@bit-gpt/h402' --no-git-checks 
