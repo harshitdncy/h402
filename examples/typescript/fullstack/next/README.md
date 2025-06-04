@@ -36,7 +36,7 @@ The h402 middleware allows you to protect routes in your Next.js application and
 The middleware is configured in `middleware.ts`:
 
 ```typescript
-import { h402NextMiddleware } from "@bit-gpt/h402";
+import { h402NextMiddleware } from "h402-next";
 import { imageGenerationPaymentRequirements } from "./config/paymentRequirements";
 
 export const middleware = h402NextMiddleware({
@@ -74,7 +74,7 @@ This configuration:
 Payment requirements are defined in `config/paymentRequirements.ts`:
 
 ```typescript
-import { PaymentRequirements } from "@bit-gpt/h402/types";
+import { PaymentRequirements } from "h402-next";
 
 // EVM payment requirement (USDT on BSC)
 export const evmPaymentRequirementsUSDTonBSC: PaymentRequirements = {

@@ -191,3 +191,11 @@ export function h402NextMiddleware(config: MiddlewareConfig) {
     }
   };
 }
+
+export type {
+  PaymentRequirements,
+  Money,
+  Network,
+  Resource,
+  RouteConfig,
+} from "@bit-gpt/h402/types";
