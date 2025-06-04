@@ -12,15 +12,15 @@ WORKDIR /app
 COPY ./package.json /app/package.json
 COPY ./pnpm-lock.yaml /app/pnpm-lock.yaml
 COPY ./pnpm-workspace.yaml /app/pnpm-workspace.yaml
-COPY ./typescript/package/package.json /app/typescript/package/package.json
-COPY ./typescript/facilitator/package.json /app/typescript/facilitator/package.json 
+COPY ./typescript/packages/h402/package.json /app/typescript/packages/h402/package.json
+COPY ./typescript/packages/facilitator/package.json /app/typescript/packages/facilitator/package.json 
 
 RUN --mount=type=cache,target=/app/.pnpm-store \
     pnpm --filter '@bit-gpt/h402' i && \
     pnpm --filter facilitator i
 
-COPY ./typescript/package /app/typescript/package
-COPY ./typescript/facilitator /app/typescript/facilitator
+COPY ./typescript/packages/h402 /app/typescript/packages/h402
+COPY ./typescript/packages/facilitator /app/typescript/packages/facilitator
 RUN pnpm --filter '@bit-gpt/h402' build && \
     pnpm --filter facilitator build
  
@@ -30,17 +30,17 @@ COPY --from=build /app/pnpm-workspace.yaml /app/pnpm-workspace.yaml
 COPY --from=build /app/package.json /app/package.json
 COPY --from=build /app/node_modules /app/node_modules
 
-COPY --from=build /app/typescript/facilitator/dist /app/typescript/facilitator/dist
-COPY --from=build /app/typescript/facilitator/package.json /app/typescript/facilitator/package.json
-COPY --from=build /app/typescript/facilitator/node_modules /app/typescript/facilitator/node_modules
+COPY --from=build /app/typescript/packages/facilitator/dist /app/typescript/packages/facilitator/dist
+COPY --from=build /app/typescript/packages/facilitator/package.json /app/typescript/packages/facilitator/package.json
+COPY --from=build /app/typescript/packages/facilitator/node_modules /app/typescript/packages/facilitator/node_modules
 
 # pnpm node_modules
-COPY --from=build /app/typescript/package/dist /app/typescript/package/dist
-COPY --from=build /app/typescript/package/package.json /app/typescript/package/package.json
-COPY --from=build /app/typescript/package/node_modules /app/typescript/package/node_modules
+COPY --from=build /app/typescript/packages/h402/dist /app/typescript/packages/h402/dist
+COPY --from=build /app/typescript/packages/h402/package.json /app/typescript/packages/h402/package.json
+COPY --from=build /app/typescript/packages/h402/node_modules /app/typescript/packages/h402/node_modules
 
 RUN npm i -g pnpm@^10.10
 
-WORKDIR /app/typescript/facilitator
+WORKDIR /app/typescript/packages/facilitator
 EXPOSE 3000/tcp
 ENTRYPOINT [ "node", "dist/index.js" ]
