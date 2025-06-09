@@ -37,7 +37,6 @@ COPY --from=build /app/pnpm-workspace.yaml /app/pnpm-workspace.yaml
 COPY --from=build /app/package.json /app/package.json
 COPY --from=build /app/node_modules /app/node_modules
 COPY --from=build /app/examples/typescript/fullstack/next/.next /app/examples/typescript/fullstack/next/.next
-COPY --from=build /app/examples/typescript/fullstack/next/data /app/examples/typescript/fullstack/next/data
 COPY --from=build /app/examples/typescript/fullstack/next/package.json /app/examples/typescript/fullstack/next/package.json
 COPY --from=build /app/examples/typescript/fullstack/next/node_modules /app/examples/typescript/fullstack/next/node_modules
 
