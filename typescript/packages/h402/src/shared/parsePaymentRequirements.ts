@@ -1,4 +1,4 @@
-import { type PaymentRequirements } from "../types";
+import { type PaymentRequirements } from "../types/index.js";
 import { evm, solana } from "./index.js";
 import { type PublicActions } from "viem";
 

@@ -4,10 +4,10 @@ import {
   getProgramDerivedAddress,
 } from "@solana/kit";
 import type { AccountInfoWithJsonData } from "@solana/kit";
-import { NATIVE_SOL_DECIMALS } from "./index.js";
 import { TOKEN_PROGRAM_ADDRESS } from "@solana-program/token";
 import { TOKEN_2022_PROGRAM_ADDRESS } from "@solana-program/token-2022";
-import {getFacilitator} from "../next";
+import { NATIVE_SOL_DECIMALS } from "./index.js";
+import { getFacilitator } from "../next.js";
 
 /**
  * Convert a hex string to Uint8Array
@@ -15,7 +15,7 @@ import {getFacilitator} from "../next";
  */
 function hexToUint8Array(hexString: string): Uint8Array {
   // Remove '0x' prefix if present
-  const hex = hexString.startsWith('0x') ? hexString.slice(2) : hexString;
+  const hex = hexString.startsWith("0x") ? hexString.slice(2) : hexString;
 
   // Ensure even length
   const len = hex.length;
@@ -25,7 +25,7 @@ function hexToUint8Array(hexString: string): Uint8Array {
 
   const bytes = new Uint8Array(len / 2);
   for (let i = 0; i < len; i += 2) {
-    bytes[i/2] = parseInt(hex.substring(i, i + 2), 16);
+    bytes[i / 2] = parseInt(hex.substring(i, i + 2), 16);
   }
 
   return bytes;
@@ -45,9 +45,7 @@ const WELL_KNOWN_TOKENS: Record<string, string> = {
  * For native SOL, returns 9
  * For SPL tokens, fetches the mint info
  */
-export async function getTokenDecimals(
-  tokenAddress: string,
-): Promise<number> {
+export async function getTokenDecimals(tokenAddress: string): Promise<number> {
   // Special case for native SOL (empty string or special zero address)
   if (!tokenAddress || tokenAddress === "11111111111111111111111111111111") {
     return NATIVE_SOL_DECIMALS;
@@ -102,7 +100,7 @@ async function findMetadataAddress(mint: string): Promise<string> {
 }
 
 export async function getTokenSymbol(
-  tokenAddress: string,
+  tokenAddress: string
 ): Promise<string | undefined> {
   // Special case for native SOL
   if (tokenAddress === "11111111111111111111111111111111") {

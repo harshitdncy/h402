@@ -1,5 +1,5 @@
 import { erc20Abi } from "viem";
-import { getPublicClient } from "../../types/shared/evm";
+import { getPublicClient } from "../../types/shared/evm/index.js";
 
 /**
  * Get the number of decimals for a token

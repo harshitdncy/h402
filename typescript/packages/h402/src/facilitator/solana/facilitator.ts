@@ -1,14 +1,14 @@
 import {
   verify as verifyExact,
   settle as settleExact,
-} from "../../schemes/exact/solana";
-import { SolanaClient } from "../../types/shared/client";
+} from "../../schemes/exact/solana/index.js";
+import { SolanaClient } from "../../types/shared/client.js";
 import {
   SolanaPaymentPayload,
   PaymentRequirements,
   SettleResponse,
   VerifyResponse,
-} from "../../types";
+} from "../../types/index.js";
 
 /**
  * Verifies a payment payload against the required payment details regardless of the scheme
@@ -22,7 +22,10 @@ export async function verify(
   payload: SolanaPaymentPayload,
   paymentRequirements: PaymentRequirements
 ): Promise<VerifyResponse> {
-  if (paymentRequirements.scheme === "exact" && paymentRequirements.namespace === "solana") {
+  if (
+    paymentRequirements.scheme === "exact" &&
+    paymentRequirements.namespace === "solana"
+  ) {
     const valid = await verifyExact(payload, paymentRequirements);
     return valid;
   }
@@ -46,7 +49,10 @@ export async function settle(
   payload: SolanaPaymentPayload,
   paymentRequirements: PaymentRequirements
 ): Promise<SettleResponse> {
-  if (paymentRequirements.scheme === "exact" && paymentRequirements.namespace === "solana") {
+  if (
+    paymentRequirements.scheme === "exact" &&
+    paymentRequirements.namespace === "solana"
+  ) {
     return settleExact(payload, paymentRequirements);
   }
 

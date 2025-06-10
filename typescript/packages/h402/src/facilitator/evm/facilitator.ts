@@ -1,15 +1,15 @@
 import {
   verify as verifyExact,
   settle as settleExact,
-} from "../../schemes/exact/evm";
-import { EvmClient } from "../../types/shared/client";
+} from "../../schemes/exact/evm/index.js";
+import { EvmClient } from "../../types/shared/client.js";
 import {
   EvmPaymentPayload,
   PaymentRequirements,
   SettleResponse,
   VerifyResponse,
   isSupportedEVMNetworkId,
-} from "../../types";
+} from "../../types/index.js";
 import { PublicClient } from "viem";
 
 /**

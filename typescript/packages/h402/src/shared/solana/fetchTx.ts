@@ -4,7 +4,7 @@ import {
   type TransactionVersion,
   type GetTransactionApi,
 } from "@solana/kit";
-import {getFacilitator} from "../next";
+import { getFacilitator } from "../next.js";
 
 /**
  * Options for fetching a transaction

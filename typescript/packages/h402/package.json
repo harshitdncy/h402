@@ -48,6 +48,11 @@
       "import": "./dist/schemes/exact/solana/index.js",
       "default": "./dist/schemes/exact/solana/index.js"
     },
+    "./schemes/exact/evm": {
+      "types": "./dist/schemes/exact/evm/index.d.ts",
+      "import": "./dist/schemes/exact/evm/index.js",
+      "default": "./dist/schemes/exact/evm/index.js"
+    },
     "./middleware": {
       "types": "./dist/middleware/index.d.ts",
       "import": "./dist/middleware/index.js",

@@ -17,7 +17,7 @@ import type {
 import { baseSepolia, avalancheFuji, bsc } from "viem/chains";
 import { privateKeyToAccount } from "viem/accounts";
 import { type Hex } from "viem";
-import { EvmNetworkToChainId } from "../network";
+import { EvmNetworkToChainId } from "../network.js";
 
 // Create a public client for reading data
 export type SignerWallet<

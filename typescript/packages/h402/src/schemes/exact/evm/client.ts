@@ -1,8 +1,10 @@
-import { WalletClient, PublicActions } from "viem";
-import { signAndSendTransaction, signAuthorization, signTransaction, utils } from "./index.js";
+import { WalletClient, PublicActions, Hex } from "viem";
+import { signAndSendTransaction, signTransaction, signAuthorization, utils } from "./index.js";
 import { evm } from "../../../shared/index.js";
-import { PaymentRequirements, EvmPaymentPayload } from "../../../types";
-import { Hex } from "viem";
+import {
+  PaymentRequirements,
+  EvmPaymentPayload,
+} from "../../../types/index.js";
 
 const TRANSFER_WITH_AUTHORIZATION_ABI = [
   {

@@ -27,11 +27,11 @@ import {
   PaymentRequirements,
   SolanaClient,
   SolanaPaymentPayload,
-} from "../../../types";
+} from "../../../types/index.js";
 import {
   createAddressSigner,
   getAssociatedTokenAddress,
-} from "../../../shared/solana";
+} from "../../../shared/solana/index.js";
 import bs58 from "bs58";
 import { getFacilitator } from "../../../shared/next.js";
 

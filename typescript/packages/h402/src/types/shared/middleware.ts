@@ -1,7 +1,7 @@
-import { type CreateHeaders } from "../../verify";
-import { type Money } from "./money";
-import { type Resource } from "./resource";
-import { type PaymentRequirements } from "../verify";
+import { type CreateHeaders } from "../../verify/index.js";
+import { type Money } from "./money.js";
+import { type Resource } from "./resource.js";
+import { type PaymentRequirements } from "../verify/index.js";
 
 export type FacilitatorConfig = {
   url: Resource;

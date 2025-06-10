@@ -1,7 +1,7 @@
 import type {
   PaymentRequirements,
   EnrichedPaymentRequirements,
-} from "../types";
+} from "../types/index.js";
 import {
   getTokenDecimals as getSolanaTokenDecimals,
   getTokenSymbol as getSolanaTokenSymbol,
@@ -16,7 +16,7 @@ import {
  * This is used by the middleware before redirecting to the paywall
  */
 export async function enrichPaymentRequirements(
-  requirements: PaymentRequirements[],
+  requirements: PaymentRequirements[]
 ): Promise<EnrichedPaymentRequirements[]> {
   return Promise.all(
     requirements.map(async (req) => {

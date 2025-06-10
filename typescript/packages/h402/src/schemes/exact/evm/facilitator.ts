@@ -9,7 +9,7 @@ import {
   EvmSignAndSendTransactionPayload,
   EvmSignedTransactionPayload,
   Namespace,
-} from "../../../types";
+} from "../../../types/index.js";
 import {
   encodeFunctionData,
   WalletClient,

@@ -10,9 +10,9 @@ import {
   SolanaPaymentPayload,
   SolanaSignTransactionPayload,
   VerifyResponse,
-} from "../../../types";
+} from "../../../types/index.js";
 import { solana } from "../../../shared/index.js";
-import { getFacilitator } from "../../../shared/next";
+import { getFacilitator } from "../../../shared/next.js";
 
 /**
  * Verify a Solana payment for the exact scheme

@@ -1,10 +1,11 @@
 import { z } from "zod";
-import { NetworkSchema } from "../shared";
-import {ExactEvmPayloadSchema} from "./evmPayload";
-import {ExactSolanaPayloadSchema} from "./solanaPayload";
+import { NetworkSchema } from "../shared/index.js";
+import { ExactEvmPayloadSchema } from "./evmPayload.js";
+import { ExactSolanaPayloadSchema } from "./solanaPayload.js";
 
 // Constants
-const MixedAddressRegex = /^0x[a-fA-F0-9]{40}|[A-Za-z0-9][A-Za-z0-9-]{0,34}[A-Za-z0-9]$/;
+const MixedAddressRegex =
+  /^0x[a-fA-F0-9]{40}|[A-Za-z0-9][A-Za-z0-9-]{0,34}[A-Za-z0-9]$/;
 
 // Enums
 export const schemes = ["exact"] as const;
@@ -33,14 +34,11 @@ export const ErrorReasons = [
 ] as const;
 
 // h402PaymentRequirements
-const NamespaceSchema = z.enum(['evm', 'solana']);
-const AmountFormatSchema = z.enum(['humanReadable', 'smallestUnit']);
+const NamespaceSchema = z.enum(["evm", "solana"]);
+const AmountFormatSchema = z.enum(["humanReadable", "smallestUnit"]);
 
 // Helper function to validate bigint or number
-const BigintOrNumberSchema = z.union([
-  z.bigint(),
-  z.number()
-]);
+const BigintOrNumberSchema = z.union([z.bigint(), z.number()]);
 
 // Base Payment Requirements Schema
 export const BasePaymentRequirementsSchema = z.object({
@@ -64,26 +62,32 @@ export const BasePaymentRequirementsSchema = z.object({
 });
 
 // Enriched Payment Requirements Schema
-export const EnrichedPaymentRequirementsSchema = BasePaymentRequirementsSchema.extend({
-  tokenDecimals: z.number().int(), // Required after enrichment
-  tokenSymbol: z.string(), // Required after enrichment
-});
+export const EnrichedPaymentRequirementsSchema =
+  BasePaymentRequirementsSchema.extend({
+    tokenDecimals: z.number().int(), // Required after enrichment
+    tokenSymbol: z.string(), // Required after enrichment
+  });
 
 // Main export schema
 export const PaymentRequirementsSchema = BasePaymentRequirementsSchema;
 
-
 // Type exports (inferred from schemas)
-export type BasePaymentRequirements = z.infer<typeof BasePaymentRequirementsSchema>;
-export type EnrichedPaymentRequirements = z.infer<typeof EnrichedPaymentRequirementsSchema>;
+export type BasePaymentRequirements = z.infer<
+  typeof BasePaymentRequirementsSchema
+>;
+export type EnrichedPaymentRequirements = z.infer<
+  typeof EnrichedPaymentRequirementsSchema
+>;
 export type PaymentRequirements = z.infer<typeof PaymentRequirementsSchema>;
 export type Namespace = z.infer<typeof NamespaceSchema>;
 export type AmountFormat = z.infer<typeof AmountFormatSchema>;
 
 // h402PaymentPayload
-export function createPaymentPayloadSchema<T extends z.ZodType>(payloadSchema: T) {
+export function createPaymentPayloadSchema<T extends z.ZodType>(
+  payloadSchema: T
+) {
   return z.object({
-    h402Version: z.number().refine(val => x402Versions.includes(val as 1)),
+    h402Version: z.number().refine((val) => x402Versions.includes(val as 1)),
     scheme: z.enum(schemes),
     payload: payloadSchema,
     namespace: NamespaceSchema,
@@ -92,8 +96,12 @@ export function createPaymentPayloadSchema<T extends z.ZodType>(payloadSchema: T
   });
 }
 
-export const EvmPaymentPayloadSchema = createPaymentPayloadSchema(ExactEvmPayloadSchema);
-export const SolanaPaymentPayloadSchema = createPaymentPayloadSchema(ExactSolanaPayloadSchema);
+export const EvmPaymentPayloadSchema = createPaymentPayloadSchema(
+  ExactEvmPayloadSchema
+);
+export const SolanaPaymentPayloadSchema = createPaymentPayloadSchema(
+  ExactSolanaPayloadSchema
+);
 export type EvmPaymentPayload = z.infer<typeof EvmPaymentPayloadSchema>;
 export type SolanaPaymentPayload = z.infer<typeof SolanaPaymentPayloadSchema>;
 
@@ -105,7 +113,7 @@ export const VerifyResponseSchema = z.object({
   //
   errorMessage: z.string().optional(),
   txHash: z.string().regex(MixedAddressRegex).optional(),
-  type: z.enum(["payload", "transaction"] as const).optional()
+  type: z.enum(["payload", "transaction"] as const).optional(),
 });
 export type VerifyResponse = z.infer<typeof VerifyResponseSchema>;
 
@@ -123,7 +131,7 @@ export type SettleResponse = z.infer<typeof SettleResponseSchema>;
 
 // h402SupportedPaymentKind
 export const SupportedPaymentKindSchema = z.object({
-  h402Version: z.number().refine(val => x402Versions.includes(val as 1)),
+  h402Version: z.number().refine((val) => x402Versions.includes(val as 1)),
   scheme: z.enum(schemes),
   network: NetworkSchema,
 });
@@ -133,4 +141,6 @@ export type SupportedPaymentKind = z.infer<typeof SupportedPaymentKindSchema>;
 export const SupportedPaymentKindsResponseSchema = z.object({
   kinds: z.array(SupportedPaymentKindSchema),
 });
-export type SupportedPaymentKindsResponse = z.infer<typeof SupportedPaymentKindsResponseSchema>;
+export type SupportedPaymentKindsResponse = z.infer<
+  typeof SupportedPaymentKindsResponseSchema
+>;

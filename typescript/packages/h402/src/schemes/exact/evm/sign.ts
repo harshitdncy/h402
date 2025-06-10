@@ -2,10 +2,9 @@ import {
   EvmAuthorizationParameters,
   EvmSignAndSendTransactionParameters,
   PaymentRequirements,
-} from "../../../types";
-import { WalletClient, PublicActions, Hex } from "viem";
+} from "../../../types/index.js";
 import { evm } from "../../../shared/index.js";
-import { encodeFunctionData } from "viem";
+import { WalletClient, PublicActions, Hex, encodeFunctionData } from "viem";
 
 const ERC20_ABI = [
   {
