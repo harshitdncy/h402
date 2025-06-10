@@ -1,108 +1,125 @@
-import { createContext, useCallback, useContext, useEffect, useState } from "react";
+"use client";
 
-type Theme = "dark" | "light" | "system";
+import { createContext, useContext, useEffect, useState } from "react";
 
-type ThemeProviderProps = {
+type Theme = "dark" | "light";
+
+interface ThemeProviderProps {
   children: React.ReactNode;
   defaultTheme?: Theme;
-};
+}
 
-type ThemeProviderState = {
+interface ThemeContextValue {
   theme: Theme;
   setTheme: (theme: Theme) => void;
   isDarkMode: boolean;
+}
+
+const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
+
+const STORAGE_KEY = "theme";
+const VALID_THEMES = ["dark", "light"] as const;
+
+const isValidTheme = (value: string): value is Theme =>
+  VALID_THEMES.includes(value as Theme);
+
+const getStoredTheme = (): Theme | null => {
+  if (typeof window === "undefined") return null;
+
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    return stored && isValidTheme(stored) ? stored : null;
+  } catch {
+    return null;
+  }
 };
 
-const initialState: ThemeProviderState = {
-  theme: "system",
-  setTheme: () => null,
-  isDarkMode: false,
+const getSystemTheme = (): Theme => {
+  if (typeof window === "undefined") return "light";
+  return window.matchMedia("(prefers-color-scheme: dark)").matches
+    ? "dark"
+    : "light";
 };
-
-const ThemeProviderContext = createContext<ThemeProviderState>(initialState);
 
 export function ThemeProvider({
   children,
-  defaultTheme = "system",
+  defaultTheme = "light",
 }: ThemeProviderProps) {
-  // Initialize theme from localStorage if available, otherwise use defaultTheme
-  const [theme, setTheme] = useState<Theme>(() => {
-    // Only access localStorage on the client side
-    if (typeof window !== 'undefined') {
-      const savedTheme = localStorage.getItem('theme') as Theme;
-      return savedTheme || defaultTheme;
-    }
-    return defaultTheme;
-  });
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  // Always start with the default theme for SSR consistency
+  const [theme, setThemeState] = useState<Theme>(defaultTheme);
+  const [isHydrated, setIsHydrated] = useState(false);
 
-  // Update the root class and isDarkMode state
-  const updateThemeClass = useCallback(() => {
-    if (typeof window === 'undefined') return;
-
-    const root = window.document.documentElement;
-    root.classList.remove("light", "dark");
-
-    let effectiveTheme: "light" | "dark";
-
-    if (theme === "system") {
-      effectiveTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-    } else {
-      effectiveTheme = theme as "light" | "dark";
-    }
-
-    root.classList.add(effectiveTheme);
-    setIsDarkMode(effectiveTheme === "dark");
-  }, [theme]);
-
-  // Update theme when it changes
+  // Hydrate with the actual theme after mount
   useEffect(() => {
-    updateThemeClass();
-  }, [theme, updateThemeClass]);
+    const storedTheme = getStoredTheme();
+    const systemTheme = getSystemTheme();
+
+    // Priority: stored theme > system theme > default theme
+    const actualTheme = storedTheme || systemTheme;
+
+    setThemeState(actualTheme);
+    setIsHydrated(true);
+  }, []);
 
   // Listen for system theme changes
   useEffect(() => {
-    if (theme !== "system") return;
+    if (!isHydrated) return;
 
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-    const handleChange = updateThemeClass;
+
+    const handleChange = () => {
+      // Only auto-update if no theme is stored (user hasn't made explicit choice)
+      const storedTheme = getStoredTheme();
+      if (!storedTheme) {
+        const newSystemTheme = mediaQuery.matches ? "dark" : "light";
+        setThemeState(newSystemTheme);
+      }
+    };
 
     mediaQuery.addEventListener("change", handleChange);
     return () => mediaQuery.removeEventListener("change", handleChange);
-  }, [theme, updateThemeClass]);
+  }, [isHydrated]);
 
-  // Save theme to localStorage whenever it changes
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('theme', theme);
+  const setTheme = (newTheme: Theme) => {
+    if (!isValidTheme(newTheme)) return;
+
+    setThemeState(newTheme);
+
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem(STORAGE_KEY, newTheme);
+      } catch {
+        // Silently fail if localStorage is unavailable
+      }
     }
-  }, [theme]);
-
-  const value = {
-    theme,
-    setTheme,
-    isDarkMode,
   };
 
+  // Apply theme to DOM
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const root = document.documentElement;
+    root.classList.remove("light", "dark");
+    root.classList.add(theme);
+  }, [theme]);
+
   return (
-    <ThemeProviderContext.Provider value={value}>
+    <ThemeContext.Provider
+      value={{
+        theme,
+        setTheme,
+        isDarkMode: theme === "dark",
+      }}
+    >
       {children}
-    </ThemeProviderContext.Provider>
+    </ThemeContext.Provider>
   );
 }
 
-export const useTheme = () => {
-  const context = useContext(ThemeProviderContext);
-
-  if (context === undefined) {
+export const useTheme = (): ThemeContextValue => {
+  const context = useContext(ThemeContext);
+  if (!context) {
     throw new Error("useTheme must be used within a ThemeProvider");
   }
-
   return context;
-};
-
-// Convenience hook to directly get the dark mode state
-export const useIsDarkMode = () => {
-  const { isDarkMode } = useTheme();
-  return isDarkMode;
 };

@@ -19,6 +19,7 @@ export const Dropdown = ({
   toggleDropdown,
   isDarkMode,
 }: DropdownProps) => {
+  console.log("isDarkMode", isDarkMode);
   if (!selected.id) return null;
   return (
     <div className="mb-4">
@@ -33,8 +34,8 @@ export const Dropdown = ({
         <button
           className={`w-full flex items-center justify-between border rounded-lg px-4 py-2.5 text-left focus:outline-none focus:ring-2 focus:ring-blue-500 ${
             isDarkMode
-              ? "bg-gray-700 border-gray-600"
-              : "bg-white border-gray-300"
+              ? "bg-gray-700 border-gray-600 text-gray-200"
+              : "bg-white border-gray-300 text-gray-800"
           }`}
           onClick={toggleDropdown}
           type="button"
@@ -79,7 +80,9 @@ export const Dropdown = ({
               <button
                 key={item.id}
                 className={`w-full flex items-center px-4 py-2.5 text-left ${
-                  isDarkMode ? "hover:bg-gray-600" : "hover:bg-gray-100"
+                  isDarkMode
+                    ? "hover:bg-gray-600 text-gray-200"
+                    : "hover:bg-gray-100 text-gray-800"
                 }`}
                 onClick={() => onSelect(item)}
               >

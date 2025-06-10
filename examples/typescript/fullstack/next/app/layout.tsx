@@ -34,7 +34,7 @@ export default async function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased w-dvw h-dvh text-black dark:text-white`}
       >
-        <ThemeProvider defaultTheme="system">
+        <ThemeProvider defaultTheme="light">
           <header className="flex justify-between items-center -mb-20 mr-2">
             <div className="text-2xl font-bold text-white"></div>
             <div className="flex gap-4 items-center pt-2">

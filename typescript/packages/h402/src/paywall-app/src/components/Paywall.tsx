@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useWallets } from "@wallet-standard/react";
-import { useIsDarkMode } from "./ThemeProvider";
+import { useTheme } from "./ThemeProvider";
 import { useEvmWallet } from "@/evm/context/EvmWalletContext";
 import type {
   Coin,
@@ -32,7 +32,7 @@ import { type EnrichedPaymentRequirements } from "@bit-gpt/h402/types";
 export default function PaymentUI({ paymentRequirements }: PaymentUIProps) {
   const wallets = useWallets();
   const { connectedAddress: evmAddress } = useEvmWallet();
-  const isDarkMode = useIsDarkMode();
+  const { isDarkMode } = useTheme();
   const { isTrueEvmProvider } = useWalletDetection(evmAddress);
   const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>("idle");
   const [activePaymentRequirements, setActivePaymentRequirements] =
@@ -136,9 +136,7 @@ export default function PaymentUI({ paymentRequirements }: PaymentUIProps) {
   ]);
 
   // Event handlers
-  const handlePaymentSuccess = async (
-    paymentHeader: string,
-  ) => {
+  const handlePaymentSuccess = async (paymentHeader: string) => {
     // Set payment status to success
     setPaymentStatus("success");
 
@@ -159,10 +157,10 @@ export default function PaymentUI({ paymentRequirements }: PaymentUIProps) {
 
       // Make the request with the proper X-PAYMENT header
       const response = await fetch(currentUrl, {
-        method: 'GET',
+        method: "GET",
         headers: {
-          'X-PAYMENT': paymentHeader
-        }
+          "X-PAYMENT": paymentHeader,
+        },
       });
 
       if (!response.ok) {
