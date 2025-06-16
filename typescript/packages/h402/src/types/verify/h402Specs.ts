@@ -9,7 +9,7 @@ const MixedAddressRegex =
 
 // Enums
 export const schemes = ["exact"] as const;
-export const x402Versions = [1] as const;
+export const h402Versions = [1] as const;
 export const ErrorReasons = [
   "insufficient_funds",
   "invalid_exact_evm_payload_authorization_valid_after",
@@ -87,7 +87,7 @@ export function createPaymentPayloadSchema<T extends z.ZodType>(
   payloadSchema: T
 ) {
   return z.object({
-    h402Version: z.number().refine((val) => x402Versions.includes(val as 1)),
+    h402Version: z.number().refine((val) => h402Versions.includes(val as 1)),
     scheme: z.enum(schemes),
     payload: payloadSchema,
     namespace: NamespaceSchema,
@@ -131,7 +131,7 @@ export type SettleResponse = z.infer<typeof SettleResponseSchema>;
 
 // h402SupportedPaymentKind
 export const SupportedPaymentKindSchema = z.object({
-  h402Version: z.number().refine((val) => x402Versions.includes(val as 1)),
+  h402Version: z.number().refine((val) => h402Versions.includes(val as 1)),
   scheme: z.enum(schemes),
   network: NetworkSchema,
 });

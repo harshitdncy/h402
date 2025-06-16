@@ -6,8 +6,8 @@ This is an implementation of an h402 facilitator service that handles payment ve
 
 The facilitator provides two main endpoints:
 
-- `/verify`: Verifies x402 payment payloads
-- `/settle`: Settles x402 payments by signing and broadcasting transactions
+- `/verify`: Verifies h402 payment payloads
+- `/settle`: Settles h402 payments by signing and broadcasting transactions
 
 ## Setup
 

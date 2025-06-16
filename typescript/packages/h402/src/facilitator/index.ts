@@ -106,11 +106,11 @@ export function getSupported(): {
 } {
   return {
     evm: {
-      x402Version: 1,
+      h402Version: 1,
       kind: [{ scheme: "exact", networkId: "evm" }],
     },
     solana: {
-      x402Version: 1,
+      h402Version: 1,
       kind: [{ scheme: "exact", networkId: "solana" }],
     },
   };

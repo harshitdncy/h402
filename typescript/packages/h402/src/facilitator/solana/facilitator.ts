@@ -65,7 +65,7 @@ export async function settle(
 }
 
 export type Supported = {
-  x402Version: number;
+  h402Version: number;
   kind: {
     scheme: string;
     networkId: string;
