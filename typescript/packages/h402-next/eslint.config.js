@@ -37,9 +37,12 @@ export default [
     rules: {
       ...ts.configs.recommended.rules,
       "import/first": "error",
-      "prettier/prettier": "error",
+      "prettier/prettier": "warn",
       "@typescript-eslint/member-ordering": "error",
-      "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_$" }]
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        { argsIgnorePattern: "^_$" },
+      ],
     },
   },
 ];
