@@ -40,9 +40,8 @@ jobs:
           cd ./typescript/packages/h402
           pnpm --filter '@bit-gpt/h402' i
           pnpm --filter '@bit-gpt/h402' build
-          pnpm publish --filter '@bit-gpt/h402' --no-git-checks 
         env:
-          NPM_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   publish:
     runs-on: [self-hosted]
@@ -53,8 +52,16 @@ jobs:
       packages: write
     
     steps:
-      - name: Publish
+      - name: Publish GitHub
         run: |
+          pnpm publish --filter '@bit-gpt/h402' --no-git-checks
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish NPM
+        run: |
+          npm config set @bit-gpt:registry https://registry.npmjs.org -L project
+          echo '//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}' >> .npmrc
           pnpm publish --filter '@bit-gpt/h402' --no-git-checks 
         env:
-          NPM_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPMJS_TOKEN }}
