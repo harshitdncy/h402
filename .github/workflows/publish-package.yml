@@ -23,6 +23,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
 
       - uses: pnpm/action-setup@v4
         with:
@@ -43,6 +45,12 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - uses: actions/upload-artifact@v4
+        with:
+          name: h402-dist
+          path: typescript/packages/h402/dist
+          if-no-files-found: error
+
   publish:
     runs-on: [self-hosted]
     needs: [build]
@@ -52,8 +60,28 @@ jobs:
       packages: write
     
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: h402-dist
+          path: typescript/packages/h402/dist
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
+
       - name: Publish GitHub
         run: |
+          npm config set @bit-gpt:registry https://npm.pkg.github.com -L project
+          echo '//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}' >> .npmrc 
           pnpm publish --filter '@bit-gpt/h402' --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -62,6 +90,6 @@ jobs:
         run: |
           npm config set @bit-gpt:registry https://registry.npmjs.org -L project
           echo '//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}' >> .npmrc
-          pnpm publish --filter '@bit-gpt/h402' --no-git-checks 
+          pnpm publish --filter '@bit-gpt/h402' --no-git-checks --access=public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPMJS_TOKEN }}
