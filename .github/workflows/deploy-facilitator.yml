@@ -8,6 +8,8 @@ on:
     paths:
       - 'typescript/packages/facilitator/**'
   push:
+    tags-ignore:
+      - '**'
     paths:
       - 'typescript/packages/facilitator/**'
 

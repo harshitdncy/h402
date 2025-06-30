@@ -8,6 +8,8 @@ on:
     paths:
       - 'examples/typescript/fullstack/next/**'
   push:
+    tags-ignore:
+      - '**'
     paths:
       - 'examples/typescript/fullstack/next/**'
 
