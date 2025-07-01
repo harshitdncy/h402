@@ -306,7 +306,7 @@ async function verifySignAndSendTransactionPayload(
     }
 
     // Use consolidated validation for transaction data
-    const transferValidation = validateTransferData(
+    const transferValidation = await validateTransferData(
       txData,
       paymentRequirements
     );
@@ -366,7 +366,7 @@ async function verifySignedTransactionPayload(
     const parsedTx = parseTransaction(payload.signedTransaction as Hex);
 
     // Use consolidated validation
-    const transferValidation = validateTransferData(
+    const transferValidation = await validateTransferData(
       parsedTx,
       paymentRequirements
     );

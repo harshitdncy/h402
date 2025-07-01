@@ -6,6 +6,7 @@ import {
   Hex,
 } from "viem";
 import { evm } from "../../../shared/index.js";
+import { parsePaymentRequirementsForAmount } from "../../../shared/parsePaymentRequirements.js";
 import { PaymentRequirements } from "../../../types";
 
 // Transfer validation types and interfaces
@@ -35,16 +36,15 @@ interface TransferEventLog {
 /**
  * Validates transfer data for both native and ERC20 token transfers
  */
-function validateTransferData(
+async function validateTransferData(
   txData: TransactionData,
   paymentRequirements: PaymentRequirements
-): TransferValidationResult {
+): Promise<TransferValidationResult> {
   const isNativeTransfer = paymentRequirements.tokenAddress === evm.ZERO_ADDRESS;
-
   if (isNativeTransfer) {
     return validateNativeTransfer(txData, paymentRequirements);
   } else {
-    return validateERC20Transfer(txData, paymentRequirements);
+    return await validateERC20Transfer(txData, paymentRequirements);
   }
 }
 
@@ -88,10 +88,10 @@ function validateNativeTransfer(
 /**
  * Validates ERC20 token transfers
  */
-function validateERC20Transfer(
+async function validateERC20Transfer(
   txData: TransactionData,
   paymentRequirements: PaymentRequirements
-): TransferValidationResult {
+): Promise<TransferValidationResult> {  
   // Check if transaction is to the correct token contract
   if (
     txData.to?.toLowerCase() !==
@@ -148,9 +148,12 @@ function validateERC20Transfer(
         errorMessage: "Invalid transfer recipient",
       };
     }
-
+    
+    // Convert payment requirements to smallest unit if needed
+    const parsedRequirements = await parsePaymentRequirementsForAmount(paymentRequirements);
+    
     // Validate amount
-    if (amount < paymentRequirements.amountRequired) {
+    if (amount < parsedRequirements.amountRequired) {
       return {
         isValid: false,
         errorMessage: "Insufficient transfer amount",
