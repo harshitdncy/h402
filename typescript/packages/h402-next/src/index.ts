@@ -123,7 +123,7 @@ export function h402NextMiddleware(config: MiddlewareConfig) {
         // Try each matching requirement until one succeeds
         for (const requirement of matchingRequirements) {
           const result = await verify(paymentHeader, requirement);
-          if (!result.isValid) {
+          if (result.isValid) {
             verificationResult = result;
             selectedRequirement = requirement;
             break;
