@@ -51,7 +51,10 @@ export function useFacilitator(facilitator?: FacilitatorConfig) {
     });
 
     if (res.status !== 200) {
-      throw new Error(`Failed to verify payment: ${res.statusText}`);
+      return {
+        isValid: false,
+        errorMessage: `Failed to verify payment: ${res.statusText}`
+      };
     }
 
     const data = await res.json();
