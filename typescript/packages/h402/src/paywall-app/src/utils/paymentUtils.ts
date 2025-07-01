@@ -5,7 +5,7 @@ import SolanaNetwork from "../assets/networks/solana.svg";
 import SolCoin from "../assets/coins/sol.svg";
 import BnbCoin from "../assets/coins/bnb.svg";
 import UsdcCoin from "../assets/coins/usdc.svg";
-import UsdtCoin from "../assets/coins/usdc.svg";
+import UsdtCoin from "../assets/coins/usdt.svg";
 
 /**
  * Converts payment details to array if needed
