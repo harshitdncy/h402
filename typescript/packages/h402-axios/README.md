@@ -5,7 +5,7 @@ A utility package that extends Axios to automatically handle 402 Payment Require
 ## Installation
 
 ```bash
-npm install h402-axios
+npm install @bit-gpt/h402-axios
 ```
 
 ## Quick Start

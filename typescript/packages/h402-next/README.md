@@ -5,7 +5,7 @@ Next.js middleware integration for the h402 Payment Protocol. This package allow
 ## Installation
 
 ```bash
-npm install h402-next
+npm install @bit-gpt/h402-next
 ```
 
 ## Quick Start

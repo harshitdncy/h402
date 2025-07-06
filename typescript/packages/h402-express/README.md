@@ -5,7 +5,7 @@ Express middleware integration for the h402 Payment Protocol. This package allow
 ## Installation
 
 ```bash
-pnpm add h402-express
+npm install @bit-gpt/h402-express
 ```
 
 ## Quick Start

@@ -5,7 +5,7 @@ A utility package that extends the native `fetch` API to automatically handle 40
 ## Installation
 
 ```bash
-npm install h402-fetch
+npm install @bit-gpt/h402-fetch
 ```
 
 ## Quick Start
