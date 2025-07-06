@@ -1,4 +1,4 @@
-name: Publish package to GitHub Packages
+name: Publish NPM packages
 
 on:
   workflow_dispatch:
@@ -9,13 +9,25 @@ on:
       - main
     paths:
       - 'typescript/packages/h402/**'    
+      - 'typescript/packages/h402-express/**'
+      - 'typescript/packages/h402-fetch/**'
   push:
     paths:
       - 'typescript/packages/h402/**'
+      - 'typescript/packages/h402-express/**'
+      - 'typescript/packages/h402-fetch/**'
 
 jobs:
   build:
     runs-on: [self-hosted]
+    outputs:
+      matrix: ${{ steps.publish-matrix.outputs.matrix }}
+    strategy:
+      matrix:
+       package:
+        - h402
+        - h402-express
+        - h402-fetch
 
     permissions:
       contents: read
@@ -39,22 +51,28 @@ jobs:
 
       - name: Build
         run: |
-          cd ./typescript/packages/h402
-          pnpm --filter '@bit-gpt/h402' i
-          pnpm --filter '@bit-gpt/h402' build
+          cd ./typescript/packages/${{ matrix.package }}
+          pnpm --filter '@bit-gpt/${{ matrix.package }}' i
+          pnpm --filter '@bit-gpt/${{ matrix.package }}' build
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: actions/upload-artifact@v4
         with:
-          name: h402-dist
-          path: typescript/packages/h402/dist
+          name: ${{ matrix.package }}-dist
+          path: typescript/packages/${{ matrix.package }}/dist
           if-no-files-found: error
 
   publish:
     runs-on: [self-hosted]
     needs: [build]
     if: ${{ startsWith(github.ref, 'refs/tags/') }}
+    strategy:
+      matrix:
+        package:
+          - h402
+          - h402-express
+          - h402-fetch
 
     permissions:
       packages: write
@@ -66,8 +84,8 @@ jobs:
 
       - uses: actions/download-artifact@v4
         with:
-          name: h402-dist
-          path: typescript/packages/h402/dist
+          name: ${{ matrix.package }}-dist
+          path: typescript/packages/${{ matrix.package }}/dist
 
       - uses: pnpm/action-setup@v4
         with:
@@ -82,7 +100,7 @@ jobs:
         run: |
           npm config set @bit-gpt:registry https://npm.pkg.github.com -L project
           echo '//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}' >> .npmrc 
-          pnpm publish --filter '@bit-gpt/h402' --no-git-checks
+          pnpm publish --filter '@bit-gpt/${{ matrix.package }}' --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -90,6 +108,6 @@ jobs:
         run: |
           npm config set @bit-gpt:registry https://registry.npmjs.org -L project
           echo '//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}' >> .npmrc
-          pnpm publish --filter '@bit-gpt/h402' --no-git-checks --access=public
+          pnpm publish --filter '@bit-gpt/${{ matrix.package }}' --no-git-checks --access=public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPMJS_TOKEN }}
