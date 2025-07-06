@@ -60,6 +60,23 @@ jobs:
           name: ${{ matrix.package }}-dist
           path: typescript/packages/${{ matrix.package }}/dist
 
+      - uses: actions/download-artifact@v4
+        with:
+          name: ${{ matrix.package }}-node_modules
+          path: typescript/packages/${{ matrix.package }}/node_modules
+
+      - uses: actions/download-artifact@v4
+        if: ${{ matrix.package != 'h402' }}
+        with:
+          name: h402-dist
+          path: typescript/packages/h402/dist
+
+      - uses: actions/download-artifact@v4
+        if: ${{ matrix.package != 'h402' }}
+        with:
+          name: h402-node_modules
+          path: typescript/packages/h402/node_modules
+
       - uses: pnpm/action-setup@v4
         with:
           version: 10

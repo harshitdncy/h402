@@ -30,6 +30,12 @@ jobs:
           name: h402-dist
           path: typescript/packages/h402/dist
 
+      - uses: actions/download-artifact@v4
+        if: ${{ inputs.wants-h402 == true }}
+        with:
+          name: h402-node_modules
+          path: typescript/packages/h402/node_modules
+
       - uses: pnpm/action-setup@v4
         with:
           version: 10
@@ -53,4 +59,10 @@ jobs:
         with:
           name: ${{ inputs.package }}-dist
           path: typescript/packages/${{ inputs.package }}/dist
+          if-no-files-found: error
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.package }}-node_modules
+          path: typescript/packages/${{ inputs.package }}/node_modules
           if-no-files-found: error
