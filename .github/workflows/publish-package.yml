@@ -18,50 +18,23 @@ on:
       - 'typescript/packages/h402-fetch/**'
 
 jobs:
+  build-h402:
+    uses: ./.github/workflows/build-package.yml
+    with:
+      package: h402
+
   build:
-    runs-on: [self-hosted]
-    outputs:
-      matrix: ${{ steps.publish-matrix.outputs.matrix }}
+    needs: [build-h402]
     strategy:
       matrix:
        package:
-        - h402
         - h402-express
         - h402-fetch
 
-    permissions:
-      contents: read
-      packages: read
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
-
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 10
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version-file: ".nvmrc"
-          registry-url: "https://npm.pkg.github.com"
-          scope: "@bit-gpt"
-          cache: "pnpm"
-
-      - name: Build
-        run: |
-          cd ./typescript/packages/${{ matrix.package }}
-          pnpm --filter '@bit-gpt/${{ matrix.package }}' i
-          pnpm --filter '@bit-gpt/${{ matrix.package }}' build
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.package }}-dist
-          path: typescript/packages/${{ matrix.package }}/dist
-          if-no-files-found: error
+    uses: ./.github/workflows/build-package.yml
+    with:
+      package: ${{ matrix.package }}
+      wants-h402: true
 
   publish:
     runs-on: [self-hosted]

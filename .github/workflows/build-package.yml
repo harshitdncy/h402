@@ -1,0 +1,56 @@
+name: build package
+on:
+  workflow_call:
+    inputs:
+      package:
+        type: string
+        required: true
+      registry-url:
+        type: string
+        default: "https://npm.pkg.github.com"
+      wants-h402:
+        type: boolean
+        default: false
+
+jobs:
+  build:
+    runs-on: [self-hosted]
+    permissions:
+      contents: read
+      packages: read
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - uses: actions/download-artifact@v4
+        if: ${{ inputs.wants-h402 == true }}
+        with:
+          name: h402-dist
+          path: typescript/packages/h402/dist
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          registry-url: ${{ inputs.registry-url }}
+          scope: "@bit-gpt"
+          cache: "pnpm"
+
+      - name: Build
+        run: |
+          cd ./typescript/packages/${{ inputs.package }}
+          pnpm --filter '@bit-gpt/${{ inputs.package }}' i
+          pnpm --filter '@bit-gpt/${{ inputs.package }}' build
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.package }}-dist
+          path: typescript/packages/${{ inputs.package }}/dist
+          if-no-files-found: error

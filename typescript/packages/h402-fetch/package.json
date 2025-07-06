@@ -1,5 +1,5 @@
 {
-  "name": "h402-fetch",
+  "name": "@bit-gpt/h402-fetch",
   "version": "0.0.1",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",
