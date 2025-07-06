@@ -30,6 +30,8 @@ jobs:
        package:
         - h402-express
         - h402-fetch
+        - h402-axios
+        - h402-next
 
     uses: ./.github/workflows/build-package.yml
     with:
@@ -46,6 +48,8 @@ jobs:
           - h402
           - h402-express
           - h402-fetch
+          - h402-axios
+          - h402-next
 
     permissions:
       packages: write

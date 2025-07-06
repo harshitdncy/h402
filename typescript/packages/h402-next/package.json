@@ -1,5 +1,5 @@
 {
-  "name": "h402-next",
+  "name": "@bit-gpt/h402-next",
   "version": "0.0.1",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",
