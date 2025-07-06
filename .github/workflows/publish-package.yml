@@ -11,11 +11,15 @@ on:
       - 'typescript/packages/h402/**'    
       - 'typescript/packages/h402-express/**'
       - 'typescript/packages/h402-fetch/**'
+      - 'typescript/packages/h402-axios/**'
+      - 'typescript/packages/h402-next/**'
   push:
     paths:
       - 'typescript/packages/h402/**'
       - 'typescript/packages/h402-express/**'
       - 'typescript/packages/h402-fetch/**'
+      - 'typescript/packages/h402-axios/**'
+      - 'typescript/packages/h402-next/**'
 
 jobs:
   build-h402:
