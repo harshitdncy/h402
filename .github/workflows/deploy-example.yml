@@ -18,7 +18,8 @@ env:
 
 jobs:
   build:
-    runs-on: [self-hosted]
+    runs-on:
+      group: arc-runners
 
     permissions:
       contents: read
@@ -65,7 +66,9 @@ jobs:
           NPM_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   deploy:
-    runs-on: [self-hosted]
+    runs-on:
+      group: arc-runners
+
     needs: [build]
     if: ${{ github.ref == 'refs/heads/main' }}
 
