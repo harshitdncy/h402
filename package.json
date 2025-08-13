@@ -22,5 +22,8 @@
   "bugs": {
     "url": "https://github.com/bit-gpt/402/issues"
   },
-  "homepage": "https://github.com/bit-gpt/402#readme"
+  "homepage": "https://github.com/bit-gpt/402#readme",
+  "devDependencies": {
+    "@changesets/cli": "^2.29.5"
+  }
 }
