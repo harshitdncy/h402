@@ -7,7 +7,7 @@ const config = createConfig({
   connectors: [
     metaMask(),
     // coinbaseWallet({ appName: "BitGPT H402" }),
-    walletConnect({ projectId: "233c440b08a2b78d6b3e76370b979bed" }),
+    walletConnect({ projectId: import.meta.env.VITE_WALLETCONNECT_PROJECT_ID ?? "" }),
     injected({ shimDisconnect: true, target: "phantom" })
   ],
   transports: {

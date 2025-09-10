@@ -11,6 +11,7 @@ import PhantomIcon from "../assets/wallets/phantom.svg";
 import WalletConnectIcon from "../assets/wallets/walletConnect.svg";
 import { EnrichedPaymentRequirements } from "@bit-gpt/h402/types";
 import { WalletType } from "@/evm/context/EvmWalletContext";
+import { getChainId } from "@/evm/components/EvmPaymentHandler";
 
 /**
  * Get the appropriate coin icon based on token symbol
@@ -82,12 +83,15 @@ export function getCompatiblePaymentRequirements(
   }
 
   const compatibleMethods = paymentRequirements.filter((requirement) => {
+    const bscChainId = getChainId("bsc");
+    const baseChainId = getChainId("base");
+    
     if (networkId === "solana") {
       return requirement.namespace === "solana";
     } else if (networkId === "bsc") {
-      return requirement.networkId === "56"; 
+      return requirement.networkId === bscChainId; 
     } else if (networkId === "base") {
-      return requirement.networkId === "8453"; 
+      return requirement.networkId === baseChainId; 
     }
     return false;
   });
@@ -112,18 +116,21 @@ export function generateAvailableNetworks(paymentRequirements: EnrichedPaymentRe
   let containsBSC = false;
   let containsBASE = false;
 
+  const bscChainId = getChainId("bsc");
+  const baseChainId = getChainId("base");
+
   if (networkGroups["evm"] && networkGroups["evm"].length > 0) {
     networkGroups["evm"].forEach((requirement: EnrichedPaymentRequirements) => {
       if (
         containsBSC === false &&
-        (requirement.networkId === "56")
+        (requirement.networkId === bscChainId)
       ) {
         containsBSC = true;
       }
 
       if (
         containsBASE === false &&
-        (requirement.networkId === "8453")
+        (requirement.networkId === baseChainId)
       ) {
         containsBASE = true;
       }
@@ -132,7 +139,7 @@ export function generateAvailableNetworks(paymentRequirements: EnrichedPaymentRe
     if (containsBSC) {
       const bscCoins = networkGroups["evm"]
         .filter((requirement: EnrichedPaymentRequirements) => 
-          requirement.networkId === "56"
+          requirement.networkId === bscChainId
         )
         .map(createCoinFromRequirement);
 
@@ -147,7 +154,7 @@ export function generateAvailableNetworks(paymentRequirements: EnrichedPaymentRe
     if (containsBASE) {
       const baseCoins = networkGroups["evm"]
         .filter((requirement: EnrichedPaymentRequirements) => 
-          requirement.networkId === "8453"
+          requirement.networkId === baseChainId
         )
         .map(createCoinFromRequirement);
 

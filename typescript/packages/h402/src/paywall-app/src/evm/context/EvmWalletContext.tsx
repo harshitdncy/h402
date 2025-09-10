@@ -93,7 +93,7 @@ export function EvmWalletProvider({ children }: { children: ReactNode }) {
         }
         
         connector = walletConnect({
-          projectId: "233c440b08a2b78d6b3e76370b979bed",
+          projectId: import.meta.env.VITE_WALLETCONNECT_PROJECT_ID ?? "",
         });
       } else {
         connector = injected({ shimDisconnect: true });
