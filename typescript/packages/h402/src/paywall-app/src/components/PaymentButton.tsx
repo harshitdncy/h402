@@ -46,7 +46,7 @@ export default function PaymentButtonUI({
       case "facilitator_error":
         return "Service Unavailable";
       case "error":
-        return "Payment Failed";
+        return "Payment Failed (Click again to retry)";
       default:
         return `Pay - ${amount}`;
     }

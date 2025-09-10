@@ -15,7 +15,9 @@ export function useCompatibleWallet(
       const preferredWallets =
         selectedNetwork.id === "solana"
           ? ["phantom", "solflare"]
-          : ["metamask", "coinbase", "wallet"];
+          : selectedNetwork.id === "base" ? 
+          ["metamask", "wallet", "phantom"]
+          : ["metamask", "wallet"];
 
       // Don't proceed with EVM if no valid provider is detected
       if (selectedNetwork.id === "bsc" && !isTrueEvmProvider) {
@@ -43,7 +45,7 @@ export function useCompatibleWallet(
       }
 
       // For EVM network, only find EVM wallets
-      if (selectedNetwork.id === "bsc") {
+      if (selectedNetwork.id === "bsc" || selectedNetwork.id === "base") {
         // First try to find preferred wallets, then fall back to any compatible wallet
         return (
           wallets.find(

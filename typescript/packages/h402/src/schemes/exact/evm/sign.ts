@@ -291,6 +291,7 @@ async function signAndSendTransaction(
           to: to as Hex,
           value,
           chain,
+          data: '0x' // Added 0x for Trust Wallet via WalletConnect
         });
       } else {
         const data = encodeFunctionData({
