@@ -195,11 +195,13 @@ export default function PaymentUI({ paymentRequirements }: PaymentUIProps) {
   const selectNetwork = (network: Network) => {
     setSelectedNetwork(network);
     setSelectedCoin(network.coins[0]);
+    setPaymentStatus("idle")
     toggleDropdown("network");
   };
 
   const selectCoin = (coin: Coin) => {
     setSelectedCoin(coin);
+    setPaymentStatus("idle")
     toggleDropdown("coin");
   };
 
@@ -252,7 +254,6 @@ export default function PaymentUI({ paymentRequirements }: PaymentUIProps) {
             symbol: selectedCoin.name,
             decimals: activePaymentRequirements.tokenDecimals,
           })}
-          wallet={selectedWallet}
           paymentRequirements={activePaymentRequirements}
           onSuccess={handlePaymentSuccess}
           onError={handlePaymentError}
@@ -260,7 +261,7 @@ export default function PaymentUI({ paymentRequirements }: PaymentUIProps) {
           paymentStatus={paymentStatus}
         />
       );
-    } else if (selectedNetwork.id === "bsc") {
+    } else if (selectedNetwork.id === "bsc" || selectedNetwork.id === "base") {
       return (
         <EvmPaymentHandler
           amount={formatAmountForDisplay({
@@ -275,6 +276,7 @@ export default function PaymentUI({ paymentRequirements }: PaymentUIProps) {
           onError={handlePaymentError}
           setPaymentStatus={setPaymentStatus}
           paymentStatus={paymentStatus}
+          networkId={selectedNetwork.id}
         />
       );
     }

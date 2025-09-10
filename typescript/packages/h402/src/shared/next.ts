@@ -12,4 +12,11 @@ export const getUrl = (request: NextRequest) => {
     return `${getScheme(request)}://${getHost(request)}`
 }
 
-export const getFacilitator = () => process.env.FACILITATOR_URL || "https://facilitator.bitgpt.xyz"
+export const getFacilitator = () => {
+    // Check if we're in a Node.js environment (server-side)
+    if (typeof process !== 'undefined' && process.env) {
+        return process.env.FACILITATOR_URL || "https://facilitator.bitgpt.xyz";
+    }
+    // Fallback for browser environment
+    return "https://facilitator.bitgpt.xyz";
+}

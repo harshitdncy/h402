@@ -1,9 +1,11 @@
 import {useCallback, useEffect, useRef, useState} from "react";
 import {useWalletAccountTransactionSendingSigner, useWalletAccountTransactionSigner} from "@solana/react";
-import {type UiWalletAccount, useConnect} from "@wallet-standard/react";
+import {UiWallet, type UiWalletAccount, useConnect} from "@wallet-standard/react";
 import {createPaymentHeader, h402Version} from "@bit-gpt/h402";
-import type {PaymentButtonProps} from "@/types/payment";
+import type {PaymentButtonProps, PaymentStatus} from "@/types/payment";
 import PaymentButtonUI from "@/components/PaymentButton";
+import SolanaWalletSelector from "./SolanaWalletSelector";
+import { useSolanaWallets } from "../hooks/useSolanaWallets";
 
 /**
  * Solana-specific payment handler
@@ -11,65 +13,54 @@ import PaymentButtonUI from "@/components/PaymentButton";
  */
 export default function SolanaPaymentHandler({
   amount,
-  wallet,
   paymentRequirements,
   onSuccess,
   onError,
   paymentStatus,
   setPaymentStatus,
   className = "",
-}: PaymentButtonProps & { wallet: any }) {
+}: PaymentButtonProps) {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [selectedWallet, setSelectedWallet] = useState<UiWallet | null>(null);
   const [selectedAccount, setSelectedAccount] =
     useState<UiWalletAccount | null>(null);
 
   // Simplified ref to track payment attempts
   const paymentAttemptRef = useRef({attemptInProgress: false});
 
-  // Get the wallet connection hook
-  const [isConnecting, connect] = useConnect(wallet);
+  const handleWalletSelect = (wallet: UiWallet) => {
+    setPaymentStatus("idle");
+    setSelectedWallet(wallet);
+    if (selectedAccount) {
+      setSelectedAccount(null);
+    }
+  };
 
   // Handle button click for unified experience
   // If no account, connect first
   // If already connected, start processing payment
   const handleButtonClick = async () => {
-    console.log("[DEBUG] Button clicked", {
-      selectedAccountAddress: selectedAccount?.address,
-      currentStatus: paymentStatus,
-    });
-    // If no account, connect first
-    if (!selectedAccount) {
-      await handleConnectWallet();
+    if (selectedWallet && !selectedAccount) {
+      setPaymentStatus("connecting");
       return;
     }
-    // If already connected, start processing payment
+
     setPaymentStatus("approving");
   };
 
-  // Connect wallet handler
-  const handleConnectWallet = async () => {
-    setErrorMessage(null);
-    setPaymentStatus("connecting");
-
-    try {
-      console.log("[DEBUG] Connecting wallet");
-      // Use existing accounts if available, otherwise connect to get accounts
-      const accounts =
-        wallet.accounts.length > 0 ? wallet.accounts : await connect();
-      console.log("[DEBUG] Retrieved accounts", accounts?.length);
-      if (!accounts || accounts.length === 0) {
-        throw new Error("No accounts available");
-      }
-      setSelectedAccount(accounts[0]);
-      // Set the status to approving to show tx approval in walet
-      setPaymentStatus("approving");
-    } catch (err) {
-      console.error("[DEBUG] Wallet connection error:", err);
-      setPaymentStatus("error");
-      const errMsg = err instanceof Error ? err.message : String(err);
-      setErrorMessage(errMsg);
-      onError?.(err instanceof Error ? err : new Error(errMsg));
-    }
+  const handleConnectionError = (err: Error) => {
+    console.error(
+      "[DEBUG] Connection error from WalletConnectionManager:",
+      err
+    );
+    const errorMessage = err instanceof Error ? err.message : String(err);
+    
+    const finalErrorMessage = errorMessage.includes("Unexpected error") 
+      ? `Please switch your ${selectedWallet?.name} wallet to correct network`
+      : errorMessage;
+    
+    setPaymentStatus('error');
+    setErrorMessage(finalErrorMessage);
   };
 
   // Update payment status callbacks
@@ -132,12 +123,25 @@ export default function SolanaPaymentHandler({
     paymentAttemptRef.current.attemptInProgress = true;
   }, []);
 
-  // Determine if the button is disabled
   const isDisabled =
-    isConnecting || ["processing", "success"].includes(paymentStatus);
+  ["processing", "success"].includes(paymentStatus) ||
+  (!selectedAccount && !selectedWallet);
 
   return (
-    <div className="flex flex-col w-full">
+    <div className="flex flex-col w-full space-y-4">
+      <SolanaWalletSelector
+        onWalletSelect={handleWalletSelect}
+        selectedWallet={selectedWallet}
+        disabled={["approving", "connecting", "processing"].includes(paymentStatus)}
+      />
+      {selectedWallet && paymentStatus === "connecting" && (
+        <WalletConnectionManager
+          wallet={selectedWallet}
+          onConnectionError={handleConnectionError}
+          setSelectedAccount={setSelectedAccount}
+          setPaymentStatus={setPaymentStatus}
+        />
+      )}
       {/* Payment processor component that watches for account and status */}
       {selectedAccount &&
         paymentStatus === "approving" &&
@@ -283,5 +287,71 @@ function SolanaPaymentProcessor({
   }, [account, paymentRequirements, transactionSendingSigner, onSuccess, onError, onProcessing, paymentAttemptRef, transactionSigner?.modifyAndSignTransactions]);
 
   // This component doesn't render anything
+  return null;
+}
+
+function WalletConnectionManager({
+  wallet,
+  onConnectionError,
+  setSelectedAccount,
+  setPaymentStatus,
+}: {
+  wallet: UiWallet;
+  onConnectionError: (err: Error) => void;
+  setSelectedAccount: (account: UiWalletAccount) => void;
+  setPaymentStatus: (status: PaymentStatus) => void;
+}) {
+  const [isConnecting, connect] = useConnect(wallet);
+  const connectionAttemptedRef = useRef(false);
+  const walletAccountSelectionRef = useRef(false);
+  const { wallets } = useSolanaWallets();
+  const [connectionSuccess, setConnectionSuccess] = useState(false);
+
+  useEffect(() => {
+    if (!isConnecting && !connectionAttemptedRef.current) {
+      connectionAttemptedRef.current = true;
+
+      const handleConnection = async () => {
+        try {
+          await connect();
+          setConnectionSuccess(true);
+        } catch (err) {
+          setConnectionSuccess(false);
+          if (onConnectionError) {
+            onConnectionError(err instanceof Error ? err : new Error(String(err)));
+          }
+        }
+      };
+
+      handleConnection();
+    }
+  }, [isConnecting, connect, onConnectionError, setConnectionSuccess]);
+
+  useEffect(() => {
+    if (
+      wallets.length > 0 &&
+      connectionAttemptedRef.current &&
+      connectionSuccess &&
+      !walletAccountSelectionRef.current
+    ) {
+      walletAccountSelectionRef.current = true;
+      const updatedWallet = wallets.find((w) => w.name === wallet.name);
+
+      if (updatedWallet?.accounts?.length && updatedWallet.accounts.length > 0) {
+        setSelectedAccount(updatedWallet.accounts[0]);
+        setPaymentStatus("approving");
+      } else {
+        throw new Error("No accounts available after connection");
+      }
+    }
+  }, [
+    wallet,
+    wallets,
+    setSelectedAccount,
+    setPaymentStatus,
+    walletAccountSelectionRef,
+    connectionSuccess,
+  ]);
+
   return null;
 }

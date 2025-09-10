@@ -59,4 +59,5 @@ export interface PaymentButtonProps {
   paymentStatus: PaymentStatus;
   setPaymentStatus: (paymentStatus: PaymentStatus) => void;
   className?: string;
+  networkId?: string;
 }

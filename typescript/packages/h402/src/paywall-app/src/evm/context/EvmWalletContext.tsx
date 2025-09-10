@@ -6,23 +6,24 @@ import {
   type ReactNode,
 } from "react";
 import { type WalletClient, type PublicActions, publicActions } from "viem";
-import { bsc } from "viem/chains";
 import { connect, disconnect } from "wagmi/actions";
 import {
   injected,
   metaMask,
-  coinbaseWallet,
   walletConnect,
 } from "wagmi/connectors";
 import { getWalletClient } from "@wagmi/core";
 import { config } from "../config/wagmi";
+import { getChainId } from "../components/EvmPaymentHandler";
+import { getChainConfig, handleChainSwitch } from "../utils/chainUtils";
 
 // Export the WalletType for use in other components
 export type WalletType =
   | "metamask"
-  | "coinbase"
-  | "rabby"
-  | "trust"
+  | "phantom"
+  // | "coinbase"
+  // | "rabby"
+  // | "trust"
   | "walletconnect";
 
 interface EvmWalletContextType {
@@ -30,7 +31,7 @@ interface EvmWalletContextType {
   connectedAddress: string;
   statusMessage: string;
   setStatusMessage: (message: string) => void;
-  connectWallet: (walletType: WalletType) => Promise<void>;
+  connectWallet: (walletType: WalletType, networkId?: string) => Promise<void>;
   disconnectWallet: () => Promise<void>;
 }
 
@@ -55,7 +56,8 @@ export function EvmWalletProvider({ children }: { children: ReactNode }) {
   const [connectedAddress, setConnectedAddress] = useState("");
   const [statusMessage, setStatusMessage] = useState("");
 
-  const connectWallet = useCallback(async (walletType: WalletType) => {
+  const connectWallet = useCallback(async (walletType: WalletType, networkId = "bsc") => {
+    const { targetChain, networkName } = getChainConfig(networkId);
     try {
       setStatusMessage("Connecting wallet...");
 
@@ -69,11 +71,27 @@ export function EvmWalletProvider({ children }: { children: ReactNode }) {
       let connector;
       if (walletType === "metamask") {
         connector = metaMask();
-      } else if (walletType === "coinbase") {
-        connector = coinbaseWallet();
-      } else if (walletType === "rabby") {
-        connector = injected({ shimDisconnect: true, target: "rabby" });
-      } else if (walletType === "trust" || walletType === "walletconnect") {
+      } else if(walletType === "phantom") {
+        connector = injected({ shimDisconnect: true, target: "phantom" });
+      // } else if (walletType === "coinbase") {
+      //   connector = coinbaseWallet();
+      // } else if (walletType === "rabby") {
+      //   connector = injected({ shimDisconnect: true, target: "rabby" });
+      // } else if (walletType === "trust" || walletType === "walletconnect") {
+      } else if (walletType === "walletconnect") {
+        const existingWC = window.ethereum?.isWalletConnect || 
+                            localStorage.getItem('walletconnect') ||
+                            document.querySelector('[data-testid*="walletconnect"]');
+
+       
+        if (typeof window !== "undefined" && window.indexedDB) {
+          window.indexedDB.deleteDatabase("WALLET_CONNECT_V2_INDEXED_DB");
+        }
+        
+        if (existingWC) {
+          connector = injected({ shimDisconnect: true });
+        }
+        
         connector = walletConnect({
           projectId: "233c440b08a2b78d6b3e76370b979bed",
         });
@@ -81,52 +99,62 @@ export function EvmWalletProvider({ children }: { children: ReactNode }) {
         connector = injected({ shimDisconnect: true });
       }
 
-      // First connect without specifying chainId to check current chain
-      const initialResult = await connect(config, { connector });
+      const selectedChainId = Number(getChainId(networkId));
 
-      if (!initialResult.accounts?.[0]) {
-        throw new Error("Please select an account in your wallet");
-      }
-
-      // Check if we need to switch chains
-      try {
-        const initialClient = await getWalletClient(config, {
-          account: initialResult.accounts[0],
-        });
-
-        if (initialClient) {
-          const currentChainId = await initialClient.getChainId();
-
-          // If not on BSC, we need to switch
-          if (currentChainId !== bsc.id) {
-            setStatusMessage("Please switch to BSC network in your wallet...");
-
-            try {
-              // Request chain switch
-              await initialClient.switchChain({ id: bsc.id });
-              console.log("Chain switched successfully to BSC");
-            } catch (switchError) {
-              console.error("Failed to switch chain:", switchError);
-              throw new Error(
-                "Please manually switch to Binance Smart Chain (BSC) in your wallet and try again."
-              );
-            }
-          }
-        }
-      } catch (checkError) {
-        console.error("Error checking/switching chain:", checkError);
-      }
-
-      // Now connect with the correct chain
-      const result = await connect(config, { connector, chainId: bsc.id });
+      // Connect directly with the target chain for WalletConnect to avoid session conflicts
+      const result = await connect(config, { 
+        connector, 
+        chainId: walletType === "walletconnect" ? selectedChainId : undefined 
+      });
 
       if (!result.accounts?.[0]) {
         throw new Error("Please select an account in your wallet");
       }
 
+      // For non-WalletConnect wallets, check if we need to switch chains
+      if (walletType !== "walletconnect") {
+        try {
+          const baseInitialClient = await getWalletClient(config, {
+            account: result.accounts[0],
+          });
+
+          if (baseInitialClient) {
+            const initialClient = baseInitialClient.extend(publicActions) as unknown as WalletClient & PublicActions;
+            const currentChainId = await initialClient.getChainId();
+
+            // If not on correct chain, we need to switch
+            if (currentChainId !== selectedChainId) {
+              setStatusMessage(`Please switch to ${networkId.toUpperCase()} network in your wallet...`);
+
+              try {
+                // Request chain switch
+                await handleChainSwitch({
+                  initialClient,
+                  targetChain,
+                  networkName,
+                  config,
+                  account: result.accounts[0],
+                  connector,
+                  result: result,
+                });
+                console.log(`Chain switched successfully to ${networkId.toUpperCase()}`);
+              } catch (switchError) {
+                console.error("Failed to switch chain:", switchError);
+                throw new Error(
+                  `Please manually switch to ${networkId.toUpperCase()} in your wallet and try again.`
+                );
+              }
+            }
+          }
+        } catch (checkError) {
+          console.error("Error checking/switching chain:", checkError);
+          throw new Error(`Please switch to ${networkId.toUpperCase()} network in your wallet...`);
+        }
+      }
+
       const baseClient = await getWalletClient(config, {
         account: result.accounts[0],
-        chainId: bsc.id,
+        chainId: selectedChainId,
       });
 
       if (!baseClient) {
@@ -145,8 +173,8 @@ export function EvmWalletProvider({ children }: { children: ReactNode }) {
       }
 
       const chainId = await client.getChainId();
-      if (chainId !== bsc.id) {
-        throw new Error("Please switch to BSC network");
+      if (chainId !== selectedChainId) {
+        throw new Error(`Please switch to ${networkId.toUpperCase()} network`);
       }
 
       setWalletClient(client);
@@ -159,7 +187,7 @@ export function EvmWalletProvider({ children }: { children: ReactNode }) {
       if (error instanceof Error) {
         if (error.message.includes("Unsupported chain")) {
           message =
-            "This wallet doesn't support BSC. Please use MetaMask or another BSC-compatible wallet.";
+            `This wallet doesn't support ${networkId.toUpperCase()}. Please use MetaMask or another ${walletType.toUpperCase()}-compatible wallet.`;
         } else if (error.message.includes("User rejected")) {
           message = "Connection rejected. Please try again.";
         } else if (error.message.includes("already pending")) {
@@ -168,10 +196,11 @@ export function EvmWalletProvider({ children }: { children: ReactNode }) {
           message =
             "No Ethereum provider found. Please install a wallet extension.";
         } else if (error.message.includes("chain of the connector") || error.message.includes("chain mismatch")) {
-          message = "Please switch to Binance Smart Chain (BSC) in your wallet and try again.";
+          message = `Please switch to ${networkId.toUpperCase()} in your wallet and try again.`;
         }
       }
       setStatusMessage(message);
+      throw new Error(message);
     }
   }, []);
 
