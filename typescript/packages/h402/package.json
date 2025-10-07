@@ -6,8 +6,8 @@
   "types": "./dist/index.d.ts",
   "description": "BitGPT's 402 open protocol for blockchain-native payments",
   "scripts": {
-    "build": "pnpm run build:paywall && tsc",
-    "build:paywall": "node ../../../scripts/build-paywall.js",
+    "build": "tsc && pnpm run build:paywall && tsc",
+    "build:paywall": "pnpm --filter 'paywall-app' build && node ../../../scripts/build-paywall.js",
     "clean": "rm -rf dist"
   },
   "repository": {
