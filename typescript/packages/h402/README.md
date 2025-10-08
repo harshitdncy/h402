@@ -57,7 +57,7 @@ To build the static HTML paywall bundle:
 npm run build:paywall
 ```
 
-This will build the paywall-app with static export and copy the output to the `static/paywall` directory.
+This will build the paywall-app with static export and copy the output to the [`src/shared/paywall/paywallHtml.ts`](./src/shared/paywall/paywallHtml.ts) directory.
 
 The middleware will automatically serve the static HTML bundle when a 402 status is encountered.
 
