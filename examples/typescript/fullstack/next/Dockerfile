@@ -22,6 +22,7 @@ RUN --mount=type=cache,target=/app/.pnpm-store \
     pnpm --filter h402-next-example i
 
 COPY ./typescript/tsconfig.base.json /app/typescript/tsconfig.base.json
+COPY ./scripts/build-paywall.js /app/scripts/
 COPY ./typescript/packages/h402 /app/typescript/packages/h402
 COPY ./typescript/packages/h402-next /app/typescript/packages/h402-next
 COPY ./examples/typescript/fullstack/next /app/examples/typescript/fullstack/next
