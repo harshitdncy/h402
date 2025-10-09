@@ -9,10 +9,12 @@ export default function SolanaWalletSelector({
   onWalletSelect,
   selectedWallet: propSelectedWallet, 
   disabled = false,
+  isDarkMode,
 }: {
   onWalletSelect: (wallet: UiWallet) => void;
   selectedWallet: UiWallet | null;
   disabled: boolean;
+  isDarkMode?: boolean;
 }) {
   const {
     wallets: solanaWallets,
@@ -42,7 +44,7 @@ export default function SolanaWalletSelector({
   return (
     <div className="mb-8">
       <div className="flex items-center justify-between">
-        <div className="block text-sm font-medium text-gray-700 mb-2">
+        <div className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
           Select Solana wallet
         </div>
       </div>
@@ -59,8 +61,8 @@ export default function SolanaWalletSelector({
                   wallet.accounts.some(
                     (acc) => acc.address === selectedWalletAccount.address
                   ))
-                  ? "border-blue-500 bg-blue-50 ring-2 ring-blue-200"
-                  : "border-gray-200 hover:bg-gray-50"
+                  ? `border-blue-500 ring-2 ring-blue-500 ${isDarkMode ? 'bg-gray-900' : 'bg-blue-50'}`
+                  : `${isDarkMode ? '!border-gray-600 hover:bg-gray-700' : '!border-gray-200 hover:bg-gray-50'}`
               }
               ${disabled ? "opacity-50 cursor-not-allowed" : ""}
             `}
@@ -91,15 +93,15 @@ export default function SolanaWalletSelector({
                   className="w-6 h-6 object-contain"
                 />
               ) : (
-                <div className="w-6 h-6 bg-gray-300 rounded flex items-center justify-center">
-                  <span className="text-xs font-medium text-gray-600">
+                <div className={`w-6 h-6 ${isDarkMode ? 'bg-gray-600' : 'bg-gray-300'} rounded flex items-center justify-center`}>
+                  <span className={`text-xs font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
                     {wallet.name.charAt(0).toUpperCase()}
                   </span>
                 </div>
               )}
             </div>
 
-            <div className="text-sm font-medium text-gray-900 truncate">
+            <div className={`text-sm font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'} truncate`}>
               {wallet.name}
             </div>
 

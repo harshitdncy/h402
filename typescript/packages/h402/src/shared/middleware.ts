@@ -97,10 +97,11 @@ export function getDefaultAsset(network: Network) {
 
   return {
     address: address as `0x${string}`, // Type assertion for compatibility
-    decimals: 6,
+    decimals: network === "bsc" ? 18 : 6,
     eip712: {
       name:
         network === "bsc"
+          || network === "base"
           ? "Tether USD"
           : network === "solana"
           ? "USD Coin"
@@ -188,11 +189,15 @@ export function decodeXPaymentResponse(header: string) {
  *
  * @param price - The price to create the RouteConfig from
  * @param network - The network to create the RouteConfig for
+ * @param evmAddress - The EVM address to use for the RouteConfig
+ * @param solanaAddress - The Solana address to use for the RouteConfig
  * @returns The created RouteConfig
  */
 export function createRouteConfigFromPrice(
   price: Price,
-  network: Network
+  network: Network,
+  evmAddress?: Address,
+  solanaAddress?: string
 ): RouteConfig {
   const processedPrice = processPriceToAtomicAmount(price, network);
 
@@ -209,8 +214,10 @@ export function createRouteConfigFromPrice(
     resource: "" as any, // Will be filled in by the middleware
     description: `Payment required (${network})`,
     mimeType: "application/json",
-    payToAddress: "0x0000000000000000000000000000000000000000" as any, // Will be filled in by the middleware
+    payToAddress: network === "solana" ? solanaAddress : evmAddress || "0x0000000000000000000000000000000000000000" as any,
     tokenAddress: asset.address as any,
+    tokenSymbol: network === "bsc" || network === "base" ? "USDT" : "USDC",
+    tokenDecimals: asset.decimals as any,
     outputSchema: null,
     extra: asset.eip712,
     amountRequired: Number(maxAmountRequired),
@@ -233,6 +240,9 @@ export function getUsdcAddressForChain(chainId: number | string): string {
   // BSC mainnet (chain ID 56) uses USDT
   if (chainId === 56) {
     return STABLECOIN_ADDRESSES.USDT_BSC;
+  }
+  if (chainId === 8453) {
+    return STABLECOIN_ADDRESSES.USDT_BASE;
   }
   // For Solana (no numeric chain ID), use USDC
   if (chainId === "mainnet") {

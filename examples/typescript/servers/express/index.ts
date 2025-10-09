@@ -1,14 +1,15 @@
 import { config } from "dotenv";
 import express from "express";
-import { paymentMiddleware, Resource, createRouteConfigFromPrice, Network } from "h402-express";
+import { paymentMiddleware, Resource, createRouteConfigFromPrice, Network } from "@bit-gpt/h402-express";
 
 config();
 
 const facilitatorUrl = process.env.FACILITATOR_URL as Resource;
-const payTo = process.env.ADDRESS as `0x${string}`;
+const evmAddress = process.env.EVM_ADDRESS as `0x${string}`;
+const solanaAddress = process.env.SOLANA_ADDRESS as string;
 const network = process.env.NETWORK as Network;
 
-if (!facilitatorUrl || !payTo || !network) {
+if (!facilitatorUrl || !evmAddress || !solanaAddress || !network) {
   console.error("Missing required environment variables");
   process.exit(1);
 }
@@ -19,10 +20,9 @@ console.log("Server is running");
 
 app.use(
   paymentMiddleware(
-    payTo,
     {
       // Use createRouteConfigFromPrice to construct the RouteConfig
-      "/weather": createRouteConfigFromPrice("$0.001", network),
+      "/weather": createRouteConfigFromPrice("$0.001", network, evmAddress, solanaAddress),
       // Example of advanced configuration with multiple payment options
       "/premium/*": {
         paymentRequirements: [
@@ -33,20 +33,34 @@ app.use(
             amountRequired: 0.01,
             amountRequiredFormat: "humanReadable",
             networkId: "56",
-            payToAddress: payTo,
+            payToAddress: evmAddress,
             description: "Premium content access with USDT on BSC",
             tokenDecimals: 18,
+            tokenSymbol: "USDT",
+          },
+          {
+            scheme: "exact",
+            namespace: "evm",
+            tokenAddress: "0xfde4C96c8593536E31F229EA8f37b2ADa2699bb2", // USDT on Base
+            amountRequired: 0.01, 
+            amountRequiredFormat: "humanReadable", 
+            networkId: "8453", 
+            payToAddress: evmAddress,
+            description: "Premium content access with USDT on Base",
+            tokenDecimals: 6,
+            tokenSymbol: "USDT",
           },
           {
             scheme: "exact",
             namespace: "solana",
             tokenAddress: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", // USDC on Solana
-            amountRequired: 0.01,
+            amountRequired: 0.001,
             amountRequiredFormat: "humanReadable",
             networkId: "mainnet",
-            payToAddress: "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM", // Example Solana address
+            payToAddress: solanaAddress, // Example Solana address
             description: "Premium content access with USDC on Solana",
             tokenDecimals: 6,
+            tokenSymbol: "USDC",
           },
         ],
       },
@@ -69,7 +83,7 @@ app.get("/weather", (req, res) => {
 app.get("/premium/content", (req, res) => {
   res.send({
     content: "This is premium content accessible via multiple payment methods",
-    supportedPayments: ["USDT on BSC", "USDC on Solana"],
+    supportedPayments: ["USDT on BSC", "USDT on Base", "USDC on Solana"],
   });
 });
 

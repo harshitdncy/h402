@@ -23,7 +23,6 @@ import { VerifyResponse, SettleResponse } from "@bit-gpt/h402/types";
 /**
  * Creates a payment middleware factory for Hono
  *
- * @param payTo - The address to receive payments
  * @param routes - Configuration for protected routes and their payment requirements
  * @param facilitator - Optional configuration for the payment facilitator service
  * @returns A Hono middleware handler
@@ -32,7 +31,6 @@ import { VerifyResponse, SettleResponse } from "@bit-gpt/h402/types";
  * ```typescript
  * // Simple configuration - All endpoints protected by $0.01 USDT on BSC
  * app.use(paymentMiddleware(
- *   '0x123...', // payTo address
  *   {
  *     '*': '$0.01' // All routes protected by $0.01 USDT on BSC
  *   }
@@ -40,7 +38,6 @@ import { VerifyResponse, SettleResponse } from "@bit-gpt/h402/types";
  *
  * // Advanced configuration - Multiple payment options per route
  * app.use(paymentMiddleware(
- *   '0x123...', // payTo address
  *   {
  *     '/weather/*': '$0.001', // Simple price for weather endpoints
  *     '/premium/*': {
@@ -72,7 +69,6 @@ import { VerifyResponse, SettleResponse } from "@bit-gpt/h402/types";
  * ```
  */
 export function paymentMiddleware(
-  payTo: Address,
   routes: RoutesConfig,
   facilitator?: FacilitatorConfig,
 ) {
@@ -99,25 +95,25 @@ export function paymentMiddleware(
     const resourceUrl: Resource = (primaryRequirement.resource || c.req.url) as Resource;
 
     // Update the resource URL in all payment requirements and validate addresses
-    const updatedPaymentRequirements = paymentRequirements.map(req => {
+    const updatedPaymentRequirements = paymentRequirements.map(requirement => {
       let validatedPayToAddress: string;
 
-      if (req.namespace === "evm") {
+      if (requirement.namespace === "evm") {
         // Use viem's getAddress for EVM address validation and checksumming
-        validatedPayToAddress = getAddress(payTo);
-      } else if (req.namespace === "solana") {
+        validatedPayToAddress = getAddress(requirement.payToAddress);
+      } else if (requirement.namespace === "solana") {
         // Basic Solana address validation
-        if (typeof payTo !== "string" || payTo.length < 32 || payTo.length > 44) {
+        if (typeof requirement.payToAddress !== "string" || requirement.payToAddress.length < 32 || requirement.payToAddress.length > 44) {
           throw new Error("Invalid Solana address format");
         }
         // Additional validation could be added here using @solana/web3.js
-        validatedPayToAddress = payTo;
+        validatedPayToAddress = requirement.payToAddress;
       } else {
-        throw new Error(`Unsupported namespace: ${req.namespace}`);
+        throw new Error(`Unsupported namespace: ${requirement.namespace}`);
       }
 
       return {
-        ...req,
+        ...requirement,
         resource: resourceUrl,
         payToAddress: validatedPayToAddress,
       };
@@ -259,8 +255,16 @@ export function paymentMiddleware(
       return;
     }
 
+    // For signAndSendTransaction payments (type: "transaction"), the payment is already executed
+    // Skip settlement and proceed with the response
+    if (verification.type === "transaction") {
+      console.log("paymentMiddleware: Payment already executed (signAndSendTransaction), skipping settlement");
+      return;
+    }
+
     c.res = undefined;
 
+    // For authorization and signedTransaction payments (type: "payload"), settlement is required
     // Settle payment before processing the request, as Hono middleware does not allow us to set headers after the response has been sent
     try {
       console.log(

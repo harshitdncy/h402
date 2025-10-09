@@ -33,12 +33,82 @@ pnpm install
 pnpm dev
 ```
 
+## API Endpoints
+
+### `/weather` - Simple Payment Configuration
+- **Payment**: $0.001 (configured via `createRouteConfigFromPrice`)
+- **Network**: Based on NETWORK environment variable
+- **Response**: Weather data
+
+### `/premium/content` - Multiple Payment Options
+- **Payment Options**:
+  - USDT on BSC (Binance Smart Chain) - $0.01
+  - USDC on Solana - $0.01
+- **User Choice**: Users can pay with either option
+- **Response**: Premium content with payment method information
+
+## Configuration Examples
+
+### Simple Configuration
+```typescript
+app.use(
+  paymentMiddleware(
+    {
+      "/weather": createRouteConfigFromPrice("$0.001", network, evmAddress, solanaAddress),
+    },
+    {
+      url: facilitatorUrl,
+    },
+  ),
+);
+```
+
+### Advanced Multi-Chain Configuration
+```typescript
+app.use(
+  paymentMiddleware(
+    {
+      "/premium/*": {
+        paymentRequirements: [
+          {
+            scheme: "exact",
+            namespace: "evm",
+            tokenAddress: "0x55d398326f99059ff775485246999027b3197955", // USDT on BSC
+            amountRequired: 0.01,
+            amountRequiredFormat: "humanReadable",
+            networkId: "56",
+            payToAddress: evmAddress, // Example Evm address
+            description: "Premium content access with USDT on BSC",
+            tokenDecimals: 18,
+            tokenSymbol: "USDT",
+          },
+          {
+            scheme: "exact",
+            namespace: "solana",
+            tokenAddress: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", // USDC on Solana
+            amountRequired: 0.01,
+            amountRequiredFormat: "humanReadable",
+            networkId: "mainnet",
+            payToAddress: solanaAddress, // Example Solana address
+            description: "Premium content access with USDC on Solana",
+            tokenDecimals: 6,
+            tokenSymbol: "USDC",
+          },
+        ],
+      },
+    },
+    {
+      url: facilitatorUrl,
+    },
+  ),
+);
+```
+
 ## Testing the Server
 
 You can test the server using one of the example clients:
 
 ### Using the Fetch Client
-
 ```bash
 cd ../clients/fetch
 # Ensure .env is setup
@@ -47,7 +117,6 @@ pnpm dev
 ```
 
 ### Using the Axios Client
-
 ```bash
 cd ../clients/axios
 # Ensure .env is setup
@@ -55,95 +124,35 @@ pnpm install
 pnpm dev
 ```
 
-These clients will demonstrate how to:
+## Payment Flow
 
-1. Make an initial request to get payment requirements
-2. Process the payment requirements
-3. Make a second request with the payment token
+1. **Request**: Client makes a request to a protected endpoint
+2. **Payment Required**: Server responds with 402 status and available payment options
+3. **Payment Choice**: Client chooses preferred payment method (EVM or Solana)
+4. **Payment**: Client creates and signs payment transaction
+5. **Verification**: Server verifies the payment via facilitator
+6. **Access**: Server provides access to protected content
+7. **Settlement**: Payment is settled on-chain
 
-## Example Endpoint
+## Environment Variables
 
-The server includes a single example endpoint at `/weather` that requires a payment of $0.001 to access. The endpoint returns a simple weather report.
+- `FACILITATOR_URL`: URL of the payment facilitator service
+- `NETWORK`: Network to use for simple price configurations (e.g., "base-sepolia", "bsc")
+- `EVM_ADDRESS`: Your Ethereum address for receiving EVM payments
+- `SOLANA_ADDRESS`: Your Solana address for receiving Solana payments
 
-## Response Format
+## Supported Networks & Tokens
 
-### Payment Required (402)
+### EVM Chains
+- **BSC (Binance Smart Chain)**: USDT (0x55d398326f99059ff775485246999027b3197955)
+- **Base**: USDC (configurable via network parameter)
 
-```json
-{
-  "error": "X-PAYMENT header is required",
-  "paymentRequirements": {
-    "scheme": "exact",
-    "network": "base",
-    "maxAmountRequired": "1000",
-    "resource": "http://localhost:4021/weather",
-    "description": "",
-    "mimeType": "",
-    "payTo": "0xYourAddress",
-    "maxTimeoutSeconds": 60,
-    "asset": "0x...",
-    "outputSchema": null,
-    "extra": null
-  }
-}
-```
+### Solana
+- **Mainnet**: USDC (EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v)
 
-### Successful Response
+## Architecture Benefits
 
-```ts
-// Body
-{
-  "report": {
-    "weather": "sunny",
-    "temperature": 70
-  }
-}
-// Headers
-{
-  "X-PAYMENT-RESPONSE": "..." // Encoded response object
-}
-```
-
-## Extending the Example
-
-To add more paid endpoints, follow this pattern:
-
-```typescript
-// First, configure the payment middleware with your routes
-app.use(
-  paymentMiddleware(payTo, {
-    // Define your routes and their payment requirements
-    "/your-endpoint": {
-      price: "$0.10",
-      network,
-    },
-    "/premium/*": {
-      price: {
-        amount: "100000",
-        asset: {
-          address: "0xabc",
-          decimals: 18,
-          eip712: {
-            name: "WETH",
-            version: "1",
-          },
-        },
-      },
-      network,
-    },
-  }),
-);
-
-// Then define your routes as normal
-app.get("/your-endpoint", c => {
-  return c.json({
-    // Your response data
-  });
-});
-
-app.get("/premium/content", c => {
-  return c.json({
-    content: "This is premium content",
-  });
-});
-```
+- **Better UX**: Users can choose their preferred payment method
+- **Cross-Chain**: Support multiple blockchain ecosystems
+- **Extensible**: Easy to add new networks and tokens
+- **Granular Control**: Different payment options per route

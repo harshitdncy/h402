@@ -45,16 +45,7 @@ export const middleware = h402NextMiddleware({
       paymentRequirements: imageGenerationPaymentRequirements,
     },
   },
-  paywallRoute: "/paywall",
   facilitatorUrl: process.env.FACILITATOR_URL || "http://localhost:3001",
-  solanaRpcUrls: process.env.SOLANA_MAINNET_RPC_URL
-    ? {
-        mainnet: {
-          url: process.env.SOLANA_MAINNET_RPC_URL,
-          wsUrl: process.env.SOLANA_MAINNET_WS_URL,
-        },
-      }
-    : undefined,
 });
 
 export const config = {
@@ -243,9 +234,7 @@ The payment flow works as follows:
 The `h402NextMiddleware` function takes a configuration object with the following properties:
 
 - `routes`: A map of routes to protect and their payment requirements
-- `paywallRoute`: The route to redirect to when payment is required
 - `facilitatorUrl`: The URL of the facilitator service that verifies payments
-- `solanaRpcUrls`: (Optional) RPC URLs for Solana networks
 
 ### Payment Requirements
 

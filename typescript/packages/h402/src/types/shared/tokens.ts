@@ -5,12 +5,14 @@
 // Stablecoin token addresses
 export const STABLECOIN_ADDRESSES = {
   USDT_BSC: "0x55d398326f99059ff775485246999027b3197955",
+  USDT_BASE: "0xfde4C96c8593536E31F229EA8f37b2ADa2699bb2",
   USDC_SOLANA: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
 } as const;
 
 // Native token addresses (special addresses for native tokens)
 export const NATIVE_TOKEN_ADDRESSES = {
   BNB_BSC: "0x0000000000000000000000000000000000000000", // Special address for native BNB
+  ETH_BASE: "0x0000000000000000000000000000000000000000", // Special address for native ETH Base
   SOL_SOLANA: "11111111111111111111111111111111", // System Program ID for native SOL
 } as const;
 

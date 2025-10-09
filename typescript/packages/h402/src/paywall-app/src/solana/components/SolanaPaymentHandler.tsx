@@ -6,6 +6,7 @@ import type {PaymentButtonProps, PaymentStatus} from "@/types/payment";
 import PaymentButtonUI from "@/components/PaymentButton";
 import SolanaWalletSelector from "./SolanaWalletSelector";
 import { useSolanaWallets } from "../hooks/useSolanaWallets";
+import { useTheme } from "@/components/ThemeProvider";
 
 /**
  * Solana-specific payment handler
@@ -20,6 +21,7 @@ export default function SolanaPaymentHandler({
   setPaymentStatus,
   className = "",
 }: PaymentButtonProps) {
+  const { isDarkMode } = useTheme();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [selectedWallet, setSelectedWallet] = useState<UiWallet | null>(null);
   const [selectedAccount, setSelectedAccount] =
@@ -133,6 +135,7 @@ export default function SolanaPaymentHandler({
         onWalletSelect={handleWalletSelect}
         selectedWallet={selectedWallet}
         disabled={["approving", "connecting", "processing"].includes(paymentStatus)}
+        isDarkMode={isDarkMode}
       />
       {selectedWallet && paymentStatus === "connecting" && (
         <WalletConnectionManager

@@ -101,7 +101,7 @@ export default function EvmWalletSelector({
   return (
     <div className="mb-8">
       <div className="flex items-center justify-between">
-        <div className="block text-sm font-medium text-gray-700 mb-2">
+        <div className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
           Select EVM wallet
         </div>
       </div>

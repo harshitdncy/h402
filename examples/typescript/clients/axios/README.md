@@ -45,7 +45,7 @@ import { createWalletClient, http, publicActions } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { withPaymentInterceptor } from "h402-axios";
 import axios from "axios";
-import { baseSepolia } from "viem/chains";
+import { base } from "viem/chains";
 
 config();
 
@@ -56,7 +56,7 @@ const account = privateKeyToAccount(PRIVATE_KEY as "0x${string}");
 const client = createWalletClient({
   account,
   transport: http(),
-  chain: baseSepolia,
+  chain: base as Chain,
 }).extend(publicActions);
 
 // Create Axios instance with payment handling

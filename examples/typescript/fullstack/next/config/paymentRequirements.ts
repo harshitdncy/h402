@@ -1,4 +1,4 @@
-import { PaymentRequirements } from "h402-next";
+import { PaymentRequirements } from "@bit-gpt/h402-next";
 
 export const evmPaymentRequirementsUSDTonBSC: PaymentRequirements = {
   namespace: "evm",
