@@ -48,7 +48,7 @@ import { config } from "dotenv";
 import { createWalletClient, http } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { wrapFetchWithPayment } from "h402-fetch";
-import { baseSepolia } from "viem/chains";
+import { base } from "viem/chains";
 
 config();
 
@@ -59,7 +59,7 @@ const account = privateKeyToAccount(PRIVATE_KEY as `0x${string}`);
 const client = createWalletClient({
   account,
   transport: http(),
-  chain: baseSepolia,
+  chain: base as Chain,
 });
 
 // Wrap fetch with payment handling

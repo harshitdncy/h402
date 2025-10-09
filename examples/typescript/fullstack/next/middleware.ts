@@ -1,4 +1,4 @@
-import { h402NextMiddleware } from "h402-next";
+import { h402NextMiddleware } from "@bit-gpt/h402-next";
 import { imageGenerationPaymentRequirements } from "./config/paymentRequirements";
 
 export const middleware = h402NextMiddleware({

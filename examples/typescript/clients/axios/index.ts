@@ -1,7 +1,7 @@
 import axios from "axios";
 import { config } from "dotenv";
-import { createWalletClient, http, publicActions, type Hex } from "viem";
-import { withPaymentInterceptor, decodeXPaymentResponse } from "h402-axios";
+import { Chain, createWalletClient, http, publicActions, type Hex } from "viem";
+import { withPaymentInterceptor, decodeXPaymentResponse } from "@bit-gpt/h402-axios";
 import { Keypair } from "@solana/web3.js";
 import bs58 from "bs58";
 import { createKeyPairSignerFromBytes } from "@solana/signers";
@@ -17,7 +17,7 @@ const solanaPrivateKey = process.env.SOLANA_PRIVATE_KEY as Hex;
 const baseURL = process.env.RESOURCE_SERVER_URL as string; // e.g. http://localhost:3000
 const endpointPath = process.env.ENDPOINT_PATH as string; // e.g. /image
 
-if (!baseURL || !evmPrivateKey || !endpointPath) {
+if (!baseURL || !evmPrivateKey || !endpointPath || !solanaPrivateKey) {
   console.error("Missing required environment variables");
   process.exit(1);
 }
@@ -27,7 +27,7 @@ const evmAccount = privateKeyToAccount(evmPrivateKey);
 const evmClient = createWalletClient({
   account: evmAccount,
   transport: http(),
-  chain: bsc,
+  chain: bsc as Chain,
 }).extend(publicActions);
 
 // Solana client

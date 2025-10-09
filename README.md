@@ -26,8 +26,7 @@ export const middleware = h402NextMiddleware({
         },
       ],
     },
-  },
-  paywallRoute: "/paywall",
+  }
 });
 
 export const config = {

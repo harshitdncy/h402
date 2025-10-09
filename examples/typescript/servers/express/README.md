@@ -58,43 +58,57 @@ pnpm dev
 
 ### Simple Configuration
 ```typescript
-app.use(paymentMiddleware(
-  payTo,
-  {
-    "/weather": createRouteConfigFromPrice("$0.001", network)
-  }
-));
+app.use(
+  paymentMiddleware(
+    {
+      "/weather": createRouteConfigFromPrice("$0.001", network, evmAddress, solanaAddress),
+    },
+    {
+      url: facilitatorUrl,
+    },
+  ),
+);
 ```
 
 ### Advanced Multi-Chain Configuration
 ```typescript
-app.use(paymentMiddleware(
-  payTo,
-  {
-    "/premium/*": {
-      paymentRequirements: [
-        {
-          scheme: "exact",
-          namespace: "evm",
-          tokenAddress: "0x55d398326f99059ff775485246999027b3197955", // USDT on BSC
-          amountRequired: 0.01,
-          amountRequiredFormat: "humanReadable",
-          networkId: "56",
-          description: "Premium content access with USDT on BSC"
-        },
-        {
-          scheme: "exact", 
-          namespace: "solana",
-          tokenAddress: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", // USDC on Solana
-          amountRequired: 0.01,
-          amountRequiredFormat: "humanReadable", 
-          networkId: "mainnet",
-          description: "Premium content access with USDC on Solana"
-        }
-      ]
-    }
-  }
-));
+app.use(
+  paymentMiddleware(
+    {
+      "/premium/*": {
+        paymentRequirements: [
+          {
+            scheme: "exact",
+            namespace: "evm",
+            tokenAddress: "0x55d398326f99059ff775485246999027b3197955", // USDT on BSC
+            amountRequired: 0.01,
+            amountRequiredFormat: "humanReadable",
+            networkId: "56",
+            payToAddress: evmAddress, // Example Evm address
+            description: "Premium content access with USDT on BSC",
+            tokenDecimals: 18,
+            tokenSymbol: "USDT",
+          },
+          {
+            scheme: "exact",
+            namespace: "solana",
+            tokenAddress: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", // USDC on Solana
+            amountRequired: 0.01,
+            amountRequiredFormat: "humanReadable",
+            networkId: "mainnet",
+            payToAddress: solanaAddress, // Example Solana address
+            description: "Premium content access with USDC on Solana",
+            tokenDecimals: 6,
+            tokenSymbol: "USDC",
+          },
+        ],
+      },
+    },
+    {
+      url: facilitatorUrl,
+    },
+  ),
+);
 ```
 
 ## Testing the Server
@@ -130,10 +144,9 @@ pnpm dev
 ## Environment Variables
 
 - `FACILITATOR_URL`: URL of the payment facilitator service
-- `NETWORK`: Network to use for simple price configurations (e.g., "base-sepolia", "bsc")
-- `ADDRESS`: Your Ethereum address for receiving EVM payments
-- `CDP_API_KEY_ID`: Coinbase Developer Platform Key (for Base mainnet)
-- `CDP_API_KEY_SECRET`: Coinbase Developer Platform Key Secret (for Base mainnet)
+- `NETWORK`: Network to use for simple price configurations (e.g., "base", "bsc")
+- `EVM_ADDRESS`: Your Ethereum address for receiving EVM payments
+- `SOLANA_ADDRESS`: Your Solana address for receiving Solana payments
 
 ## Supported Networks & Tokens
 
