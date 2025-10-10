@@ -17,9 +17,4 @@ server {
     proxy_set_header Host $host;
     proxy_set_header x-scheme $scheme;
   }
-
-  location /uploads {
-    try_files $uri @next;
-    alias /app/public/uploads;
-  }
 }
