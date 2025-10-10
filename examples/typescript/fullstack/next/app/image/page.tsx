@@ -84,7 +84,7 @@ function ImageComponent({
           );
           setRequestId(data.requestId);
           // Now we'll start checking the status of the image generation
-          await checkImageStatus(data.requestId, 15, 2000);
+          await checkImageStatus(data.requestId, 30, 2000);
         } else {
           throw new Error("No requestId received from API");
         }
@@ -215,7 +215,7 @@ function ImageComponent({
       };
 
       // Add a cache-busting parameter to prevent browser caching
-      img.src = `/uploads/${filename}?t=${Date.now()}`;
+      img.src = `/api/images/${filename}?t=${Date.now()}`;
     };
 
     checkImage();
@@ -265,7 +265,7 @@ function ImageComponent({
       <div className="relative w-full h-full flex items-center justify-center p-4">
         {/* Using Next.js Image component for better performance */}
         <Image
-          src={`/uploads/${filename}?t=${Date.now()}`}
+          src={`/api/images/${filename}?t=${Date.now()}`}
           alt="AI Generated Image"
           width={1024}
           height={1024}
@@ -274,7 +274,7 @@ function ImageComponent({
         />
         {/* Debug information */}
         <div className="absolute bottom-2 left-2 text-white text-xs opacity-50">
-          Image path: /uploads/{filename}
+          Image path: /api/images/{filename}
         </div>
       </div>
     </div>
