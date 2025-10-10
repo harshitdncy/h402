@@ -33,10 +33,11 @@ export async function GET(
     // Check for completed image
     const files = await fs.readdir(publicDir);
     const imageFile = files.find((file) => imagePattern.test(file));
+    const fileNameWithoutExt = imageFile?.replace(".png", "");
     if (imageFile) {
       return NextResponse.json({
         status: "completed",
-        filename: imageFile,
+        filename: fileNameWithoutExt,
       });
     }
 

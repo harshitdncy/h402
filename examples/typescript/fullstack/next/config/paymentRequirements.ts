@@ -16,13 +16,15 @@ export const evmPaymentRequirementsUSDTonBSC: PaymentRequirements = {
   extra: null,
   maxAmountRequired: undefined,
   requiredDeadlineSeconds: undefined,
+  tokenDecimals: 18,
+  tokenSymbol: "USDT",
 };
 
 // EVM native token payment option (BNB)
 export const evmNativePaymentRequirements: PaymentRequirements = {
   namespace: "evm",
   tokenAddress: "0x0000000000000000000000000000000000000000", // Special address for native token
-  amountRequired: 0.0001, // 0.0001 BNB
+  amountRequired: 0.01, // 0.01 BNB
   amountRequiredFormat: "humanReadable", // Human readable format
   payToAddress: "0xc60d20FB910794df939eA1B758B367d7114733ae",
   networkId: "56", // BSC Chain ID
@@ -35,13 +37,15 @@ export const evmNativePaymentRequirements: PaymentRequirements = {
   extra: null,
   maxAmountRequired: undefined,
   requiredDeadlineSeconds: undefined,
+  tokenDecimals: 18,
+  tokenSymbol: "BNB",
 };
 
 // Solana payment option (native SOL)
 export const solanaNativePaymentRequirements: PaymentRequirements = {
   namespace: "solana",
   tokenAddress: "11111111111111111111111111111111", // System Program ID for native SOL
-  amountRequired: 100000, // 0.0001 SOL in lamports
+  amountRequired: 10000000, // 0.01 SOL in lamports
   amountRequiredFormat: "smallestUnit", // Amount is in lamports
   payToAddress: "4pX5LbCK85Sf6iLXMwUodo2f5rvQKAofyhANT6TUwG3f",
   networkId: "mainnet",
@@ -54,6 +58,8 @@ export const solanaNativePaymentRequirements: PaymentRequirements = {
   extra: null,
   maxAmountRequired: undefined,
   requiredDeadlineSeconds: undefined,
+  tokenDecimals: 9,
+  tokenSymbol: "SOL",
 };
 
 // Solana SPL token payment option (example with USDC)
@@ -73,6 +79,8 @@ export const solanaSplPaymentRequirementsUSDC: PaymentRequirements = {
   extra: null,
   maxAmountRequired: undefined,
   requiredDeadlineSeconds: undefined,
+  tokenDecimals: 6,
+  tokenSymbol: "USDC",
 };
 
 export const imageGenerationPaymentRequirements: PaymentRequirements[] = [
