@@ -101,10 +101,16 @@ export function EvmWalletProvider({ children }: { children: ReactNode }) {
 
       const selectedChainId = Number(getChainId(networkId));
 
+      console.log("[DEBUG] Connecting wallet", config);
+
       // Connect directly with the target chain for WalletConnect to avoid session conflicts
       const result = await connect(config, { 
         connector, 
         chainId: walletType === "walletconnect" ? selectedChainId : undefined 
+      });
+
+      console.log("[DEBUG] Connected wallet", {
+        result,
       });
 
       if (!result.accounts?.[0]) {

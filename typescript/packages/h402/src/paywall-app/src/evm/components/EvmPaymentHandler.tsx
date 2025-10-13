@@ -194,6 +194,10 @@ export const getChainId = (network: string) => {
       return "56";
     case "base":
       return "8453";
+    case "polygon":
+      return "137";
+    case "sei":
+      return "1329";
     default:
       return "56";
   }
@@ -205,6 +209,10 @@ export const getNetworkName = (chainId: string) => {
       return "bsc";
     case "8453":
       return "base";
+    case "137":
+      return "polygon";
+    case "1329":
+      return "sei";
     default:
       return "bsc";
   }

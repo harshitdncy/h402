@@ -261,7 +261,10 @@ export default function PaymentUI({ paymentRequirements }: PaymentUIProps) {
           paymentStatus={paymentStatus}
         />
       );
-    } else if (selectedNetwork.id === "bsc" || selectedNetwork.id === "base") {
+    } else if (selectedNetwork.id === "bsc" || 
+      selectedNetwork.id === "base" || 
+      selectedNetwork.id === "polygon" || 
+      selectedNetwork.id === "sei") {
       return (
         <EvmPaymentHandler
           amount={formatAmountForDisplay({

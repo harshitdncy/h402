@@ -94,6 +94,7 @@ export function findMatchingRoute(
 export function getDefaultAsset(network: Network) {
   const networkId = getNetworkId(network);
   const address = getUsdcAddressForChain(networkId);
+  console.log("networkIdddddddddddddd", network);
 
   return {
     address: address as `0x${string}`, // Type assertion for compatibility
@@ -102,6 +103,8 @@ export function getDefaultAsset(network: Network) {
       name:
         network === "bsc"
           || network === "base"
+          || network === "polygon"
+          || network === "sei"
           ? "Tether USD"
           : network === "solana"
           ? "USD Coin"
@@ -216,7 +219,7 @@ export function createRouteConfigFromPrice(
     mimeType: "application/json",
     payToAddress: network === "solana" ? solanaAddress : evmAddress || "0x0000000000000000000000000000000000000000" as any,
     tokenAddress: asset.address as any,
-    tokenSymbol: network === "bsc" || network === "base" ? "USDT" : "USDC",
+    tokenSymbol: network === "bsc" || network === "base" || network === "polygon" || network === "sei" ? "USDT" : "USDC",
     tokenDecimals: asset.decimals as any,
     outputSchema: null,
     extra: asset.eip712,
@@ -243,6 +246,12 @@ export function getUsdcAddressForChain(chainId: number | string): string {
   }
   if (chainId === 8453) {
     return STABLECOIN_ADDRESSES.USDT_BASE;
+  }
+  if (chainId === 137) {
+    return STABLECOIN_ADDRESSES.USDT_POLYGON;
+  }
+  if (chainId === 1329) {
+    return STABLECOIN_ADDRESSES.USDT_SEI;
   }
   // For Solana (no numeric chain ID), use USDC
   if (chainId === "mainnet") {

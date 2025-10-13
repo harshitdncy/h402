@@ -1,4 +1,4 @@
-import { base, bsc, type Chain } from "viem/chains";
+import { base, bsc, polygon, sei, type Chain } from "viem/chains";
 import {
   type WalletClient,
   type PublicActions,
@@ -150,10 +150,15 @@ interface ChainConfig {
 }
 
 export function getChainConfig(networkId: string): ChainConfig {
-  const targetChain = networkId === "base" ? base : bsc;
-  const networkName =
-    networkId === "base" ? "Base" : "Binance Smart Chain (BSC)";
-
-  return { targetChain, networkName };
+  switch (networkId) {
+    case "base":
+      return { targetChain: base, networkName: "Base" };
+    case "polygon":
+      return { targetChain: polygon, networkName: "Polygon" };
+    case "sei":
+      return { targetChain: sei, networkName: "Sei" };
+    default:
+      return { targetChain: bsc, networkName: "Binance Smart Chain (BSC)" };
+  }
 }
 
