@@ -19,6 +19,7 @@ RUN --mount=type=cache,target=/app/.pnpm-store \
     pnpm --filter '@bit-gpt/h402' i && \
     pnpm --filter facilitator i
 
+COPY ./scripts/build-paywall.js /app/scripts/
 COPY ./typescript/packages/h402 /app/typescript/packages/h402
 COPY ./typescript/packages/facilitator /app/typescript/packages/facilitator
 RUN pnpm --filter '@bit-gpt/h402' build && \
