@@ -46,7 +46,7 @@ export const evmPaymentRequirementsUSDTOnBase: PaymentRequirements = {
   tokenAddress: "0xfde4C96c8593536E31F229EA8f37b2ADa2699bb2", // USDT on Base
   amountRequired: 0.01, // 0.01 USDT
   amountRequiredFormat: "humanReadable", // smallest unit format
-  payToAddress: "0xD50453c96380561B16aBe356b84E91987b9f8AcF",
+  payToAddress: "0xc60d20FB910794df939eA1B758B367d7114733ae",
   networkId: "8453", // Base Chain ID
   description: "Get weather data with Base",
   resource: "https://example.com/resource",
@@ -66,7 +66,7 @@ export const evmPaymentRequirementsUSDTonPolygon: PaymentRequirements = {
   tokenAddress: "0xc2132d05d31c914a87c6611c10748aeb04b58e8f", // USDT on Polygon
   amountRequired: 0.0001, // 0.01 USDT
   amountRequiredFormat: "humanReadable", // Human readable format
-  payToAddress: "0x1BA55bD3e48e978A58506c3D66525cBAb5609d53",
+  payToAddress: "0xc60d20FB910794df939eA1B758B367d7114733ae",
   networkId: "137", // Polygon Chain ID
   description: "Access to generated images (EVM)",
   resource: "https://example.com/resource",
@@ -86,7 +86,7 @@ export const evmPaymentRequirementsUSDConPolygon: PaymentRequirements = {
   tokenAddress: "0x3c499c542cef5e3811e1192ce70d8cc03d5c3359", // USDC on Polygon
   amountRequired: 0.0001, // 0.01 USDT
   amountRequiredFormat: "humanReadable", // Human readable format
-  payToAddress: "0x1BA55bD3e48e978A58506c3D66525cBAb5609d53",
+  payToAddress: "0xc60d20FB910794df939eA1B758B367d7114733ae",
   networkId: "137", // Polygon Chain ID
   description: "Access to generated images (EVM)",
   resource: "https://example.com/resource",
@@ -148,7 +148,7 @@ export const evmPaymentRequirementsUSDTonSEI: PaymentRequirements = {
   tokenAddress: "0x9151434b16b9763660705744891fa906f660ecc5", // USDT on Sei
   amountRequired: 0.01, // 0.01 USDT
   amountRequiredFormat: "humanReadable", // Human readable format
-  payToAddress: "0x1BA55bD3e48e978A58506c3D66525cBAb5609d53",
+  payToAddress: "0xc60d20FB910794df939eA1B758B367d7114733ae",
   networkId: "1329", // Sei Chain ID
   description: "Access to generated images (EVM)",
   resource: "https://example.com/resource",
