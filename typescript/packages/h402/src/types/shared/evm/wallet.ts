@@ -15,7 +15,7 @@ import type {
   PublicClient,
   LocalAccount,
 } from "viem";
-import { base, avalanche, baseSepolia, avalancheFuji, iotex, bsc } from "viem/chains";
+import { base, avalanche, baseSepolia, avalancheFuji, iotex, bsc, polygon, sei } from "viem/chains";
 import { privateKeyToAccount } from "viem/accounts";
 import { type Hex } from "viem";
 import { EvmNetworkToChainId } from "../network.js";
@@ -58,6 +58,10 @@ export function getPublicClient(
         return createClientIotex();
     case EvmNetworkToChainId.get("bsc")?.toString():
       return createClientBsc();
+    case EvmNetworkToChainId.get("polygon")?.toString():
+      return createClientPolygon();
+    case EvmNetworkToChainId.get("sei")?.toString():
+      return createClientSei();
     default:
       throw new Error(`Unsupported network ID: ${networkId}`);
   }
@@ -159,6 +163,39 @@ export function createClientBsc(): ConnectedClient<
     transport: http(),
   }).extend(publicActions);
 }
+
+/**
+ * Creates a public client configured for the Polygon
+ *
+ * @returns A public client instance connected to Polygon
+ */
+export function createClientPolygon(): ConnectedClient<
+  Transport,
+  typeof polygon,
+  undefined
+> {
+  return createPublicClient({
+    chain: polygon,
+    transport: http(),
+  }).extend(publicActions);
+}
+
+/**
+ * Creates a public client configured for the Sei
+ *
+ * @returns A public client instance connected to Sei
+ */
+export function createClientSei(): ConnectedClient<
+  Transport,
+  typeof sei,
+  undefined
+> {
+  return createPublicClient({
+    chain: sei,
+    transport: http(),
+  }).extend(publicActions);
+}
+
 
 /**
  * Creates a wallet client configured for the Base with a private key

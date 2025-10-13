@@ -65,9 +65,9 @@ export default function EvmWalletSelector({
 
       const supportedWallets = wallets.filter((wallet) => {
         const chainSupport: ChainSupport = {
-          metamask: ["bsc", "base"],
-          phantom: ["base"],
-          walletconnect: ["bsc", "base"],
+          metamask: ["bsc", "base", "polygon", "sei"],
+          phantom: ["base", "polygon"],
+          walletconnect: ["bsc", "base", "polygon", "sei"],
         };
 
         const isSupported = chainSupport[wallet.id]?.includes(chainId) || false;

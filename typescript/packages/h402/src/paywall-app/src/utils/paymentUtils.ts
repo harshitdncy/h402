@@ -1,11 +1,15 @@
 import BscNetwork from "../assets/networks/bsc.svg";
 import SolanaNetwork from "../assets/networks/solana.svg";
 import BaseNetwork from "../assets/networks/base.svg";
+import PolygonNetwork from "../assets/networks/polygon.svg";
+import SeiNetwork from "../assets/networks/sei.svg";
 import SolCoin from "../assets/coins/sol.svg";
 import BnbCoin from "../assets/coins/bnb.svg";
 import UsdcCoin from "../assets/coins/usdc.svg";
 import UsdtCoin from "../assets/coins/usdt.svg";
 import EthCoin from "../assets/coins/eth.svg";
+import PolCoin from "../assets/coins/pol.svg";
+import SeiCoin from "../assets/coins/sei.svg";
 import MetamaskIcon from "../assets/wallets/metamask.svg";
 import PhantomIcon from "../assets/wallets/phantom.svg";
 import WalletConnectIcon from "../assets/wallets/walletConnect.svg";
@@ -28,6 +32,10 @@ function getCoinIcon(tokenSymbol: string) {
       return UsdtCoin;
     case "ETH":
       return EthCoin;
+    case "POL":
+      return PolCoin;
+    case "SEI":
+      return SeiCoin;
     default:
       return "";
   }
@@ -85,13 +93,19 @@ export function getCompatiblePaymentRequirements(
   const compatibleMethods = paymentRequirements.filter((requirement) => {
     const bscChainId = getChainId("bsc");
     const baseChainId = getChainId("base");
-    
+    const polygonChainId = getChainId("polygon");
+    const seiChainId = getChainId("sei");
+
     if (networkId === "solana") {
       return requirement.namespace === "solana";
     } else if (networkId === "bsc") {
       return requirement.networkId === bscChainId; 
     } else if (networkId === "base") {
       return requirement.networkId === baseChainId; 
+    } else if (networkId === "polygon") {
+      return requirement.networkId === polygonChainId; 
+    } else if (networkId === "sei") {
+      return requirement.networkId === seiChainId; 
     }
     return false;
   });
@@ -115,9 +129,13 @@ export function generateAvailableNetworks(paymentRequirements: EnrichedPaymentRe
   const networks = [];
   let containsBSC = false;
   let containsBASE = false;
+  let containsPOLYGON = false;
+  let containsSEI = false;
 
   const bscChainId = getChainId("bsc");
   const baseChainId = getChainId("base");
+  const polygonChainId = getChainId("polygon");
+  const seiChainId = getChainId("sei");
 
   if (networkGroups["evm"] && networkGroups["evm"].length > 0) {
     networkGroups["evm"].forEach((requirement: EnrichedPaymentRequirements) => {
@@ -133,6 +151,20 @@ export function generateAvailableNetworks(paymentRequirements: EnrichedPaymentRe
         (requirement.networkId === baseChainId)
       ) {
         containsBASE = true;
+      }
+
+      if (
+        containsPOLYGON === false &&
+        (requirement.networkId === polygonChainId)
+      ) {
+        containsPOLYGON = true;
+      }
+
+      if (
+        containsSEI === false &&
+        (requirement.networkId === seiChainId)
+      ) {
+        containsSEI = true;
       }
     });
 
@@ -163,6 +195,36 @@ export function generateAvailableNetworks(paymentRequirements: EnrichedPaymentRe
         name: "Base",
         icon: BaseNetwork,
         coins: baseCoins,
+      });
+    }
+
+    if (containsPOLYGON) {
+      const polygonCoins = networkGroups["evm"]
+        .filter((requirement: EnrichedPaymentRequirements) => 
+          requirement.networkId === polygonChainId
+        )
+        .map(createCoinFromRequirement);
+
+      networks.push({
+        id: "polygon",
+        name: "Polygon",
+        icon: PolygonNetwork,
+        coins: polygonCoins,
+      });
+    }
+    
+    if (containsSEI) {
+      const seiCoins = networkGroups["evm"]
+        .filter((requirement: EnrichedPaymentRequirements) => 
+          requirement.networkId === seiChainId
+        )
+        .map(createCoinFromRequirement);
+
+      networks.push({
+        id: "sei",
+        name: "Sei",
+        icon: SeiNetwork,
+        coins: seiCoins,
       });
     }
   }

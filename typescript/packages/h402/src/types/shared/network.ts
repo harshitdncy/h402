@@ -2,7 +2,7 @@ import { z } from "zod";
 
 // Define network types
 export const EVMNetworkSchema = z.enum([
-  "base", "avalanche", "iotex", "bsc",
+  "base", "avalanche", "iotex", "bsc", "polygon", "sei"
 ]);
 
 export const SolanaNetworkSchema = z.enum(["solana"]);
@@ -20,6 +20,8 @@ export const SupportedEVMNetworks: EVMNetwork[] = [
   "avalanche",
   "iotex",
   "bsc",
+  "polygon",
+  "sei",
 ];
 
 export const SupportedSolanaNetworks: SolanaNetwork[] = ["solana"];
@@ -35,6 +37,8 @@ export const EvmNetworkToChainId = new Map<EVMNetwork, number>([
   ["avalanche", 43114],
   ["iotex", 4689],
   ["bsc", 56],
+  ["polygon", 137],
+  ["sei", 1329],
 ]);
 
 export const ChainIdToEvmNetwork = Object.fromEntries(
@@ -72,6 +76,8 @@ export const NetworkMetadata = {
   avalanche: { name: "Avalanche", type: "evm" },
   iotex: { name: "IoTeX", type: "evm" },
   bsc: { name: "BNB Smart Chain", type: "evm" },
+  polygon: { name: "Polygon", type: "evm" },
+  sei: { name: "Sei", type: "evm" },
   // Solana Networks
   solana: { name: "Solana", type: "solana" },
 } as const;
