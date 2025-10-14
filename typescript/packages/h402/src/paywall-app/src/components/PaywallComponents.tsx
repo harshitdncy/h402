@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import type { Coin, Network } from "@/types/payment";
 
 interface DropdownProps {
@@ -19,6 +20,21 @@ export const Dropdown = ({
   toggleDropdown,
   isDarkMode,
 }: DropdownProps) => {
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        toggleDropdown();
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isOpen, toggleDropdown]);
+
   if (!selected.id) return null;
   return (
     <div className="mb-4">
@@ -29,7 +45,7 @@ export const Dropdown = ({
       >
         {type === "network" ? "Network" : "Coin"}
       </label>
-      <div className="relative">
+      <div className="relative" ref={dropdownRef}>
         <button
           className={`w-full flex items-center justify-between border rounded-lg px-4 py-2.5 text-left focus:outline-none focus:ring-2 focus:ring-blue-500 ${
             isDarkMode

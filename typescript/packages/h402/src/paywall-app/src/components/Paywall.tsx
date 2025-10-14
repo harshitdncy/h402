@@ -187,7 +187,8 @@ export default function PaymentUI({ paymentRequirements }: PaymentUIProps) {
 
   const toggleDropdown = (dropdownName: "network" | "coin") => {
     setDropdownState((prev) => ({
-      ...prev,
+      network: false,
+      coin: false,
       [dropdownName]: !prev[dropdownName],
     }));
   };
