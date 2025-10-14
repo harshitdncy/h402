@@ -15,8 +15,14 @@ import {
 
 import {
   getCreateAssociatedTokenIdempotentInstruction,
-  getTransferInstruction,
+  getTransferCheckedInstruction,
+  TOKEN_PROGRAM_ADDRESS,
 } from "@solana-program/token";
+import {
+  getCreateAssociatedTokenIdempotentInstruction as getCreateAssociatedTokenIdempotentInstructionToken2022,
+  getTransferCheckedInstruction as getTransferCheckedInstructionToken2022,
+  TOKEN_2022_PROGRAM_ADDRESS,
+} from "@solana-program/token-2022";
 import {
   getTransferSolInstruction,
   SYSTEM_PROGRAM_ADDRESS,
@@ -34,6 +40,39 @@ import {
 } from "../../../shared/solana/index.js";
 import bs58 from "bs58";
 import { getFacilitator } from "../../../shared/next.js";
+
+async function getTokenProgramForMint(
+  mintAddress: string
+): Promise<typeof TOKEN_PROGRAM_ADDRESS | typeof TOKEN_2022_PROGRAM_ADDRESS> {
+  const rpc = createSolanaRpc(`${getFacilitator()}/solana-rpc`);
+  
+  try {
+    const { value: mintInfo } = await rpc
+      .getAccountInfo(address(mintAddress), {
+        encoding: "jsonParsed",
+      })
+      .send();
+
+    if (!mintInfo || !mintInfo.data) {
+      throw new Error(`Token mint not found: ${mintAddress}`);
+    }
+
+    if (mintInfo.owner === TOKEN_2022_PROGRAM_ADDRESS) {
+      console.log(`[Token Detection] ${mintAddress} is Token-2022`);
+      return TOKEN_2022_PROGRAM_ADDRESS;
+    } else if (mintInfo.owner === TOKEN_PROGRAM_ADDRESS) {
+      console.log(`[Token Detection] ${mintAddress} is standard SPL Token`);
+      return TOKEN_PROGRAM_ADDRESS;
+    } else {
+      throw new Error(
+        `Token mint ${mintAddress} is not owned by a token program`
+      );
+    }
+  } catch (error) {
+    console.error(`[Token Detection] Error detecting token program:`, error);
+    return TOKEN_PROGRAM_ADDRESS;
+  }
+}
 
 async function buildPaymentTransaction(
   requirements: PaymentRequirements,
@@ -66,25 +105,71 @@ async function buildPaymentTransaction(
     return appendTransactionMessageInstruction(instruction, tx);
   } else {
     const mint = address(requirements.tokenAddress);
+    
+    const tokenProgram = await getTokenProgramForMint(requirements.tokenAddress);
+    const isToken2022 = tokenProgram === TOKEN_2022_PROGRAM_ADDRESS;
+    
+    const { value: mintInfo } = await rpc
+      .getAccountInfo(mint, {
+        encoding: "jsonParsed",
+      })
+      .send();
+
+    if (!mintInfo || !mintInfo.data) {
+      throw new Error(`Token mint not found: ${requirements.tokenAddress}`);
+    }
+
+    const parsedData = mintInfo.data as any;
+    const decimals = parsedData?.parsed?.info?.decimals;
+    
+    if (typeof decimals !== "number") {
+      throw new Error(`Could not get decimals for token: ${requirements.tokenAddress}`);
+    }
+    
+    console.log(`[Token Info] Mint: ${requirements.tokenAddress}, Decimals: ${decimals}, Program: ${isToken2022 ? 'Token-2022' : 'Token'}`);
+    
     const senderATA = await getAssociatedTokenAddress(
       mint,
-      payerSigner.address
+      payerSigner.address,
+      tokenProgram
     );
-    const receiverATA = await getAssociatedTokenAddress(mint, payTo);
+    const receiverATA = await getAssociatedTokenAddress(
+      mint, 
+      payTo,
+      tokenProgram
+    );
 
-    const createATAIx = getCreateAssociatedTokenIdempotentInstruction({
-      payer: payerSigner,
-      mint,
-      owner: payTo,
-      ata: receiverATA,
-    });
+    const createATAIx = isToken2022
+      ? getCreateAssociatedTokenIdempotentInstructionToken2022({
+          payer: payerSigner,
+          mint,
+          owner: payTo,
+          ata: receiverATA,
+        })
+      : getCreateAssociatedTokenIdempotentInstruction({
+          payer: payerSigner,
+          mint,
+          owner: payTo,
+          ata: receiverATA,
+        });
 
-    const transferIx = getTransferInstruction({
-      source: senderATA,
-      destination: receiverATA,
-      authority: payerSigner,
-      amount,
-    });
+    const transferIx = isToken2022
+      ? getTransferCheckedInstructionToken2022({
+          source: senderATA,
+          destination: receiverATA,
+          authority: payerSigner,
+          mint,
+          amount,
+          decimals,
+        })
+      : getTransferCheckedInstruction({
+          source: senderATA,
+          destination: receiverATA,
+          authority: payerSigner,
+          mint,
+          amount,
+          decimals,
+        });
 
     const withCreateATA = appendTransactionMessageInstruction(createATAIx, tx);
     return appendTransactionMessageInstruction(transferIx, withCreateATA);
