@@ -3,21 +3,26 @@ import {
   TOKEN_PROGRAM_ADDRESS,
   ASSOCIATED_TOKEN_PROGRAM_ADDRESS,
 } from "@solana-program/token";
+import { TOKEN_2022_PROGRAM_ADDRESS } from "@solana-program/token-2022";
 import bs58 from "bs58";
 
 /**
  * Get the associated token address for a given mint and owner
  * This function derives the ATA using the standard Solana approach
+ * @param mint - The token mint address
+ * @param owner - The owner address
+ * @param tokenProgram - The token program (defaults to standard Token program)
  */
 export async function getAssociatedTokenAddress(
   mint: ReturnType<typeof address>,
-  owner: ReturnType<typeof address>
+  owner: ReturnType<typeof address>,
+  tokenProgram: typeof TOKEN_PROGRAM_ADDRESS | typeof TOKEN_2022_PROGRAM_ADDRESS = TOKEN_PROGRAM_ADDRESS
 ): Promise<ReturnType<typeof address>> {
   try {
     // Convert the address objects to strings
     const mintStr = mint.toString();
     const ownerStr = owner.toString();
-    const tokenProgramStr = TOKEN_PROGRAM_ADDRESS.toString();
+    const tokenProgramStr = tokenProgram.toString();
 
     // Decode from base58 to get the raw bytes
     const mintBytes = bs58.decode(mintStr);
