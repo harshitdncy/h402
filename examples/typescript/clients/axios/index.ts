@@ -12,52 +12,60 @@ import { bsc } from "viem/chains";
 
 config();
 
-const evmPrivateKey = process.env.EVM_PRIVATE_KEY as Hex;
-const solanaPrivateKey = process.env.SOLANA_PRIVATE_KEY as Hex;
+const evmPrivateKey = process.env.EVM_PRIVATE_KEY as Hex | undefined;
+const solanaPrivateKey = process.env.SOLANA_PRIVATE_KEY as string | undefined;
 const baseURL = process.env.RESOURCE_SERVER_URL as string; // e.g. http://localhost:3000
 const endpointPath = process.env.ENDPOINT_PATH as string; // e.g. /image
 
-if (!baseURL || !evmPrivateKey || !endpointPath || !solanaPrivateKey) {
-  console.error("Missing required environment variables");
+if (!baseURL || !endpointPath) {
+  console.error("Missing required environment variables: RESOURCE_SERVER_URL or ENDPOINT_PATH");
   process.exit(1);
 }
 
-// EVM client
-const evmAccount = privateKeyToAccount(evmPrivateKey);
-const evmClient = createWalletClient({
-  account: evmAccount,
-  transport: http(),
-  chain: bsc as Chain,
-}).extend(publicActions);
+if (!evmPrivateKey && !solanaPrivateKey) {
+  console.error("At least one of EVM_PRIVATE_KEY or SOLANA_PRIVATE_KEY must be provided");
+  process.exit(1);
+}
 
-// Solana client
-const solanaKeypair = Keypair.fromSecretKey(bs58.decode(solanaPrivateKey));
-const solanaClient = {
-  publicKey: solanaKeypair.publicKey.toBase58(),
-  signTransaction: async <T extends Transaction>(
-    transactions: readonly T[],
-  ): Promise<readonly T[]> => {
-    const signer = await createKeyPairSignerFromBytes(solanaKeypair.secretKey);
-    const signatures = await signer.signTransactions(transactions);
-    const modifiedTransactions = transactions.map((transaction, index) => {
-      const signature = signatures[index];
-      if (!signature || Object.keys(signature).length === 0) {
-        throw new Error(`Failed to sign transaction at index ${index}`);
-      }
+const evmClient = evmPrivateKey
+  ? createWalletClient({
+      account: privateKeyToAccount(evmPrivateKey),
+      transport: http(),
+      chain: bsc as Chain,
+    }).extend(publicActions)
+  : undefined;
+
+const solanaClient = solanaPrivateKey
+  ? (() => {
+      const solanaKeypair = Keypair.fromSecretKey(bs58.decode(solanaPrivateKey));
       return {
-        ...transaction,
-        signatures: {
-          ...transaction.signatures,
-          ...signature,
+        publicKey: solanaKeypair.publicKey.toBase58(),
+        signTransaction: async <T extends Transaction>(
+          transactions: readonly T[],
+        ): Promise<readonly T[]> => {
+          const signer = await createKeyPairSignerFromBytes(solanaKeypair.secretKey);
+          const signatures = await signer.signTransactions(transactions);
+          const modifiedTransactions = transactions.map((transaction, index) => {
+            const signature = signatures[index];
+            if (!signature || Object.keys(signature).length === 0) {
+              throw new Error(`Failed to sign transaction at index ${index}`);
+            }
+            return {
+              ...transaction,
+              signatures: {
+                ...transaction.signatures,
+                ...signature,
+              },
+            } as T;
+          });
+          return modifiedTransactions;
         },
-      } as T;
-    });
-    return modifiedTransactions;
-  },
-} satisfies {
-  publicKey: string;
-  signTransaction: TransactionModifyingSigner["modifyAndSignTransactions"];
-};
+      } satisfies {
+        publicKey: string;
+        signTransaction: TransactionModifyingSigner["modifyAndSignTransactions"];
+      };
+    })()
+  : undefined;
 
 // Create the API client with payment interceptor
 // If multiple clients are provided, the payment interceptor will use the first one that is available according to payment requirements
