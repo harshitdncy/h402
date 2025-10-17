@@ -96,6 +96,7 @@
     "zod": "^3.25.49"
   },
   "dependencies": {
+    "@solana-program/compute-budget": "^0.8.0",
     "@solana-program/memo": "^0.7.0",
     "@solana-program/system": "^0.7.0",
     "@solana-program/token": "^0.5.1",
