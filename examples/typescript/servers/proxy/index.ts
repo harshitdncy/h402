@@ -1,27 +1,17 @@
-import express, { Request, Response } from "express";
-import { createProxyMiddleware } from "http-proxy-middleware";
+import express from "express";
 import { readFile } from "fs/promises";
-import {
-  paymentMiddleware,
-  createRouteConfigFromPrice,
-  Network,
-  Resource,
-} from "@bit-gpt/h402-express";
-import type * as http from "http";
-import type { Socket } from "net";
+import { h402Proxy, createRouteConfigFromPrice } from "@bit-gpt/h402-proxy";
+import { FacilitatorConfig } from "@bit-gpt/h402/types";
 
 interface ProxyConfig {
   targetURL: string;
   amount: string;
-  payToEvm: string;
-  payToSolana: string;
+  evmAddress: string;
+  solanaAddress: string;
   description?: string;
-  facilitatorURL?: string;
-  mimeType?: string;
-  maxTimeoutSeconds?: number;
-  testnet?: boolean;
+  facilitator?: FacilitatorConfig;
   headers?: Record<string, string>;
-  network?: Network;
+  network?: string;
 }
 
 async function loadConfig(configPath: string): Promise<ProxyConfig> {
@@ -29,17 +19,28 @@ async function loadConfig(configPath: string): Promise<ProxyConfig> {
     const data = await readFile(configPath, "utf-8");
     const config: ProxyConfig = JSON.parse(data);
 
-    config.facilitatorURL = config.facilitatorURL || "https://facilitator.bitgpt.xyz";
-    config.testnet = config.testnet !== undefined ? config.testnet : true;
-    config.maxTimeoutSeconds = config.maxTimeoutSeconds || 60;
+    const defaultUrl = "https://facilitator.bitgpt.xyz";
+    if (!config.facilitator) {
+      config.facilitator = { url: defaultUrl };
+    } else if (!config.facilitator.url) {
+      config.facilitator.url = defaultUrl;
+    }
     config.network = config.network || "base";
 
     if (
       !config.targetURL ||
       !config.amount ||
-      (!config.payToEvm && !config.payToSolana)
+      (!config.evmAddress && !config.solanaAddress)
     ) {
-      throw new Error("Config is missing required fields: targetURL, amount, or payToEvm or payToSolana");
+      throw new Error("Config is missing required fields: targetURL, amount, or evmAddress or solanaAddress");
+    }
+
+    if (config.network === "solana" && !config.solanaAddress) {
+      throw new Error("Config is missing required fields: solanaAddress");
+    }
+
+    if (config.network !== "solana" && !config.evmAddress) {
+      throw new Error("Config is missing required fields: evmAddress");
     }
 
     return config;
@@ -68,88 +69,24 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
-  console.log("Running with config:", config);
-
   const app = express();
 
+  // Use the h402-proxy package
   app.use(
-    paymentMiddleware(
-      {
+    h402Proxy({
+      target: config.targetURL,
+      routes: {
         "/*": createRouteConfigFromPrice(
           config.amount,
-          config.network!,
-          config.payToEvm as `0x${string}`,
-          config.payToSolana,
+          config.network as any,
+          config.evmAddress as `0x${string}`,
+          config.solanaAddress,
         ),
       },
-      {
-        url: config.facilitatorURL! as Resource,
-      },
-    ),
+      headers: config.headers,
+      facilitator: config.facilitator,
+    })
   );
-
-  const proxy = createProxyMiddleware({
-    target: config.targetURL,
-    changeOrigin: true,
-    selfHandleResponse: true, 
-    on: {
-      proxyReq: (proxyReq: http.ClientRequest, req: Request) => {
-        proxyReq.removeHeader("X-Payment");
-        proxyReq.removeHeader("X-Payment-Response");
-        
-        proxyReq.removeHeader("x-api-key");
-        proxyReq.removeHeader("X-API-Key");
-        proxyReq.removeHeader("authorization");
-        proxyReq.removeHeader("Authorization");
-        // Force set configured headers
-        if (config.headers) {
-          Object.entries(config.headers).forEach(([key, value]) => {
-            proxyReq.setHeader(key, value);
-          });
-        }
-  
-        console.log(`Proxying ${req.method} ${req.originalUrl} -> ${config.targetURL}${req.originalUrl}`);
-        console.log(`x-api-key value:`, proxyReq.getHeader('x-api-key'));
-      },
-      proxyRes: (proxyRes: http.IncomingMessage, req: Request, res: Response | http.ServerResponse) => {
-        console.log(`Response status: ${proxyRes.statusCode}`);
-        
-        if ("status" in res && typeof res.status === "function") {
-          res.status(proxyRes.statusCode || 200);
-        } else {
-          res.statusCode = proxyRes.statusCode || 200;
-        }
-        
-        Object.keys(proxyRes.headers).forEach(key => {
-          const value = proxyRes.headers[key];
-          if (value !== undefined) {
-            res.setHeader(key, value);
-          }
-        });
-        
-        proxyRes.pipe(res);
-      },
-      error: (err: Error, _req: Request, res: Response | http.ServerResponse | Socket) => {
-        console.error("Proxy error:", err.message);
-        if ("status" in res && typeof res.status === "function") {
-          res.status(502).json({
-            error: "Bad Gateway",
-            message: "Failed to proxy request to target server",
-          });
-        } else if ("writeHead" in res && typeof res.writeHead === "function") {
-          res.writeHead(502, { "Content-Type": "application/json" });
-          res.end(
-            JSON.stringify({
-              error: "Bad Gateway",
-              message: "Failed to proxy request to target server",
-            }),
-          );
-        }
-      },
-    },
-  });
-
-  app.use(proxy);
 
   const port = 4021;
   app.listen(port, () => {

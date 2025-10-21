@@ -36,8 +36,7 @@ pnpm dev
 
 The example demonstrates how to:
 
-1. Set up wallet clients for both EVM (Base) and Solana chains
-2. Create a payment client that supports multiple blockchain networks
+1. Create a wallet client
 3. Wrap the native fetch function with h402 payment handling
 4. Initialize the Anthropic SDK with the wrapped fetch function
 5. Make AI model requests through a paid proxy endpoint
@@ -47,35 +46,22 @@ The example demonstrates how to:
 ```typescript
 import Anthropic from "@anthropic-ai/sdk";
 import { config } from "dotenv";
-import { Chain, createWalletClient, Hex, http, publicActions } from "viem";
-import { privateKeyToAccount } from "viem/accounts";
-import { wrapFetchWithPayment } from "@bit-gpt/h402-fetch";
+import { wrapFetchWithPayment, createEvmClient, PaymentClient } from "@bit-gpt/h402-fetch";
 import { base } from "viem/chains";
-import { Keypair } from "@solana/web3.js";
-import bs58 from "bs58";
 
 config();
 
-const evmPrivateKey = process.env.EVM_PRIVATE_KEY as Hex | undefined;
-const solanaPrivateKey = process.env.SOLANA_PRIVATE_KEY as string | undefined;
-const baseURL = process.env.RESOURCE_SERVER_URL as string;
+const { RESOURCE_SERVER_URL, PRIVATE_KEY } = process.env;
+const privateKey = PRIVATE_KEY as `0x${string}`;
+const baseURL = RESOURCE_SERVER_URL;
 
-// Create EVM wallet client (Base chain)
-const evmClient = evmPrivateKey
-  ? createWalletClient({
-      account: privateKeyToAccount(evmPrivateKey),
-      chain: base as Chain,
-      transport: http(),
-    }).extend(publicActions)
-  : undefined;
+// Create wallet client
+const client = createEvmClient(privateKey, base);
 
-// Create Solana wallet client
-const solanaClient = solanaPrivateKey
-  ? createSolanaClient(solanaPrivateKey)
-  : undefined;
-
-// Combine clients for multi-chain support
-const paymentClient = { evmClient, solanaClient };
+// Create payment client
+const paymentClient: PaymentClient = {
+  evmClient: client,
+};
 
 // Create Anthropic client with payment-wrapped fetch
 const anthropic = new Anthropic({
@@ -84,11 +70,10 @@ const anthropic = new Anthropic({
   fetch: wrapFetchWithPayment(fetch, paymentClient),
 });
 
-// Make AI request through paid proxy
 const msg = await anthropic.messages.create({
   model: "claude-3-7-sonnet-20250219",
   max_tokens: 1024,
-  messages: [{ role: "user", content: "Hello, Claude!" }],
+  messages: [{ role: "user", content: "Hello, Claude do you know what h402 is?" }],
 });
 console.log(msg);
 ```
