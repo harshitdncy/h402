@@ -1,12 +1,11 @@
 {
   "targetURL": "https://httpbin.org",
   "amount": 0.01,
-  "payTo": "0x0000000000000000000000000000000000000000",
-  "facilitatorURL": "https://facilitator.bitgpt.xyz",
-  "testnet": true,
-  "description": "Example paywall",
-  "mimeType": "application/json",
-  "maxTimeoutSeconds": 60,
+  "evmAddress": "0x0000000000000000000000000000000000000000",
+  "network": "base",
+  "facilitator": {
+      "url": "http://localhost:3002"
+  },
   "headers": {
     "X-Example-Header": "example-value"
   }
