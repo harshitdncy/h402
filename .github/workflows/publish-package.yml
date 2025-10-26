@@ -111,7 +111,7 @@ jobs:
           #!/bin/bash -ex
 
           echo '${{ needs.get-libraries.outputs.matrix }}' | \
-          jq -r '.[]' | \
+          jq -r '. - ["${{ matrix.package }}"] | .[]' | \
           while read -r library; do
             gh run download \
               ${{ github.run_id }} \
