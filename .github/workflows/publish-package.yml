@@ -95,26 +95,33 @@ jobs:
         with:
           fetch-depth: 1
 
-      - run: |
+      - uses: actions/download-artifact@v4
+        with:
+          name: ${{ matrix.package }}-dist
+          path: typescript/packages/${{ matrix.package }}/dist
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: ${{ matrix.package }}-node_modules
+          path: typescript/packages/${{ matrix.package }}/node_modules
+
+      - name: install libraries 
+        if: ${{ matrix.package != 'h402' }}
+        run: |
           #!/bin/bash -ex
 
-          echo '${{ fromJson(needs.get-libraries.outputs.matrix) }}' | \
+          echo '${{ needs.get-libraries.outputs.matrix }}' | \
           jq -r '.[]' | \
           while read -r library; do
             gh run download \
               ${{ github.run_id }} \
               -n "${library}-dist" \
-              --dir typescript/packages/$library/dist
+              --dir "typescript/packages/${library}/dist"
 
             gh run download \
               ${{ github.run_id }} \
               -n "${library}-node_modules" \
               --dir "typescript/packages/${library}/node_modules"
-
-            gh run download \
-              ${{ github.run_id }} \
-              -n "${library}-dist" \
-              --dir "typescript/packages/${library}/dist"
           done
         env:
           GH_TOKEN: ${{ github.token }}
