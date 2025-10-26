@@ -1,4 +1,4 @@
-name: build package
+name: Build Library
 on:
   workflow_call:
     inputs:
