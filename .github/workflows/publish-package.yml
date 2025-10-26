@@ -13,6 +13,7 @@ on:
       - 'typescript/packages/h402-fetch/**'
       - 'typescript/packages/h402-axios/**'
       - 'typescript/packages/h402-next/**'
+      - 'typescript/packages/h402-proxy/**'
   push:
     paths:
       - 'typescript/packages/h402/**'
@@ -20,33 +21,55 @@ on:
       - 'typescript/packages/h402-fetch/**'
       - 'typescript/packages/h402-axios/**'
       - 'typescript/packages/h402-next/**'
-
+      - 'typescript/packages/h402-proxy/**'
 jobs:
   build-h402:
-    uses: ./.github/workflows/build-package.yml
+    uses: ./.github/workflows/build-library.yml
     with:
-      package: h402
+      name: h402
 
-  build:
-    needs: [ build-h402 ]
+  get-libraries:
+    runs-on:
+      group: arc-runners
+
+    outputs:
+      matrix: ${{ steps.output.outputs.matrix }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - id: output
+        run: |
+          #!/bin/bash
+          LIBRARIES=`jq -c . .github/workflows/libraries.jsonl`
+          echo "matrix=$LIBRARIES" >> "$GITHUB_OUTPUT"
+
+  build-libraries:
+    needs: [ build-h402, get-libraries ]
     strategy:
       matrix:
-       package:
-        - h402-express
-        - h402-fetch
-        - h402-axios
-        - h402-next
+       package: ${{ fromJSON(needs.get-libraries.outputs.matrix) }}
+
+    uses: ./.github/workflows/build-library.yml
+    with:
+      name: ${{ matrix.package }}
+      wants-h402: true
+
+  build-h402-proxy:
+    needs: [get-libraries, build-libraries]
 
     uses: ./.github/workflows/build-package.yml
     with:
-      package: ${{ matrix.package }}
-      wants-h402: true
+      name: h402-proxy
+      libraries: ${{ needs.get-libraries.outputs.matrix }}
 
   publish:
     runs-on:
       group: arc-runners
 
-    needs: [ build ]
+    needs: [ get-libraries, build-libraries, build-h402-proxy ]
     if: ${{ startsWith(github.ref, 'refs/tags/') }}
 
     strategy:
@@ -57,24 +80,44 @@ jobs:
           - h402-fetch
           - h402-axios
           - h402-next
+          - h402-proxy
 
     permissions:
       packages: write
     
     steps:
+      - run: |
+          #!/bin/bash -ex
+          sudo apt-get update
+          sudo apt-get install -y gh
+
       - uses: actions/checkout@v4
         with:
           fetch-depth: 1
 
-      - uses: actions/download-artifact@v4
-        with:
-          name: ${{ matrix.package }}-dist
-          path: typescript/packages/${{ matrix.package }}/dist
+      - run: |
+          #!/bin/bash -ex
 
-      - uses: actions/download-artifact@v4
-        with:
-          name: ${{ matrix.package }}-node_modules
-          path: typescript/packages/${{ matrix.package }}/node_modules
+          echo '${{ fromJson(needs.get-libraries.outputs.matrix) }}' | \
+          jq -r '.[]' | \
+          while read -r library; do
+            gh run download \
+              ${{ github.run_id }} \
+              -n "${library}-dist" \
+              --dir typescript/packages/$library/dist
+
+            gh run download \
+              ${{ github.run_id }} \
+              -n "${library}-node_modules" \
+              --dir "typescript/packages/${library}/node_modules"
+
+            gh run download \
+              ${{ github.run_id }} \
+              -n "${library}-dist" \
+              --dir "typescript/packages/${library}/dist"
+          done
+        env:
+          GH_TOKEN: ${{ github.token }}
 
       - uses: actions/download-artifact@v4
         if: ${{ matrix.package != 'h402' }}
