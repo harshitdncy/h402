@@ -1,6 +1,6 @@
 {
-  "name": "@bit-gpt/h402-next",
-  "version": "0.0.7",
+  "name": "@bit-gpt/h402-proxy",
+  "version": "0.0.2",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",
   "types": "./dist/index.d.ts",
@@ -13,43 +13,52 @@
     "lint": "eslint . --ext .ts --fix",
     "lint:check": "eslint . --ext .ts"
   },
-  "keywords": [],
+  "keywords": [
+    "h402",
+    "proxy",
+    "payment",
+    "middleware",
+    "express",
+    "api",
+    "monetization"
+  ],
   "license": "Apache-2.0",
   "author": "BitGPT",
   "repository": "https://github.com/bit-gpt/h402",
-  "description": "h402 Payment Protocol",
+  "description": "h402 Payment Protocol proxy middleware for Express - monetize any API with crypto payments",
   "devDependencies": {
-    "@types/node": "^22.13.4",
     "@eslint/js": "^9.24.0",
-    "eslint": "^9.24.0",
-    "eslint-plugin-jsdoc": "^50.6.9",
-    "eslint-plugin-prettier": "^5.2.6",
+    "@types/express": "^5.0.1",
+    "@types/node": "^22.13.4",
     "@typescript-eslint/eslint-plugin": "^8.29.1",
     "@typescript-eslint/parser": "^8.29.1",
+    "eslint": "^9.24.0",
     "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-jsdoc": "^50.6.9",
+    "eslint-plugin-prettier": "^5.2.6",
     "prettier": "3.5.2",
     "tsup": "^8.4.0",
     "tsx": "^4.19.2",
     "typescript": "^5.7.3",
-    "vite-tsconfig-paths": "^5.1.4",
-    "vite": "^6.2.6"
+    "vite": "^6.2.6",
+    "vite-tsconfig-paths": "^5.1.4"
   },
   "dependencies": {
-    "viem": "^2.23.1",
+    "express": "^4.18.2",
+    "http-proxy-middleware": "^3.0.0",
     "@bit-gpt/h402": "workspace:^",
-    "next": "^15.2.4",
+    "@bit-gpt/h402-express": "workspace:*",
     "zod": "^3.24.2"
   },
-  "type": "module",
   "exports": {
     ".": {
       "import": {
-        "types": "./dist/esm/index.d.ts",
-        "default": "./dist/esm/index.js"
+        "types": "./dist/esm/index.d.mts",
+        "default": "./dist/esm/index.mjs"
       },
       "require": {
-        "types": "./dist/cjs/index.d.cts",
-        "default": "./dist/cjs/index.cjs"
+        "types": "./dist/cjs/index.d.ts",
+        "default": "./dist/cjs/index.js"
       }
     }
   },
