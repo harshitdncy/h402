@@ -2,6 +2,7 @@ import type { Context } from "hono";
 import { Address, getAddress } from "viem";
 import { utils as evmUtils } from "@bit-gpt/h402/schemes/exact/evm";
 import { utils as solanaUtils } from "@bit-gpt/h402/schemes/exact/solana";
+import { utils as arkadeUtils } from "@bit-gpt/h402/schemes/exact/arkade";
 import {
   computeRoutePatterns,
   findMatchingPaymentRequirements,
@@ -13,6 +14,7 @@ import {
   FacilitatorConfig,
   EvmPaymentPayload,
   SolanaPaymentPayload,
+  ArkadePaymentPayload,
   Resource,
   settleResponseHeader,
   RoutesConfig,
@@ -61,6 +63,16 @@ import { VerifyResponse, SettleResponse } from "@bit-gpt/h402/types";
  *           networkId: "mainnet",
  *           payToAddress: "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM",
  *           description: "Premium API access with USDC on Solana"
+ *         },
+ *         {
+ *           scheme: "exact",
+ *           namespace: "arkade",
+ *           tokenAddress: "BTC", // Bitcoin only (no other tokens)
+ *           amountRequired: 0.00001, // 1000 sats
+ *           amountRequiredFormat: "humanReadable",
+ *           networkId: "bitcoin",
+ *           payToAddress: "ark1...", // Arkade address
+ *           description: "Premium API access with BTC via Arkade"
  *         }
  *       ]
  *     }
@@ -108,8 +120,16 @@ export function paymentMiddleware(
         }
         // Additional validation could be added here using @solana/web3.js
         validatedPayToAddress = requirement.payToAddress;
+      } else if (requirement.namespace === "arkade") {
+        // Validate Arkade address using SDK's validation
+        if (!arkadeUtils.isValidArkadeAddress(requirement.payToAddress)) {
+          throw new Error("Invalid Arkade address format");
+        }
+        validatedPayToAddress = requirement.payToAddress;
       } else {
-        throw new Error(`Unsupported namespace: ${requirement.namespace}`);
+        // TypeScript knows this is exhaustive, so this should never happen
+        const exhaustiveCheck: never = requirement;
+        throw new Error(`Unsupported namespace: ${(exhaustiveCheck as any).namespace}`);
       }
 
       return {
@@ -172,12 +192,14 @@ export function paymentMiddleware(
     }
 
     // Verify payment
-    let decodedPayment: EvmPaymentPayload | SolanaPaymentPayload;
+    let decodedPayment: EvmPaymentPayload | SolanaPaymentPayload | ArkadePaymentPayload;
     try {
       if (namespace === "evm") {
         decodedPayment = evmUtils.decodePaymentPayload(payment);
       } else if (namespace === "solana") {
         decodedPayment = solanaUtils.decodePaymentPayload(payment);
+      } else if (namespace === "arkade") {
+        decodedPayment = arkadeUtils.decodePaymentPayload(payment);
       } else {
         throw new Error(`Unsupported namespace: ${namespace}`);
       }

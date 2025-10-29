@@ -1,5 +1,5 @@
 import { type PaymentRequirements } from "../types/index.js";
-import { evm, solana } from "./index.js";
+import { evm, solana, arkade } from "./index.js";
 import { type PublicActions } from "viem";
 
 export async function parsePaymentRequirementsForAmount(
@@ -129,6 +129,29 @@ export async function parsePaymentRequirementsForAmount(
     } catch (error) {
       throw new Error(
         `Failed to parse Solana token data: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
+  }
+
+  // Handle Arkade (Bitcoin via Ark protocol)
+  if (details.namespace === "arkade") {
+    try {
+      // Arkade only supports BTC with 8 decimals (satoshis)
+      const decimals = arkade.NATIVE_BTC_DECIMALS;
+      
+      return {
+        ...details,
+        amountRequired: BigInt(
+          Math.floor(Number(details.amountRequired) * Math.pow(10, decimals))
+        ),
+        tokenDecimals: decimals,
+        tokenSymbol: arkade.BTC_SYMBOL,
+      };
+    } catch (error) {
+      throw new Error(
+        `Failed to parse Arkade payment data: ${
           error instanceof Error ? error.message : String(error)
         }`
       );

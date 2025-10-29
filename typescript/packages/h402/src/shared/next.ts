@@ -20,3 +20,12 @@ export const getFacilitator = () => {
     // Fallback for browser environment
     return "https://facilitator.bitgpt.xyz";
 }
+
+export const getArkadeServerUrl = () => {
+    // Check if we're in a Node.js environment (server-side)
+    if (typeof process !== 'undefined' && process.env) {
+        return process.env.ARKADE_SERVER_URL || "https://arkade.computer";
+    }
+    // Fallback for browser environment
+    return "https://arkade.computer";
+}

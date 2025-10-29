@@ -60,6 +60,11 @@
       "import": "./dist/schemes/exact/evm/index.js",
       "default": "./dist/schemes/exact/evm/index.js"
     },
+    "./schemes/exact/arkade": {
+      "types": "./dist/schemes/exact/arkade/index.d.ts",
+      "import": "./dist/schemes/exact/arkade/index.js",
+      "default": "./dist/schemes/exact/arkade/index.js"
+    },
     "./middleware": {
       "types": "./dist/middleware/index.d.ts",
       "import": "./dist/middleware/index.js",
@@ -96,6 +101,9 @@
     "zod": "^3.25.49"
   },
   "dependencies": {
+    "@arkade-os/sdk": "^0.3.3",
+    "@noble/secp256k1": "^3.0.0",
+    "@scure/btc-signer": "^2.0.1",
     "@solana-program/memo": "^0.7.0",
     "@solana-program/system": "^0.7.0",
     "@solana-program/token": "^0.5.1",
