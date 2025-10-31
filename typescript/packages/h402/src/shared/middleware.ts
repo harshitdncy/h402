@@ -5,6 +5,7 @@ import {
   PaymentRequirements,
   EvmPaymentPayload,
   SolanaPaymentPayload,
+  ArkadePaymentPayload,
   Price,
   ERC20TokenAmount,
   moneySchema,
@@ -162,7 +163,7 @@ export function processPriceToAtomicAmount(
  */
 export function findMatchingPaymentRequirements(
   paymentRequirements: PaymentRequirements[],
-  payment: EvmPaymentPayload | SolanaPaymentPayload
+  payment: EvmPaymentPayload | SolanaPaymentPayload | ArkadePaymentPayload
 ) {
   return paymentRequirements.find(
     (value) =>
@@ -201,7 +202,6 @@ export function createRouteConfigFromPrice(
   network: Network,
   evmAddress?: Address,
   solanaAddress?: string,
-  arkadeAddress?: string
 ): RouteConfig {
   const processedPrice = processPriceToAtomicAmount(price, network);
 
@@ -212,22 +212,18 @@ export function createRouteConfigFromPrice(
   const { maxAmountRequired, asset } = processedPrice;
 
   // Determine namespace based on network
-  const namespace = network === 'bitcoin'
-    ? "arkade"
-    : network === "solana"
+  const namespace = 
+    network === "solana"
     ? "solana"
     : "evm";
 
   // Determine payToAddress based on namespace
   const payToAddress = 
-    namespace === "arkade" 
-      ? arkadeAddress || ""
-      : network === "solana" 
+      network === "solana" 
       ? solanaAddress || ""
       : evmAddress || "0x0000000000000000000000000000000000000000";
 
   // Create a basic PaymentRequirements object
-  // Note: tokenAddress is optional for Arkade (BTC only), but required for EVM/Solana
   const paymentRequirements: PaymentRequirements = {
     scheme: "exact",
     namespace,
@@ -235,13 +231,11 @@ export function createRouteConfigFromPrice(
     description: `Payment required (${network})`,
     mimeType: "application/json",
     payToAddress: payToAddress as any,
-    ...(namespace !== "arkade" && { tokenAddress: asset.address as any }), // Only for EVM/Solana
-    tokenSymbol: namespace === "arkade" 
-      ? "BTC" 
-      : (network === "bsc" || network === "base" || network === "polygon" || network === "sei" ? "USDT" : "USDC"),
-    tokenDecimals: namespace === "arkade" ? 8 : (asset.decimals as any),
+    tokenAddress: asset.address as any, // Only for EVM/Solana
+    tokenSymbol: network === "bsc" || network === "base" || network === "polygon" || network === "sei" ? "USDT" : "USDC",
+    tokenDecimals: asset.decimals as any,
     outputSchema: null,
-    extra: namespace === "arkade" ? undefined : asset.eip712,
+    extra: asset.eip712,
     amountRequired: Number(maxAmountRequired),
     amountRequiredFormat: "smallestUnit",
     networkId: getNetworkId(network).toString(),

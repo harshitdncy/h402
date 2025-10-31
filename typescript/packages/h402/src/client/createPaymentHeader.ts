@@ -37,7 +37,6 @@ import { PaymentClient } from "../types";
  *    - Processes the payment based on the specified scheme
  * 2.3 For Arkade payments:
  *    - Validates client configuration
- *    - Ensures getAddress is available
  *    - Ensures either signTransaction or signAndSendTransaction is available
  *    - Processes the payment based on the specified scheme
  * 3. Encodes and returns the payment data
@@ -57,8 +56,6 @@ export async function createPaymentHeader(
       paymentRequirements
     );
   } else if (paymentRequirements.namespace === "arkade") {
-    // Arkade only supports BTC/satoshi offchain (no token addresses)
-    // Amount is already in satoshis (smallest unit)
     paymentRequirements = await parsePaymentRequirementsForAmount(
       paymentRequirements
     );

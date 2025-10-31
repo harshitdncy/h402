@@ -1,13 +1,14 @@
 import axios from "axios";
 import { config } from "dotenv";
 import { type Hex } from "viem";
-import { withPaymentInterceptor, decodeXPaymentResponse, createEvmClient, createSolanaClient, PaymentClient } from "@bit-gpt/h402-axios";
+import { withPaymentInterceptor, decodeXPaymentResponse, createEvmClient, createSolanaClient, createArkadeClient, PaymentClient } from "@bit-gpt/h402-axios";
 import { base } from "viem/chains";
 
 config();
 
 const evmPrivateKey = process.env.EVM_PRIVATE_KEY as Hex | undefined;
 const solanaPrivateKey = process.env.SOLANA_PRIVATE_KEY as string | undefined;
+const arkadePrivateKey = process.env.ARKADE_PRIVATE_KEY as string | undefined;
 const baseURL = process.env.RESOURCE_SERVER_URL as string;
 const endpointPath = process.env.ENDPOINT_PATH as string;
 
@@ -16,8 +17,8 @@ if (!baseURL || !endpointPath) {
   process.exit(1);
 }
 
-if (!evmPrivateKey && !solanaPrivateKey) {
-  console.error("At least one of EVM_PRIVATE_KEY or SOLANA_PRIVATE_KEY must be provided");
+if (!evmPrivateKey && !solanaPrivateKey && !arkadePrivateKey) {
+  console.error("At least one of EVM_PRIVATE_KEY or SOLANA_PRIVATE_KEY or ARKADE_PRIVATE_KEY must be provided");
   process.exit(1);
 }
 
@@ -29,9 +30,14 @@ const solanaClient = solanaPrivateKey
   ? createSolanaClient(solanaPrivateKey)
   : undefined;
 
+const arkadeClient = arkadePrivateKey
+  ? createArkadeClient(arkadePrivateKey)
+  : undefined;
+
 const paymentClient: PaymentClient = {
   evmClient,
   solanaClient,
+  arkadeClient
 };
 
 // Create the API client with payment interceptor
@@ -49,8 +55,12 @@ api
   .then(response => {
     console.log(response.data);
 
-    const paymentResponse = decodeXPaymentResponse(response.headers["x-payment-response"]);
-    console.log(paymentResponse);
+    // X-PAYMENT-RESPONSE header is only present for payments that require settlement
+    const paymentResponseHeader = response.headers["x-payment-response"];
+    if (paymentResponseHeader) {
+      const paymentResponse = decodeXPaymentResponse(paymentResponseHeader);
+      console.log("Payment response:", paymentResponse);
+    }
   })
   .catch(error => {
     console.error("example axios error", error);

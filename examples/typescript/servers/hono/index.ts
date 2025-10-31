@@ -1,13 +1,22 @@
 import { config } from "dotenv";
 import { Hono } from "hono";
 import { serve } from "@hono/node-server";
-import { paymentMiddleware, Resource, createRouteConfigFromPrice, Network } from "h402-hono";
+import {
+  paymentMiddleware,
+  Resource,
+  createRouteConfigFromPrice,
+  Network,
+  isArkadeNetwork,
+  isEVMNetwork,
+  isSolanaNetwork,
+} from "h402-hono";
 
 config();
 
 const facilitatorUrl = process.env.FACILITATOR_URL as Resource;
 const evmAddress = process.env.EVM_ADDRESS as `0x${string}`;
 const solanaAddress = process.env.SOLANA_ADDRESS as string;
+const arkadeAddress = process.env.ARKADE_ADDRESS as string;
 const network = process.env.NETWORK as Network;
 
 if (!facilitatorUrl || !network) {
@@ -15,20 +24,25 @@ if (!facilitatorUrl || !network) {
   process.exit(1);
 }
 
-if (
-  !evmAddress && !solanaAddress
-) {
-  console.error("Missing required environment variables: EVM_ADDRESS or SOLANA_ADDRESS");
+if (!evmAddress && !solanaAddress && !arkadeAddress) {
+  console.error(
+    "Missing required environment variables: EVM_ADDRESS or SOLANA_ADDRESS or ARKADE_ADDRESS",
+  );
   process.exit(1);
 }
 
-if (network === "solana" && !solanaAddress) {
+if (isSolanaNetwork(network) && !solanaAddress) {
   console.error("Missing required environment variable: SOLANA_ADDRESS");
   process.exit(1);
 }
 
-if (network !== "solana" && !evmAddress) {
+if (isEVMNetwork(network) && !evmAddress) {
   console.error("Missing required environment variable: EVM_ADDRESS");
+  process.exit(1);
+}
+
+if (isArkadeNetwork(network) && !arkadeAddress) {
+  console.error("Missing required environment variable: ARKADE_ADDRESS");
   process.exit(1);
 }
 
@@ -78,6 +92,17 @@ app.use(
             description: "Premium content access with USDC on Solana",
             tokenDecimals: 6,
             tokenSymbol: "USDC",
+          },
+          {
+            scheme: "exact",
+            namespace: "arkade",
+            amountRequired: 0.00001, // Amount should be more than dust amount otherwise it will be rejected
+            amountRequiredFormat: "humanReadable",
+            networkId: "bitcoin",
+            payToAddress: arkadeAddress,
+            description: "Premium content access with BTC via Arkade",
+            tokenSymbol: "BTC",
+            tokenDecimals: 8,
           },
         ],
       },

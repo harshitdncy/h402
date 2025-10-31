@@ -1,9 +1,14 @@
+import { sha256 } from "@noble/hashes/sha2.js";
+import { hashes } from '@noble/secp256k1'
 import {
   ArkadeClient,
   ArkadePaymentPayload,
   PaymentRequirements,
 } from "../../../types/index.js";
 import * as utils from "./utils.js";
+
+// Needed to sign the message, perhaps to be lifted up int App structure?
+hashes.sha256 = sha256
 
 async function signTransaction(
   client: ArkadeClient,
@@ -70,8 +75,8 @@ async function createPayment(
     h402Version: h402Version,
     scheme: "exact" as const,
     namespace: "arkade" as const,
-    networkId: requirements.networkId || "mainnet",
-    resource: requirements.resource ?? `402 signature ${Date.now()}`,
+    networkId: requirements.networkId || "bitcoin",
+    resource: requirements.resource ?? `402 signature`,
   };
 
   // Try signTransaction first (preferred - gives facilitator control)
@@ -84,7 +89,6 @@ async function createPayment(
         ...basePayload,
         payload: {
           type: "signTransaction",
-          txId: result.txid,
           transaction: result.signedTx,
           checkpoints: result.checkpoints,
         },
@@ -100,18 +104,40 @@ async function createPayment(
   }
 
   if (typeof client.signAndSendTransaction === "function") {
-    console.log("[Arkade Payment] Using signAndSendTransaction method");
-    const arkTxid = await signAndSendTransaction(client, requirements);
+    try {
+      const resourceBytes = new TextEncoder().encode(requirements.resource ?? `402 signature`);
+      const resourceHash = sha256(resourceBytes);
+      
+      if (!client.identity?.signMessage) {
+        throw new Error("Client identity.signMessage is required for signAndSendTransaction");
+      }
+      
+      const resourceSignature = await client.identity.signMessage(
+        resourceHash,
+        "schnorr"
+      );
+      const resourceSignatureHex =
+        Buffer.from(resourceSignature).toString("hex");
 
-    const payload: ArkadePaymentPayload = {
-      ...basePayload,
-      payload: {
-        type: "signAndSendTransaction",
-        txId: arkTxid,
-      },
-    };
+      console.log("[Arkade Payment] Using signAndSendTransaction method");
+      const arkTxid = await signAndSendTransaction(client, requirements);
 
-    return utils.encodePaymentPayload(payload);
+      const payload: ArkadePaymentPayload = {
+        ...basePayload,
+        payload: {
+          type: "signAndSendTransaction",
+          txId: arkTxid,
+          signedMessage: resourceSignatureHex,
+        },
+      };
+
+      return utils.encodePaymentPayload(payload);
+    } catch (error) {
+      console.warn(
+        "[Arkade Payment] signAndSendTransaction failed",
+        error
+      );
+    }
   }
 
   throw new Error(

@@ -112,4 +112,4 @@ export function wrapFetchWithPayment(
   };
 }
 
-export { decodeXPaymentResponse, createEvmClient, createSolanaClient, type PaymentClient } from "@bit-gpt/h402/shared";
+export { decodeXPaymentResponse, createEvmClient, createSolanaClient, createArkadeClient, type PaymentClient } from "@bit-gpt/h402/shared";

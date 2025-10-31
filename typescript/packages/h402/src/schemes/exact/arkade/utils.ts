@@ -62,11 +62,6 @@ function validatePaymentPayload(obj: ArkadePaymentPayload): ArkadePaymentPayload
   }
 
   if (obj.payload.type === "signTransaction") {
-    if (!obj.payload.txId || typeof obj.payload.txId !== "string") {
-      throw new Error(
-        "Invalid payment payload: signTransaction type requires signature field"
-      );
-    }
     if (
       !obj.payload.transaction ||
       typeof obj.payload.transaction !== "string"

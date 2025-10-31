@@ -5,7 +5,9 @@ import bs58 from "bs58";
 import { createKeyPairSignerFromBytes } from "@solana/signers";
 import type { TransactionModifyingSigner } from "@solana/signers";
 import type { Transaction } from "@solana/transactions";
-import type { PaymentClient, EvmClient, SolanaClient } from "../types/shared/client";
+import type { PaymentClient, EvmClient, SolanaClient, ArkadeClient } from "../types/shared/client";
+import { Identity, SingleKey, Wallet } from "@arkade-os/sdk";
+import { nip19 } from 'nostr-tools';
 
 /**
  * Creates an EVM wallet client with public actions
@@ -61,6 +63,39 @@ export function createSolanaClient(privateKey: string) : SolanaClient {
   } satisfies {
     publicKey: string;
     signTransaction: TransactionModifyingSigner["modifyAndSignTransactions"];
+  };
+}
+
+export function createArkadeClient(privateKey: string): ArkadeClient {
+  let privateKeyHex: string;
+  if (privateKey.startsWith('nsec')) {
+    const { type, data } = nip19.decode(privateKey);
+    if (type !== 'nsec') {
+      throw new Error('Expected nsec (Nostr private key), got: ' + type);
+    }
+    privateKeyHex = Buffer.from(data).toString('hex');
+  } else if(privateKey.length === 64) {
+    privateKeyHex = privateKey;
+  } else {
+    throw new Error('Invalid private key format. Expected 64-character hex string or nsec encoded key.');
+  }
+
+  const identity = SingleKey.fromHex(privateKeyHex);
+
+  return {
+    identity,
+    signAndSendTransaction: async (
+       params: { address: string, amount: number }
+    ): Promise<string> => {
+      const wallet = await Wallet.create({
+        identity,
+        arkServerUrl: 'https://arkade.computer',
+      });
+      return wallet.sendBitcoin(params);
+    },
+  } satisfies {
+    identity: Identity;
+    signAndSendTransaction: (params: { address: string, amount: number }) => Promise<string>;
   };
 }
 

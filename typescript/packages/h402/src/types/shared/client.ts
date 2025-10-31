@@ -3,6 +3,7 @@ import type {
   TransactionModifyingSigner,
   TransactionSendingSigner,
 } from "@solana/signers";
+import { ArkProvider, Identity } from "@arkade-os/sdk";
 
 /**
  * Interface for Solana client used in payment operations
@@ -39,7 +40,7 @@ export interface ArkadeClient {
   }>;
   
   /**
-   * Sign and immediately broadcast transaction (fallback, matches SDK's sendBitcoin)
+   * Sign and immediately broadcast transaction
    * This is the native method from @arkade-os/sdk Wallet
    * @param params - { address: string, amount: number (in sats) }
    * @returns arkTxid
@@ -48,16 +49,16 @@ export interface ArkadeClient {
     address: string;
     amount: number; // sats
   }) => Promise<string>;
-  
+
   /**
    * Optional: Access to the underlying Ark provider for advanced operations
    */
-  arkProvider?: any; // RestArkProvider from @arkade-os/sdk
+  arkProvider?: ArkProvider; // RestArkProvider from @arkade-os/sdk
   
   /**
    * Optional: The wallet's Identity for signing (needed for checkpoint finalization)
    */
-  identity?: any; // Identity from @arkade-os/sdk
+  identity?: Identity; // Identity from @arkade-os/sdk
 }
 
 /**

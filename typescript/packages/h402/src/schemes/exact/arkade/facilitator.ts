@@ -8,24 +8,38 @@ import {
   SettleResponse,
   VerifyResponse,
 } from "../../../types/index.js";
-import { RestArkProvider, RestIndexerProvider, Transaction } from "@arkade-os/sdk";
-import {schnorr} from '@noble/secp256k1';
+import {
+  RestArkProvider,
+  RestIndexerProvider,
+  Transaction,
+} from "@arkade-os/sdk";
+import { schnorr } from "@noble/secp256k1";
 import { base64, bech32m } from "@scure/base";
+import { sha256 } from "@noble/hashes/sha2.js";
 import { getArkadeServerUrl } from "../../../shared/next.js";
-
+import { convertAmountToSmallestUnit } from "../../../shared/arkade/amount.js";
+import { NATIVE_BTC_DECIMALS } from "../../../shared/arkade/index.js";
 
 /**
  * Verify a Schnorr signature using the sender's x-only public key
  */
-async function verifySignedMessage(message: string, signatureHex: string, publicKeyHex: string) {
+async function verifySignedMessage(
+  message: string,
+  signatureHex: string,
+  publicKeyHex: string
+) {
   try {
-    const messageBytes =
-      typeof message === "string" ? new TextEncoder().encode(message) : message;
+    const messageBytes = new TextEncoder().encode(message);
+    const messageHash = sha256(messageBytes);
 
     const signature = Buffer.from(signatureHex, "hex");
     const publicKey = Buffer.from(publicKeyHex, "hex");
 
-    const isValid = await schnorr.verifyAsync(signature, messageBytes, publicKey);
+    const isValid = await schnorr.verifyAsync(
+      signature,
+      messageHash,
+      publicKey
+    );
 
     return isValid;
   } catch (error) {
@@ -34,8 +48,8 @@ async function verifySignedMessage(message: string, signatureHex: string, public
 }
 
 /**
-* Transaction is already broadcast, so we verify it exists off-chain
-*/
+ * Transaction is already broadcast, so we verify it exists off-chain
+ */
 async function verifySignAndSendTransactionPayload(
   payload: ArkadeSignAndSendTransactionPayload,
   paymentRequirements: PaymentRequirements
@@ -44,13 +58,24 @@ async function verifySignAndSendTransactionPayload(
     arkTxid: payload.txId,
     payToAddress: paymentRequirements.payToAddress,
     amountRequired: paymentRequirements.amountRequired,
+    signedMessage: payload.signedMessage,
   });
 
   if (!payload.txId) {
     return {
       isValid: false,
-      errorMessage: "Missing required arkTxid in signAndSendTransaction payload",
+      errorMessage:
+        "Missing required arkTxid in signAndSendTransaction payload",
       invalidReason: "invalid_exact_arkade_payload_txId",
+    };
+  }
+
+  if (!payload.signedMessage) {
+    return {
+      isValid: false,
+      errorMessage:
+        "Missing required signedMessage in signAndSendTransaction payload",
+      invalidReason: "invalid_exact_arkade_payload_signedMessage",
     };
   }
 
@@ -66,7 +91,7 @@ async function verifySignAndSendTransactionPayload(
       };
     }
 
-    const indexer = new RestIndexerProvider(getArkadeServerUrl());    
+    const indexer = new RestIndexerProvider(getArkadeServerUrl());
     const virtualTxs = await indexer.getVirtualTxs([payload.txId]);
 
     if (!virtualTxs || (virtualTxs?.txs && virtualTxs.txs.length === 0)) {
@@ -80,7 +105,7 @@ async function verifySignAndSendTransactionPayload(
     const tx = virtualTxs.txs[0];
 
     const psbtBytes = base64.decode(tx);
-    
+
     if (psbtBytes.length === 0) {
       return {
         isValid: false,
@@ -100,10 +125,10 @@ async function verifySignAndSendTransactionPayload(
       if (input && input.tapScriptSig && input.tapScriptSig.length > 0) {
         for (let j = 0; j < input.tapScriptSig.length; j++) {
           const [controlBlock, signature] = input.tapScriptSig[j];
-          
+
           if (controlBlock && controlBlock.pubKey) {
-            const pubkeyHex = Buffer.from(controlBlock.pubKey).toString('hex');
-            
+            const pubkeyHex = Buffer.from(controlBlock.pubKey).toString("hex");
+
             if (pubkeyHex !== SERVER_PUBKEY) {
               senderPubkey = pubkeyHex;
               break;
@@ -121,94 +146,81 @@ async function verifySignAndSendTransactionPayload(
       };
     }
 
-    const isValidSignature = await verifySignedMessage(paymentRequirements.resource ?? `402 signature ${Date.now()}`, payload.signedMessage, senderPubkey);
+    const isValidSignature = await verifySignedMessage(
+      paymentRequirements.resource ?? `402 signature`,
+      payload.signedMessage,
+      senderPubkey
+    );
     if (!isValidSignature) {
       return {
         isValid: false,
         errorMessage: "Invalid signature",
-        invalidReason: "invalid_exact_arkade_payload_signed_message_signature_mismatch",
+        invalidReason:
+          "invalid_exact_arkade_payload_signed_message_signature_mismatch",
       };
     }
 
-    let foundMatchingOutput = false;
+    const output = transaction.getOutput(0);
 
-    for (let i = 0; i < transaction.outputsLength; i++) {
-      const output = transaction.getOutput(i);
-    
-      if (!output || !output.script) {
-        continue;
-      }
-    
-      const outputAmount = BigInt(output.amount || 0);
-      const scriptHex = Buffer.from(output.script || []).toString('hex');
-    
-      if (scriptHex.startsWith('6a')) {
-        const dataLength = parseInt(scriptHex.slice(2, 4), 16);
-        const vtxoTaprootKeyHex = scriptHex.slice(4, 4 + dataLength * 2);
-        
-        if (dataLength === 32) {
-          try {
-            const addressData = new Uint8Array(65);
-            addressData[0] = 0; 
-            addressData.set(Buffer.from(SERVER_PUBKEY, 'hex'), 1); 
-            addressData.set(Buffer.from(vtxoTaprootKeyHex, 'hex'), 33); 
-            
-            const arkAddress = bech32m.encode(
-              'ark',                      
-              bech32m.toWords(addressData),
-              1023                        
-            );
-            
-            if (arkAddress === paymentRequirements.payToAddress && outputAmount >= BigInt(paymentRequirements.amountRequired)) {
-              foundMatchingOutput = true;
-              break;
-            }
-          } catch (error: any) {
-            return {
-              isValid: false,
-              errorMessage: "Failed to generate Arkade address",
-              invalidReason: "invalid_exact_arkade_payload_recipient_mismatch",
-            };
-          }
-        }
-        continue;
-      } else if (scriptHex.startsWith('5120') && scriptHex.length === 68) {
-        const vtxoTaprootKeyHex = scriptHex.slice(4); 
-        try {
-          const addressData = new Uint8Array(65);
-          addressData[0] = 0;
-          addressData.set(Buffer.from(SERVER_PUBKEY, 'hex'), 1);
-          addressData.set(Buffer.from(vtxoTaprootKeyHex, 'hex'), 33);
-          
-          const arkAddress = bech32m.encode(
-            'ark',
-            bech32m.toWords(addressData),
-            1023
-          );
-
-          if (arkAddress === paymentRequirements.payToAddress && outputAmount >= BigInt(paymentRequirements.amountRequired)) {
-            foundMatchingOutput = true;
-            break;
-          }
-          
-        } catch (error) {
-          return {
-            isValid: false,
-            errorMessage: "Failed to generate Arkade address",
-            invalidReason: "invalid_exact_arkade_payload_recipient_mismatch",
-          };
-        }
-      }
-    }
-
-    if(!foundMatchingOutput) {
+    if (!output || !output.script) {
       return {
         isValid: false,
         errorMessage: "No matching output found",
-        invalidReason: "invalid_exact_arkade_payload_outputs_mismatch",
+        invalidReason: "invalid_exact_arkade_payload_output_not_found",
       };
     }
-    
+
+    const outputAmount = BigInt(output.amount || 0);
+    const scriptHex = Buffer.from(output.script || []).toString("hex");
+
+    const requiredAmount = convertAmountToSmallestUnit(
+      paymentRequirements.amountRequired,
+      paymentRequirements.tokenDecimals || NATIVE_BTC_DECIMALS,
+      paymentRequirements.amountRequiredFormat
+    );
+
+    if (scriptHex.startsWith("5120") && scriptHex.length === 68) {
+      const vtxoTaprootKeyHex = scriptHex.slice(4);
+      try {
+        const addressData = new Uint8Array(65);
+        addressData[0] = 0;
+        addressData.set(Buffer.from(SERVER_PUBKEY, "hex"), 1);
+        addressData.set(Buffer.from(vtxoTaprootKeyHex, "hex"), 33);
+
+        const arkAddress = bech32m.encode(
+          "ark",
+          bech32m.toWords(addressData),
+          1023
+        );
+
+        if (arkAddress !== paymentRequirements.payToAddress) {
+          return {
+            isValid: false,
+            errorMessage: "Recipient address mismatch",
+            invalidReason: "invalid_exact_arkade_payload_recipient_mismatch",
+          };
+        } else if (outputAmount < requiredAmount) {
+          return {
+            isValid: false,
+            errorMessage: "Amount mismatch",
+            invalidReason: "invalid_exact_arkade_payload_amount_mismatch",
+          };
+        }
+      } catch (error) {
+        return {
+          isValid: false,
+          errorMessage: "Failed to generate Arkade address",
+          invalidReason: "invalid_exact_arkade_payload_recipient_mismatch",
+        };
+      }
+    } else {
+      return {
+        isValid: false,
+        errorMessage: "Invalid transaction: not a taproot output",
+        invalidReason: "invalid_exact_arkade_payload_output_not_found",
+      };
+    }
+
     return {
       isValid: true,
       txHash: payload.txId,
@@ -227,9 +239,9 @@ async function verifySignAndSendTransactionPayload(
 }
 
 /**
-* Verifies a signTransaction payload
-* Transaction is signed but not broadcast, facilitator will broadcast it
-*/
+ * Verifies a signTransaction payload
+ * Transaction is signed but not broadcast, facilitator will broadcast it
+ */
 async function verifySignTransactionPayload(
   payload: ArkadeSignTransactionPayload,
   paymentRequirements: PaymentRequirements
@@ -249,7 +261,7 @@ async function verifySignTransactionPayload(
 
   try {
     const psbtBytes = base64.decode(payload.transaction);
-    
+
     if (psbtBytes.length === 0) {
       return {
         isValid: false,
@@ -259,7 +271,7 @@ async function verifySignTransactionPayload(
     }
 
     const transaction = Transaction.fromPSBT(psbtBytes);
-    
+
     console.log("[Arkade Verify] Parsed PSBT", {
       outputsCount: transaction.outputsLength,
       inputsCount: transaction.inputsLength,
@@ -291,18 +303,21 @@ async function verifySignTransactionPayload(
 
     for (let i = 0; i < transaction.outputsLength; i++) {
       const output = transaction.getOutput(i);
-      
+
       if (!output || !output.script) {
         continue;
       }
 
       const outputAmount = BigInt(output.amount || 0);
-      
+
       let outputAddress: string | undefined;
       try {
         outputAddress = transaction.getOutputAddress(i, network as any);
       } catch (error) {
-        console.warn(`[Arkade Verify] Could not decode address for output ${i}:`, error);
+        console.warn(
+          `[Arkade Verify] Could not decode address for output ${i}:`,
+          error
+        );
         continue;
       }
 
@@ -329,7 +344,7 @@ async function verifySignTransactionPayload(
       return {
         isValid: false,
         errorMessage: `No output found matching recipient address (${requiredAddress}) with sufficient amount (${requiredAmount} sats)`,
-        invalidReason: "invalid_exact_arkade_payload_outputs_mismatch",
+        invalidReason: "invalid_exact_arkade_payload_output_not_found",
       };
     }
 
@@ -361,15 +376,15 @@ async function verifySignTransactionPayload(
 }
 
 /**
-* Verifies a signMessage payload
-* Message signatures are not transactions and cannot be used for payment
-*/
+ * Verifies a signMessage payload
+ * Message signatures are not transactions and cannot be used for payment
+ */
 async function verifySignMessagePayload(
   payload: ArkadeSignMessagePayload,
   paymentRequirements: PaymentRequirements
 ): Promise<VerifyResponse> {
   console.log("[Arkade Verify] Rejecting signMessage payload");
-  
+
   return {
     isValid: false,
     errorMessage: "SignMessage payloads cannot be verified as transactions",
@@ -438,11 +453,10 @@ export async function verify(
   }
 }
 
-
 /**
-* Settles an Arkade payment
-* For signTransaction payloads, this broadcasts the signed transaction and handles checkpoints
-*/
+ * Settles an Arkade payment
+ * For signTransaction payloads, this broadcasts the signed transaction and handles checkpoints
+ */
 export async function settle(
   client: ArkadeClient,
   payload: ArkadePaymentPayload,
@@ -475,13 +489,23 @@ export async function settle(
     };
   }
 
+  if (!client.arkProvider) {
+    return {
+      success: false,
+      transaction: "",
+      namespace: "arkade",
+      errorReason: "invalid_scheme",
+      error: "ArkProvider is required for settlement",
+    };
+  }
+
   try {
     const signedTxPayload = payload.payload as ArkadeSignTransactionPayload;
 
     console.log("[Arkade Settle] Submitting transaction to Ark server");
     const result = await client.arkProvider.submitTx(
-      signedTxPayload.transaction, 
-      signedTxPayload.checkpoints || [] 
+      signedTxPayload.transaction,
+      signedTxPayload.checkpoints || []
     );
 
     const arkTxid = result.arkTxid;
@@ -496,10 +520,11 @@ export async function settle(
 
       if (client.identity) {
         try {
+          const identity = client.identity;
           const finalCheckpoints = await Promise.all(
             signedCheckpointTxs.map(async (checkpointPsbt: string) => {
               const tx = Transaction.fromPSBT(base64.decode(checkpointPsbt));
-              const fullySignedTx = await client.identity.sign(tx);
+              const fullySignedTx = await identity.sign(tx);
               return base64.encode(fullySignedTx.toPSBT());
             })
           );
@@ -507,7 +532,10 @@ export async function settle(
           await client.arkProvider.finalizeTx(arkTxid, finalCheckpoints);
           console.log("[Arkade Settle] Checkpoints finalized successfully");
         } catch (error) {
-          console.error("[Arkade Settle] Failed to finalize checkpoints:", error);
+          console.error(
+            "[Arkade Settle] Failed to finalize checkpoints:",
+            error
+          );
           return {
             success: false,
             transaction: arkTxid,

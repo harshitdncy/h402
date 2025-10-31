@@ -321,3 +321,4 @@ export function paymentMiddleware(
 
 export type { Money, Network, MiddlewareConfig, Resource, RouteConfig } from "@bit-gpt/h402/types";
 export { createRouteConfigFromPrice } from "@bit-gpt/h402/shared";
+export { isEVMNetwork, isSolanaNetwork, isArkadeNetwork } from "@bit-gpt/h402/types";
