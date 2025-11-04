@@ -53,7 +53,7 @@ The middleware supports various configuration options:
 ### Route Configuration
 
 ```typescript
-type RoutesConfig = Record<string, Price | RouteConfig>;
+type RoutesConfig = Record<string, RouteConfig>;
 
 interface RouteConfig {
   price: Price;           // Price in USD or token amount

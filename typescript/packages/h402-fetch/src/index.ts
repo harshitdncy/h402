@@ -4,6 +4,7 @@ import {
   PaymentRequirementsSelector,
   selectPaymentRequirements,
 } from "@bit-gpt/h402/client";
+import { getMaxValueForNamespace } from "@bit-gpt/h402/shared";
 
 /**
  * Enables the payment of APIs using the h402 payment protocol.
@@ -39,7 +40,7 @@ import {
 export function wrapFetchWithPayment(
   fetch: typeof globalThis.fetch,
   paymentClient: PaymentClient,
-  maxValue: bigint = BigInt(0.1 * 10 ** 6), // Default to 0.10 USDC
+  maxValue?: bigint, // Default to 0.10 USDC
   paymentRequirementsSelector: PaymentRequirementsSelector = selectPaymentRequirements,
 ) {
   return async (input: RequestInfo, init?: RequestInit) => {
@@ -79,7 +80,12 @@ export function wrapFetchWithPayment(
       "exact",
     );
 
-    if (BigInt(selectedPaymentRequirements.maxAmountRequired ?? 0) > maxValue) {
+    let _maxValue = maxValue;
+    if (!_maxValue) {
+      _maxValue = getMaxValueForNamespace(selectedPaymentRequirements.namespace);
+    }
+
+    if (BigInt(selectedPaymentRequirements.maxAmountRequired ?? 0) > _maxValue) {
       throw new Error("Payment amount exceeds maximum allowed");
     }
 

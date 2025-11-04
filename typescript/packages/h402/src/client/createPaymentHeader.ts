@@ -37,7 +37,7 @@ import { PaymentClient } from "../types";
  *    - Processes the payment based on the specified scheme
  * 2.3 For Arkade payments:
  *    - Validates client configuration
- *    - Ensures either signTransaction or signAndSendTransaction is available
+ *    - Ensures signAndSendTransaction is available
  *    - Processes the payment based on the specified scheme
  * 3. Encodes and returns the payment data
  */
@@ -128,9 +128,9 @@ export async function createPaymentHeader(
         throw new Error("arkadeClient is required for Arkade payments");
       }
 
-      if (!client.arkadeClient.signTransaction && !client.arkadeClient.signAndSendTransaction) {
+      if (!client.arkadeClient.signAndSendTransaction) {
         throw new Error(
-          "arkadeClient must implement either signTransaction or signAndSendTransaction"
+          "arkadeClient must implement signAndSendTransaction"
         );
       }
 

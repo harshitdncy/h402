@@ -31,28 +31,47 @@ import { VerifyResponse, SettleResponse } from "@bit-gpt/h402/types";
  *
  * @example
  * ```typescript
+ * import { Hono } from "hono";
+ * import { createRouteConfigFromPrice, paymentMiddleware } from "@bit-gpt/h402-hono";
+ * 
+ * const app = new Hono();
+
  * // Simple configuration - All endpoints protected by $0.01 USDT on BSC
  * app.use(paymentMiddleware(
  *   {
- *     '*': '$0.01' // All routes protected by $0.01 USDT on BSC
+ *     '*': createRouteConfigFromPrice("$0.1", "bsc", "0xYourEVMAddress") // All routes protected by $0.01 USDT on BSC. Note: This doesn't work with Arkade Network
  *   }
  * ));
  *
  * // Advanced configuration - Multiple payment options per route
  * app.use(paymentMiddleware(
  *   {
- *     '/weather/*': '$0.001', // Simple price for weather endpoints
+ *     '/weather/*': createRouteConfigFromPrice("$0.1", "bsc", "0xYourEVMAddress"), // Simple price for weather endpoints
  *     '/premium/*': {
  *       paymentRequirements: [
- *         {
+ *       {
  *           scheme: "exact",
  *           namespace: "evm",
  *           tokenAddress: "0x55d398326f99059ff775485246999027b3197955", // USDT on BSC
  *           amountRequired: 0.01,
  *           amountRequiredFormat: "humanReadable",
  *           networkId: "56",
- *           payToAddress: "0x123...",
- *           description: "Premium API access with USDT on BSC"
+ *           payToAddress: evmAddress,
+ *           description: "Premium content access with USDT on BSC",
+ *           tokenDecimals: 18,
+ *           tokenSymbol: "USDT",
+ *         },
+ *         {
+ *           scheme: "exact",
+ *           namespace: "evm",
+ *           tokenAddress: "0xfde4C96c8593536E31F229EA8f37b2ADa2699bb2", // USDT on Base
+ *           amountRequired: 0.01, 
+ *           amountRequiredFormat: "humanReadable", 
+ *           networkId: "8453", 
+ *           payToAddress: evmAddress,
+ *           description: "Premium content access with USDT on Base",
+ *           tokenDecimals: 6,
+ *           tokenSymbol: "USDT",
  *         },
  *         {
  *           scheme: "exact",
@@ -61,19 +80,22 @@ import { VerifyResponse, SettleResponse } from "@bit-gpt/h402/types";
  *           amountRequired: 0.01,
  *           amountRequiredFormat: "humanReadable",
  *           networkId: "mainnet",
- *           payToAddress: "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM",
- *           description: "Premium API access with USDC on Solana"
+ *           payToAddress: solanaAddress, // Example Solana address
+ *           description: "Premium content access with USDC on Solana",
+ *           tokenDecimals: 6,
+ *           tokenSymbol: "USDC",
  *         },
  *         {
  *           scheme: "exact",
  *           namespace: "arkade",
- *           tokenAddress: "BTC", // Bitcoin only (no other tokens)
- *           amountRequired: 0.00001, // 1000 sats
+ *           amountRequired: 0.00001, // Amount should be more than dust amount otherwise it will be rejected
  *           amountRequiredFormat: "humanReadable",
  *           networkId: "bitcoin",
- *           payToAddress: "ark1...", // Arkade address
- *           description: "Premium API access with BTC via Arkade"
- *         }
+ *           payToAddress: arkadeAddress,
+ *           description: "Premium content access with BTC via Arkade",
+ *           tokenSymbol: "BTC",
+ *           tokenDecimals: 8,
+ *         },
  *       ]
  *     }
  *   }

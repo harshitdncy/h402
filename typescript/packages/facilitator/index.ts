@@ -5,9 +5,9 @@ import { VerifyResponse, SettleResponse } from "@bit-gpt/h402/types";
 import { safeBase64Decode } from "@bit-gpt/h402/shared";
 
 config();
-const { EVM_PRIVATE_KEY, PORT } = process.env;
+const { PRIVATE_KEY, PORT } = process.env;
 
-if (!EVM_PRIVATE_KEY || !PORT) {
+if (!PRIVATE_KEY || !PORT) {
   console.error("Missing required environment variables");
   process.exit(1);
 }
@@ -79,7 +79,7 @@ app.post("/settle", async (req: any, res: any) => {
     const settleResult = await settle(
       decodedPayload,
       paymentRequirements,
-      EVM_PRIVATE_KEY as `0x${string}`,
+      PRIVATE_KEY,
     );
 
     console.log("settleResult", settleResult);

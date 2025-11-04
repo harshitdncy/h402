@@ -1,6 +1,6 @@
 # Agent Example Client
 
-This example demonstrates how to use the `h402-fetch` package with the Anthropic SDK to make AI model requests through a paid proxy endpoint. It showcases multi-chain payment support for both EVM (Base) and Solana networks.
+This example demonstrates how to use the `h402-fetch` package with the Anthropic SDK to make AI model requests through a paid proxy endpoint. It showcases multi-chain payment support for both EVM (Base) Solana networks.
 
 ## Prerequisites
 

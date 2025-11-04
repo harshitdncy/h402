@@ -5,9 +5,18 @@ import bs58 from "bs58";
 import { createKeyPairSignerFromBytes } from "@solana/signers";
 import type { TransactionModifyingSigner } from "@solana/signers";
 import type { Transaction } from "@solana/transactions";
-import type { PaymentClient, EvmClient, SolanaClient, ArkadeClient } from "../types/shared/client";
-import { Identity, SingleKey, Wallet } from "@arkade-os/sdk";
-import { nip19 } from 'nostr-tools';
+import type {
+  PaymentClient,
+  EvmClient,
+  SolanaClient,
+  ArkadeClient,
+} from "../types/shared/client";
+import {
+  SingleKey,
+  Wallet,
+} from "@arkade-os/sdk";
+import { privateKeyToHex } from "./arkade/key.js";
+import { getArkadeServerUrl } from "./next";
 
 /**
  * Creates an EVM wallet client with public actions
@@ -33,17 +42,19 @@ export function createEvmClient(
  * @param privateKey - The private key as a base58 string
  * @returns An object with publicKey and signTransaction method
  */
-export function createSolanaClient(privateKey: string) : SolanaClient {
+export function createSolanaClient(privateKey: string): SolanaClient {
   const solanaKeypair = Keypair.fromSecretKey(bs58.decode(privateKey));
-  
+
   return {
     publicKey: solanaKeypair.publicKey.toBase58(),
     signTransaction: async <T extends Transaction>(
-      transactions: readonly T[],
+      transactions: readonly T[]
     ): Promise<readonly T[]> => {
-      const signer = await createKeyPairSignerFromBytes(solanaKeypair.secretKey);
+      const signer = await createKeyPairSignerFromBytes(
+        solanaKeypair.secretKey
+      );
       const signatures = await signer.signTransactions(transactions);
-      
+
       const modifiedTransactions = transactions.map((transaction, index) => {
         const signature = signatures[index];
         if (!signature || Object.keys(signature).length === 0) {
@@ -57,7 +68,7 @@ export function createSolanaClient(privateKey: string) : SolanaClient {
           },
         } as T;
       });
-      
+
       return modifiedTransactions;
     },
   } satisfies {
@@ -67,37 +78,25 @@ export function createSolanaClient(privateKey: string) : SolanaClient {
 }
 
 export function createArkadeClient(privateKey: string): ArkadeClient {
-  let privateKeyHex: string;
-  if (privateKey.startsWith('nsec')) {
-    const { type, data } = nip19.decode(privateKey);
-    if (type !== 'nsec') {
-      throw new Error('Expected nsec (Nostr private key), got: ' + type);
-    }
-    privateKeyHex = Buffer.from(data).toString('hex');
-  } else if(privateKey.length === 64) {
-    privateKeyHex = privateKey;
-  } else {
-    throw new Error('Invalid private key format. Expected 64-character hex string or nsec encoded key.');
-  }
-
+  const privateKeyHex = privateKeyToHex(privateKey);
   const identity = SingleKey.fromHex(privateKeyHex);
 
   return {
     identity,
-    signAndSendTransaction: async (
-       params: { address: string, amount: number }
-    ): Promise<string> => {
+    signAndSendTransaction: async (params: {
+      address: string;
+      amount: number;
+    }): Promise<string> => {
       const wallet = await Wallet.create({
         identity,
-        arkServerUrl: 'https://arkade.computer',
+        arkServerUrl: getArkadeServerUrl(),
       });
+      if(params.amount < wallet.dustAmount) {
+        throw new Error("Amount must be equal or greater than dust amount: " + Number(wallet.dustAmount));
+      }
       return wallet.sendBitcoin(params);
     },
-  } satisfies {
-    identity: Identity;
-    signAndSendTransaction: (params: { address: string, amount: number }) => Promise<string>;
-  };
+  }
 }
 
 export type { PaymentClient };
-

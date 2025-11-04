@@ -52,7 +52,7 @@ console.log("Server is running");
 app.use(
   paymentMiddleware(
     {
-      // Use createRouteConfigFromPrice to construct the RouteConfig
+      // Use createRouteConfigFromPrice to construct the RouteConfig. Note: This doesn't work with Arkade Network
       "/weather": createRouteConfigFromPrice(
         "$0.0001",
         network,

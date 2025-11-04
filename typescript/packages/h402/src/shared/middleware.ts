@@ -26,9 +26,7 @@ export function computeRoutePatterns(routes: RoutesConfig): RoutePattern[] {
   const normalizedRoutes = Object.fromEntries(
     Object.entries(routes).map(([pattern, value]) => [
       pattern,
-      typeof value === "string" || typeof value === "number"
-        ? createRouteConfigFromPrice(value, "bsc")
-        : (value as RouteConfig),
+      value,
     ])
   );
 

@@ -30,6 +30,7 @@ import { privateKeyToAccount } from "viem/accounts";
 import { getChain } from "../shared/evm/chainUtils.js";
 import { RestArkProvider, SingleKey } from "@arkade-os/sdk";
 import { getArkadeServerUrl } from "../shared/next.js";
+import { privateKeyToHex } from "../shared/arkade/key.js";
 
 /**
  * Type representing any supported payment payload
@@ -84,7 +85,7 @@ export async function verify(
  *
  * @param payload - The signed payment payload
  * @param paymentRequirements - The payment requirements that the payload must satisfy
- * @param privateKeyOrClient - Private key (for EVM), SolanaClient (for Solana), or ArkadeClient (for Arkade)
+ * @param privateKeyOrClient - Private key (for EVM), SolanaClient (for Solana), or Private key (for Arkade)
  * @returns A SettleResponse indicating if the payment is settled and any settlement reason
  */
 export async function settle(
@@ -98,18 +99,6 @@ export async function settle(
       return solanaFacilitator.settle(
         privateKeyOrClient as SolanaClient,
         payload as SolanaPaymentPayload,
-        paymentRequirements
-      );
-    case "arkade":
-      const arkProvider = new RestArkProvider(getArkadeServerUrl());
-      const identity = SingleKey.fromHex(privateKeyOrClient as `0x${string}`)
-      const arkadeClient: ArkadeClient = {
-        arkProvider,
-        identity
-      };
-      return arkadeFacilitator.settle(
-        arkadeClient as ArkadeClient,
-        payload as ArkadePaymentPayload,
         paymentRequirements
       );
     case "evm":
