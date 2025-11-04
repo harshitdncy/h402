@@ -46,12 +46,14 @@ Networks:
 
 - All EVM-compatible chains (Ethereum, Binance Smart Chain, Base, etc.)
 - Solana (mainnet)
+- Arkade (Bitcoin mainnet)
 
 Payment Types:
 
 - Signed payloads (permit-based tokens like USDC)
 - Broadcasted transactions (for tokens like USDT and native currencies like BNB/ETH)
 - Solana transactions with memo (for SOL and SPL tokens)
+- Arkade transactions
 
 Payment schemes:
 
