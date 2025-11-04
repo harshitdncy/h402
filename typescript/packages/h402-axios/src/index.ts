@@ -65,12 +65,19 @@ export function withPaymentInterceptor(
         const parsed = accepts.map(x => PaymentRequirementsSchema.parse(x));
 
         // Determine the preferred namespace based on available clients
-        let namespace: "evm" | "solana" | undefined;
-        if (paymentClient.evmClient && !paymentClient.solanaClient) {
-          namespace = "evm";
-        } else if (paymentClient.solanaClient && !paymentClient.evmClient) {
-          namespace = "solana";
+        let namespace: "evm" | "solana" | "arkade" | undefined;
+        const hasEvm = !!paymentClient.evmClient;
+        const hasSolana = !!paymentClient.solanaClient;
+        const hasArkade = !!paymentClient.arkadeClient;
+        const clientCount = [hasEvm, hasSolana, hasArkade].filter(Boolean).length;
+
+        // If only one client is available, use that namespace
+        if (clientCount === 1) {
+          if (hasEvm) namespace = "evm";
+          else if (hasSolana) namespace = "solana";
+          else if (hasArkade) namespace = "arkade";
         }
+        // If multiple clients are available, let selectPaymentRequirements choose based on stablecoin/BTC preference
 
         const chainId = paymentClient.evmClient?.chain?.id;
 
@@ -113,4 +120,4 @@ export function withPaymentInterceptor(
   return axiosClient;
 }
 
-export { decodeXPaymentResponse, createEvmClient, createSolanaClient, type PaymentClient } from "@bit-gpt/h402/shared";
+export { decodeXPaymentResponse, createEvmClient, createSolanaClient, createArkadeClient, type PaymentClient } from "@bit-gpt/h402/shared";

@@ -18,6 +18,7 @@ import { PaymentClient } from "../types";
  * @throws {Error} If evmClient is missing for EIP-155 payments
  * @throws {Error} If EVM client chainId doesn't match payment networkId
  * @throws {Error} If solanaClient is missing for Solana payments
+ * @throws {Error} If arkadeClient is missing for Arkade payments
  * @throws {Error} If the namespace is not supported
  * @throws {Error} If the payment scheme is not supported
  *
@@ -34,6 +35,10 @@ import { PaymentClient } from "../types";
  *    - Validates client configuration
  *    - Ensures signAndSendTransaction is available
  *    - Processes the payment based on the specified scheme
+ * 2.3 For Arkade payments:
+ *    - Validates client configuration
+ *    - Ensures signAndSendTransaction is available
+ *    - Processes the payment based on the specified scheme
  * 3. Encodes and returns the payment data
  */
 export async function createPaymentHeader(
@@ -45,8 +50,12 @@ export async function createPaymentHeader(
     throw new Error("Payment details namespace is required");
   }
 
-  // Conditionally use the appropriate client based on the payment namespace
+  // Parse payment requirements for amount based on namespace
   if (paymentRequirements.namespace === "solana") {
+    paymentRequirements = await parsePaymentRequirementsForAmount(
+      paymentRequirements
+    );
+  } else if (paymentRequirements.namespace === "arkade") {
     paymentRequirements = await parsePaymentRequirementsForAmount(
       paymentRequirements
     );
@@ -102,7 +111,6 @@ export async function createPaymentHeader(
 
       switch (paymentRequirements.scheme) {
         case "exact": {
-          // Use the dedicated Solana createPayment function with the enhanced client
           return exact.handlers.solana.createPayment(
             client.solanaClient,
             h402Version,
@@ -115,9 +123,35 @@ export async function createPaymentHeader(
           );
       }
     }
-    default:
-      throw new Error(
-        `Unsupported namespace: ${paymentRequirements.namespace}`
-      );
+    case "arkade": {
+      if (!client.arkadeClient) {
+        throw new Error("arkadeClient is required for Arkade payments");
+      }
+
+      if (!client.arkadeClient.signAndSendTransaction) {
+        throw new Error(
+          "arkadeClient must implement signAndSendTransaction"
+        );
+      }
+
+      switch (paymentRequirements.scheme) {
+        case "exact": {
+          return exact.handlers.arkade.createPayment(
+            client.arkadeClient,
+            h402Version,
+            paymentRequirements
+          );
+        }
+        default:
+          throw new Error(
+            `Unsupported scheme for Arkade: ${paymentRequirements.scheme}`
+          );
+      }
+    }
+    default: {
+      // TypeScript knows this is exhaustive, so this should never happen
+      const exhaustiveCheck: never = paymentRequirements;
+      throw new Error(`Unsupported namespace: ${(exhaustiveCheck as any).namespace}`);
+    }
   }
 }

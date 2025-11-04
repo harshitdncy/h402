@@ -5,7 +5,7 @@ BitGPT's 402 open protocol for blockchain-native payments.
 ## Features
 
 - Support for multiple payment schemes (exact, subscription)
-- Support for multiple blockchains (EVM, Solana)
+- Support for multiple blockchains (EVM, Solana and Arkade)
 - Middleware for Express and Next.js
 - Static HTML paywall bundle for serving directly from middleware
 

@@ -5,7 +5,7 @@ This is an example Express.js server that demonstrates how to use the `h402-expr
 ## Features
 
 - **Multiple Payment Options**: Each route can accept payments via different tokens/networks
-- **Cross-Chain Support**: Accept payments on both EVM chains (BSC USDT) and Solana (USDC)
+- **Cross-Chain Support**: Accept payments on both EVM chains (BSC USDT) and Solana (USDC) and Arkade (BTC)
 - **User Choice**: Users can choose their preferred payment method from available options
 - **Simple Configuration**: Use helper functions for basic setups or define advanced configurations
 
@@ -15,6 +15,7 @@ This is an example Express.js server that demonstrates how to use the `h402-expr
 - pnpm v10 (install via [pnpm.io/installation](https://pnpm.io/installation))
 - A valid Ethereum address for receiving EVM payments
 - A valid Solana address for receiving Solana payments (if using Solana)
+- A valid Arkade address for receiving Arkade payments (if using Arkade)
 - Coinbase Developer Platform API Key & Secret (if accepting payments on Base mainnet)
   -- Get them here [https://portal.cdp.coinbase.com/projects](https://portal.cdp.coinbase.com/projects)
 
@@ -61,7 +62,7 @@ pnpm dev
 app.use(
   paymentMiddleware(
     {
-      "/weather": createRouteConfigFromPrice("$0.001", network, evmAddress, solanaAddress),
+      "/weather": createRouteConfigFromPrice("$0.001", network, evmAddress, solanaAddress), // This doesn't work with Arkade Network
     },
     {
       url: facilitatorUrl,
@@ -101,6 +102,17 @@ app.use(
             tokenDecimals: 6,
             tokenSymbol: "USDC",
           },
+          {
+            scheme: "exact",
+            namespace: "arkade",
+            amountRequired: 0.00001, // Amount should be more than dust amount otherwise it will be rejected
+            amountRequiredFormat: "humanReadable",
+            networkId: "bitcoin",
+            payToAddress: arkadeAddress,
+            description: "Premium content access with BTC via Arkade",
+            tokenSymbol: "BTC",
+            tokenDecimals: 8,
+          },
         ],
       },
     },
@@ -135,7 +147,7 @@ pnpm dev
 
 1. **Request**: Client makes a request to a protected endpoint
 2. **Payment Required**: Server responds with 402 status and available payment options
-3. **Payment Choice**: Client chooses preferred payment method (EVM or Solana)
+3. **Payment Choice**: Client chooses preferred payment method (EVM or Solana or Arkade)
 4. **Payment**: Client creates and signs payment transaction
 5. **Verification**: Server verifies the payment via facilitator
 6. **Access**: Server provides access to protected content
@@ -144,9 +156,10 @@ pnpm dev
 ## Environment Variables
 
 - `FACILITATOR_URL`: URL of the payment facilitator service
-- `NETWORK`: Network to use for simple price configurations (e.g., "base", "bsc")
+- `NETWORK`: Network to use for simple price configurations (e.g., "base", "bsc", "polygon", "sei", "solana" or "bitcoin")
 - `EVM_ADDRESS`: Your Ethereum address for receiving EVM payments
 - `SOLANA_ADDRESS`: Your Solana address for receiving Solana payments
+- `ARKADE_ADDRESS`: Your Arkade address for receiving Arkade payments
 
 ## Supported Networks & Tokens
 
@@ -156,6 +169,9 @@ pnpm dev
 
 ### Solana
 - **Mainnet**: USDC (EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v)
+
+### Arkade
+- **Mainnet**: BTC
 
 ## Architecture Benefits
 

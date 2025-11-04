@@ -3,6 +3,7 @@ import {
   PaymentRequirements,
   EvmNetworkToChainId,
   isEVMNetwork,
+  isArkadeNetwork,
   isStablecoinAddress,
   isStablecoinSymbol,
 } from "../types/index.js";
@@ -13,14 +14,14 @@ import {
  * If no stablecoin payment requirement is found, the first payment requirement is selected.
  *
  * @param paymentRequirements - The payment requirements to select from.
- * @param namespace - The namespace to check against ("evm" or "solana"). If not provided, any namespace is accepted.
+ * @param namespace - The namespace to check against ("evm", "solana", or "arkade"). If not provided, any namespace is accepted.
  * @param network - The network to check against. If not provided, the network will not be checked.
  * @param scheme - The scheme to check against. If not provided, the scheme will not be checked.
  * @returns The payment requirement that is the most appropriate for the user.
  */
 export function selectPaymentRequirements(
   paymentRequirements: PaymentRequirements[],
-  namespace?: "evm" | "solana",
+  namespace?: "evm" | "solana" | "arkade",
   network?: Network,
   scheme?: "exact"
 ): PaymentRequirements {
@@ -53,6 +54,9 @@ export function selectPaymentRequirements(
       if (network) {
         if (network === "solana") {
           isExpectedNetwork = requirement.namespace === "solana";
+        } else if (isArkadeNetwork(network)) {
+          isExpectedNetwork = requirement.namespace === "arkade" &&
+            requirement.networkId === network;
         } else {
           // For EVM networks, check if it matches the expected network
           isExpectedNetwork =
@@ -76,14 +80,19 @@ export function selectPaymentRequirements(
 
 /**
  * Check if a payment requirement uses a stablecoin (USDT/USDC)
+ * Note: Arkade only supports BTC/satoshi offchain, so it's never a stablecoin
  */
 function isStablecoin(requirement: PaymentRequirements): boolean {
+  if (requirement.namespace === "arkade") {
+    return false;
+  }
+
   // Check by token symbol
   if (requirement.tokenSymbol && isStablecoinSymbol(requirement.tokenSymbol)) {
     return true;
   }
 
-  // Check by known stablecoin addresses
+  // Check by known stablecoin addresses (TypeScript knows tokenAddress exists for EVM/Solana)
   return isStablecoinAddress(requirement.tokenAddress);
 }
 
@@ -93,6 +102,10 @@ function isStablecoin(requirement: PaymentRequirements): boolean {
 function getNetworkIdForNetwork(network: Network): string {
   if (network === "solana") {
     return "mainnet"; // Solana uses "mainnet" as networkId
+  }
+
+  if (isArkadeNetwork(network)) {
+    return network;
   }
 
   if (isEVMNetwork(network)) {
@@ -107,14 +120,14 @@ function getNetworkIdForNetwork(network: Network): string {
  * Selector for payment requirements.
  *
  * @param paymentRequirements - The payment requirements to select from.
- * @param namespace - The namespace to check against ("evm" or "solana"). If not provided, any namespace is accepted.
+ * @param namespace - The namespace to check against ("evm", "solana", or "arkade"). If not provided, any namespace is accepted.
  * @param network - The network to check against. If not provided, the network will not be checked.
  * @param scheme - The scheme to check against. If not provided, the scheme will not be checked.
  * @returns The payment requirement that is the most appropriate for the user.
  */
 export type PaymentRequirementsSelector = (
   paymentRequirements: PaymentRequirements[],
-  namespace?: "evm" | "solana",
+  namespace?: "evm" | "solana" | "arkade",
   network?: Network,
   scheme?: "exact"
 ) => PaymentRequirements;

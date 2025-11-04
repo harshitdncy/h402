@@ -7,7 +7,7 @@ This is an example client that demonstrates how to use the `h402-fetch` package 
 - Node.js v20+ (install via [nvm](https://github.com/nvm-sh/nvm))
 - pnpm v10 (install via [pnpm.io/installation](https://pnpm.io/installation))
 - A running h402 server (you can use the example express server at `examples/typescript/servers/express`)
-- A valid Ethereum private key for making payments
+- A valid Ethereum or Solana or Arkade private key for making payments
 
 ## Setup
 

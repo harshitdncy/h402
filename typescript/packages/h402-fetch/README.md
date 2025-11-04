@@ -10,22 +10,17 @@ npm install @bit-gpt/h402-fetch
 
 ## Quick Start
 
-```typescript
-import { createWalletClient, http } from "viem";
-import { privateKeyToAccount } from "viem/accounts";
-import { wrapFetchWithPayment } from "h402-fetch";
-import { baseSepolia } from "viem/chains";
+### EVM (Base) Example
 
-// Create a wallet client
-const account = privateKeyToAccount("0xYourPrivateKey");
-const client = createWalletClient({
-  account,
-  transport: http(),
-  chain: baseSepolia,
-});
+```typescript
+import { wrapFetchWithPayment, createEvmClient } from "h402-fetch";
+import { base } from "viem/chains";
+
+// Create an EVM client
+const evmClient = createEvmClient(evmPrivateKey, base);
 
 // Wrap the fetch function with payment handling
-const fetchWithPay = wrapFetchWithPayment(fetch, client);
+const fetchWithPay = wrapFetchWithPayment(fetch, { evmClient });
 
 // Make a request that may require payment
 const response = await fetchWithPay("https://api.example.com/paid-endpoint", {
@@ -33,6 +28,42 @@ const response = await fetchWithPay("https://api.example.com/paid-endpoint", {
 });
 
 const data = await response.json();
+```
+
+## Solana Example
+
+```typescript
+import { wrapFetchWithPayment, createSolanaClient } from "h402-fetch";
+
+// Create a Solana client
+const solanaClient = createSolanaClient("YourPrivateKey");
+
+// Wrap the fetch function with payment handling
+const fetchWithPay = wrapFetchWithPayment(fetch, { solanaClient });
+
+// Make a request that may require payment
+const response = await fetchWithPay("https://api.example.com/paid-endpoint", {
+  method: "GET",
+});
+
+const data = await response.json();
+```
+
+### Arkade Example
+
+```typescript
+import { wrapFetchWithPayment, createArkadeClient } from "h402-fetch";
+
+// Create a Arkade client
+const arkadeClient = createArkadeClient("YourPrivateKey");
+
+// Wrap the fetch function with payment handling
+const fetchWithPay = wrapFetchWithPayment(fetch, { arkadeClient });
+
+// Make a request that may require payment
+const response = await fetchWithPay("https://api.example.com/paid-endpoint", {
+  method: "GET",
+});
 ```
 
 ## API
@@ -45,7 +76,7 @@ Wraps the native fetch API to handle 402 Payment Required responses automaticall
 
 - `fetch`: The fetch function to wrap (typically `globalThis.fetch`)
 - `walletClient`: The wallet client used to sign payment messages (must implement the x402 wallet interface)
-- `maxValue`: Optional maximum allowed payment amount in base units (defaults to 0.1 USDC)
+- `maxValue`: Optional maximum allowed payment amount in base units (defaults to 0.1 USDC for EVM, Solana and 0.00001 BTC for Arkade)
 - `paymentRequirementsSelector`: Optional function to select payment requirements from the response (defaults to `selectPaymentRequirements`)
 
 #### Returns
@@ -57,38 +88,3 @@ A wrapped fetch function that automatically handles 402 responses by:
 3. Verifying the payment amount is within the allowed maximum
 4. Creating a payment header using the provided wallet client
 5. Retrying the request with the payment header
-
-## Example
-
-```typescript
-import { config } from "dotenv";
-import { createWalletClient, http } from "viem";
-import { privateKeyToAccount } from "viem/accounts";
-import { wrapFetchWithPayment } from "h402-fetch";
-import { baseSepolia } from "viem/chains";
-
-config();
-
-const { PRIVATE_KEY, API_URL } = process.env;
-
-const account = privateKeyToAccount(PRIVATE_KEY as `0x${string}`);
-const client = createWalletClient({
-  account,
-  transport: http(),
-  chain: baseSepolia,
-});
-
-const fetchWithPay = wrapFetchWithPayment(fetch, client);
-
-// Make a request to a paid API endpoint
-fetchWithPay(API_URL, {
-  method: "GET",
-})
-  .then(async response => {
-    const data = await response.json();
-    console.log(data);
-  })
-  .catch(error => {
-    console.error(error);
-  });
-```

@@ -108,9 +108,11 @@ async function buildPaymentTransaction(
     });
     txWithInstructions = appendTransactionMessageInstruction(instruction, txToSimulate);
   } else {
-    const mint = address(requirements.tokenAddress);
+    // TypeScript narrowing: we know tokenAddress exists here because isNative is false
+    const tokenAddress = requirements.tokenAddress!;
+    const mint = address(tokenAddress);
     
-    const tokenProgram = await getTokenProgramForMint(requirements.tokenAddress);
+    const tokenProgram = await getTokenProgramForMint(tokenAddress);
     const isToken2022 = tokenProgram === TOKEN_2022_PROGRAM_ADDRESS;
     
     const { value: mintInfo } = await rpc
@@ -119,16 +121,16 @@ async function buildPaymentTransaction(
       })
       .send();
     if (!mintInfo || !mintInfo.data) {
-      throw new Error(`Token mint not found: ${requirements.tokenAddress}`);
+      throw new Error(`Token mint not found: ${tokenAddress}`);
     }
     const parsedData = mintInfo.data as any;
     const decimals = parsedData?.parsed?.info?.decimals;
     
     if (typeof decimals !== "number") {
-      throw new Error(`Could not get decimals for token: ${requirements.tokenAddress}`);
+      throw new Error(`Could not get decimals for token: ${tokenAddress}`);
     }
     
-    console.log(`[Token Info] Mint: ${requirements.tokenAddress}, Decimals: ${decimals}, Program: ${isToken2022 ? 'Token-2022' : 'Token'}`);
+    console.log(`[Token Info] Mint: ${tokenAddress}, Decimals: ${decimals}, Program: ${isToken2022 ? 'Token-2022' : 'Token'}`);
     
     const senderATA = await getAssociatedTokenAddress(
       mint,

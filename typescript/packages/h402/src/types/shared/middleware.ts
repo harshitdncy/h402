@@ -31,7 +31,7 @@ export type MiddlewareConfig = {
   facilitatorUrl?: string;
 };
 
-export type RoutesConfig = Record<string, Price | RouteConfig>;
+export type RoutesConfig = Record<string, RouteConfig>;
 
 export interface RoutePattern {
   verb: string;

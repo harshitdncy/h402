@@ -4,6 +4,7 @@ import {
   PaymentRequirementsSelector,
   selectPaymentRequirements,
 } from "@bit-gpt/h402/client";
+import { getMaxValueForNamespace } from "@bit-gpt/h402/shared";
 
 /**
  * Enables the payment of APIs using the h402 payment protocol.
@@ -39,7 +40,7 @@ import {
 export function wrapFetchWithPayment(
   fetch: typeof globalThis.fetch,
   paymentClient: PaymentClient,
-  maxValue: bigint = BigInt(0.1 * 10 ** 6), // Default to 0.10 USDC
+  maxValue?: bigint, // Default to 0.10 USDC
   paymentRequirementsSelector: PaymentRequirementsSelector = selectPaymentRequirements,
 ) {
   return async (input: RequestInfo, init?: RequestInit) => {
@@ -56,13 +57,19 @@ export function wrapFetchWithPayment(
     const parsedPaymentRequirements = accepts.map(x => PaymentRequirementsSchema.parse(x));
 
     // Determine the preferred namespace based on available clients
-    let namespace: "evm" | "solana" | undefined;
-    if (paymentClient.evmClient && !paymentClient.solanaClient) {
-      namespace = "evm";
-    } else if (paymentClient.solanaClient && !paymentClient.evmClient) {
-      namespace = "solana";
+    let namespace: "evm" | "solana" | "arkade" | undefined;
+    const hasEvm = !!paymentClient.evmClient;
+    const hasSolana = !!paymentClient.solanaClient;
+    const hasArkade = !!paymentClient.arkadeClient;
+    const clientCount = [hasEvm, hasSolana, hasArkade].filter(Boolean).length;
+
+    // If only one client is available, use that namespace
+    if (clientCount === 1) {
+      if (hasEvm) namespace = "evm";
+      else if (hasSolana) namespace = "solana";
+      else if (hasArkade) namespace = "arkade";
     }
-    // If both clients are available, let selectPaymentRequirements choose based on stablecoin preference
+    // If multiple clients are available, let selectPaymentRequirements choose based on stablecoin/BTC preference
 
     const chainId = paymentClient.evmClient?.chain?.id;
 
@@ -73,7 +80,12 @@ export function wrapFetchWithPayment(
       "exact",
     );
 
-    if (BigInt(selectedPaymentRequirements.maxAmountRequired ?? 0) > maxValue) {
+    let _maxValue = maxValue;
+    if (!_maxValue) {
+      _maxValue = getMaxValueForNamespace(selectedPaymentRequirements.namespace);
+    }
+
+    if (BigInt(selectedPaymentRequirements.maxAmountRequired ?? 0) > _maxValue) {
       throw new Error("Payment amount exceeds maximum allowed");
     }
 
@@ -106,4 +118,4 @@ export function wrapFetchWithPayment(
   };
 }
 
-export { decodeXPaymentResponse, createEvmClient, createSolanaClient, type PaymentClient } from "@bit-gpt/h402/shared";
+export { decodeXPaymentResponse, createEvmClient, createSolanaClient, createArkadeClient, type PaymentClient } from "@bit-gpt/h402/shared";

@@ -20,7 +20,7 @@ pnpm install
 2. Create a `.env` file with the following variables:
 
 ```env
-EVM_PRIVATE_KEY=0xYourPrivateKey
+PRIVATE_KEY=YourPrivateKey (EVM, Solana)
 PORT=3001
 FACILITATOR_URL=http://localhost:3001
 ```

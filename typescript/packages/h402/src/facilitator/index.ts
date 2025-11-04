@@ -7,10 +7,12 @@
 // Import blockchain-specific facilitators
 import * as evmFacilitator from "./evm/facilitator.js";
 import * as solanaFacilitator from "./solana/facilitator.js";
+import * as arkadeFacilitator from "./arkade/facilitator.js";
 
 // Re-export the specific implementations
 export * as evm from "./evm/facilitator.js";
 export * as solana from "./solana/facilitator.js";
+export * as arkade from "./arkade/facilitator.js";
 
 // Import types
 import {
@@ -19,23 +21,26 @@ import {
   SettleResponse,
   EvmPaymentPayload,
   SolanaPaymentPayload,
-  ChainIdToEvmNetwork,
+  ArkadePaymentPayload,
 } from "../types";
-import { EvmClient, SolanaClient } from "../types/shared/client";
+import { EvmClient, SolanaClient, ArkadeClient } from "../types/shared/client";
 import { createWalletClient, http, publicActions, PublicClient } from "viem";
 import { getPublicClient } from "../types/shared/evm/wallet.js";
 import { privateKeyToAccount } from "viem/accounts";
 import { getChain } from "../shared/evm/chainUtils.js";
+import { RestArkProvider, SingleKey } from "@arkade-os/sdk";
+import { getArkadeServerUrl } from "../shared/next.js";
+import { privateKeyToHex } from "../shared/arkade/key.js";
 
 /**
  * Type representing any supported payment payload
  */
-export type PaymentPayload = EvmPaymentPayload | SolanaPaymentPayload;
+export type PaymentPayload = EvmPaymentPayload | SolanaPaymentPayload | ArkadePaymentPayload;
 
 /**
  * Type representing any supported client
  */
-export type Client = EvmClient | SolanaClient | PublicClient;
+export type Client = EvmClient | SolanaClient | ArkadeClient | PublicClient;
 
 /**
  * Verifies a payment payload against the required payment details
@@ -51,18 +56,26 @@ export async function verify(
   paymentRequirements: PaymentRequirements
 ): Promise<VerifyResponse> {
   // Route to the appropriate blockchain implementation based on namespace
-  if (paymentRequirements.namespace === "solana") {
-    return solanaFacilitator.verify(
-      payload as SolanaPaymentPayload,
-      paymentRequirements
-    );
-  } else {
-    const client = getPublicClient(paymentRequirements.networkId);
-    return evmFacilitator.verify(
-      client as PublicClient,
-      payload as EvmPaymentPayload,
-      paymentRequirements
-    );
+  switch (paymentRequirements.namespace) {
+    case "solana":
+      return solanaFacilitator.verify(
+        payload as SolanaPaymentPayload,
+        paymentRequirements
+      );
+    case "arkade":
+      return arkadeFacilitator.verify(
+        payload as ArkadePaymentPayload,
+        paymentRequirements
+      );
+    case "evm":
+    default: {
+      const client = getPublicClient(paymentRequirements.networkId);
+      return evmFacilitator.verify(
+        client as PublicClient,
+        payload as EvmPaymentPayload,
+        paymentRequirements
+      );
+    }
   }
 }
 
@@ -72,7 +85,7 @@ export async function verify(
  *
  * @param payload - The signed payment payload
  * @param paymentRequirements - The payment requirements that the payload must satisfy
- * @param privateKeyOrClient - Private key (for EVM) or client (for Solana)
+ * @param privateKeyOrClient - Private key (for EVM), SolanaClient (for Solana), or Private key (for Arkade)
  * @returns A SettleResponse indicating if the payment is settled and any settlement reason
  */
 export async function settle(
@@ -81,26 +94,29 @@ export async function settle(
   privateKeyOrClient: string | Client
 ): Promise<SettleResponse> {
   // Route to the appropriate blockchain implementation based on namespace
-  if (paymentRequirements.namespace === "solana") {
-    return solanaFacilitator.settle(
-      privateKeyOrClient as SolanaClient,
-      payload as SolanaPaymentPayload,
-      paymentRequirements
-    );
-  } else {
-    const account = privateKeyToAccount(privateKeyOrClient as `0x${string}`);
-    const chain = getChain(paymentRequirements.networkId);
-    const client = createWalletClient({
-      account,
-      transport: http(),
-      chain,
-    }).extend(publicActions);
+  switch (paymentRequirements.namespace) {
+    case "solana":
+      return solanaFacilitator.settle(
+        privateKeyOrClient as SolanaClient,
+        payload as SolanaPaymentPayload,
+        paymentRequirements
+      );
+    case "evm":
+    default: {
+      const account = privateKeyToAccount(privateKeyOrClient as `0x${string}`);
+      const chain = getChain(paymentRequirements.networkId);
+      const client = createWalletClient({
+        account,
+        transport: http(),
+        chain,
+      }).extend(publicActions);
 
-    return evmFacilitator.settle(
-      client,
-      payload as EvmPaymentPayload,
-      paymentRequirements
-    );
+      return evmFacilitator.settle(
+        client,
+        payload as EvmPaymentPayload,
+        paymentRequirements
+      );
+    }
   }
 }
 
@@ -112,6 +128,7 @@ export async function settle(
 export function getSupported(): {
   evm: evmFacilitator.Supported;
   solana: solanaFacilitator.Supported;
+  arkade: arkadeFacilitator.Supported;
 } {
   return {
     evm: {
@@ -121,6 +138,10 @@ export function getSupported(): {
     solana: {
       h402Version: 1,
       kind: [{ scheme: "exact", networkId: "solana" }],
+    },
+    arkade: {
+      h402Version: 1,
+      kind: [{ scheme: "exact", networkId: "bitcoin" }],
     },
   };
 }

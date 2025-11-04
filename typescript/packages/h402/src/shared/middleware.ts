@@ -5,6 +5,7 @@ import {
   PaymentRequirements,
   EvmPaymentPayload,
   SolanaPaymentPayload,
+  ArkadePaymentPayload,
   Price,
   ERC20TokenAmount,
   moneySchema,
@@ -25,9 +26,7 @@ export function computeRoutePatterns(routes: RoutesConfig): RoutePattern[] {
   const normalizedRoutes = Object.fromEntries(
     Object.entries(routes).map(([pattern, value]) => [
       pattern,
-      typeof value === "string" || typeof value === "number"
-        ? createRouteConfigFromPrice(value, "bsc")
-        : (value as RouteConfig),
+      value,
     ])
   );
 
@@ -162,7 +161,7 @@ export function processPriceToAtomicAmount(
  */
 export function findMatchingPaymentRequirements(
   paymentRequirements: PaymentRequirements[],
-  payment: EvmPaymentPayload | SolanaPaymentPayload
+  payment: EvmPaymentPayload | SolanaPaymentPayload | ArkadePaymentPayload
 ) {
   return paymentRequirements.find(
     (value) =>
@@ -193,13 +192,14 @@ export function decodeXPaymentResponse(header: string) {
  * @param network - The network to create the RouteConfig for
  * @param evmAddress - The EVM address to use for the RouteConfig
  * @param solanaAddress - The Solana address to use for the RouteConfig
+ * @param arkadeAddress - The Arkade address to use for the RouteConfig
  * @returns The created RouteConfig
  */
 export function createRouteConfigFromPrice(
   price: Price,
   network: Network,
   evmAddress?: Address,
-  solanaAddress?: string
+  solanaAddress?: string,
 ): RouteConfig {
   const processedPrice = processPriceToAtomicAmount(price, network);
 
@@ -209,15 +209,27 @@ export function createRouteConfigFromPrice(
 
   const { maxAmountRequired, asset } = processedPrice;
 
+  // Determine namespace based on network
+  const namespace = 
+    network === "solana"
+    ? "solana"
+    : "evm";
+
+  // Determine payToAddress based on namespace
+  const payToAddress = 
+      network === "solana" 
+      ? solanaAddress || ""
+      : evmAddress || "0x0000000000000000000000000000000000000000";
+
   // Create a basic PaymentRequirements object
   const paymentRequirements: PaymentRequirements = {
     scheme: "exact",
-    namespace: network === "solana" ? "solana" : "evm",
+    namespace,
     resource: "" as any, // Will be filled in by the middleware
     description: `Payment required (${network})`,
     mimeType: "application/json",
-    payToAddress: network === "solana" ? solanaAddress : evmAddress || "0x0000000000000000000000000000000000000000" as any,
-    tokenAddress: asset.address as any,
+    payToAddress: payToAddress as any,
+    tokenAddress: asset.address as any, // Only for EVM/Solana
     tokenSymbol: network === "bsc" || network === "base" || network === "polygon" || network === "sei" ? "USDT" : "USDC",
     tokenDecimals: asset.decimals as any,
     outputSchema: null,
@@ -225,7 +237,7 @@ export function createRouteConfigFromPrice(
     amountRequired: Number(maxAmountRequired),
     amountRequiredFormat: "smallestUnit",
     networkId: getNetworkId(network).toString(),
-  };
+  } as PaymentRequirements;
 
   return {
     paymentRequirements: [paymentRequirements],

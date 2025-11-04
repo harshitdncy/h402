@@ -35,7 +35,7 @@ pnpm dev
 
 ## API Endpoints
 
-### `/weather` - Simple Payment Configuration
+### `/weather` - Simple Payment Configuration (This doesn't work with Arkade Network)
 - **Payment**: $0.001 (configured via `createRouteConfigFromPrice`)
 - **Network**: Based on NETWORK environment variable
 - **Response**: Weather data
@@ -44,6 +44,7 @@ pnpm dev
 - **Payment Options**:
   - USDT on BSC (Binance Smart Chain) - $0.01
   - USDC on Solana - $0.01
+  - BTC on Arkade - 0.00001 Sats
 - **User Choice**: Users can pay with either option
 - **Response**: Premium content with payment method information
 
@@ -54,7 +55,7 @@ pnpm dev
 app.use(
   paymentMiddleware(
     {
-      "/weather": createRouteConfigFromPrice("$0.001", network, evmAddress, solanaAddress),
+      "/weather": createRouteConfigFromPrice("$0.001", network, evmAddress, solanaAddress), // This doesn't work with Arkade Network
     },
     {
       url: facilitatorUrl,
@@ -94,6 +95,17 @@ app.use(
             tokenDecimals: 6,
             tokenSymbol: "USDC",
           },
+          {
+            scheme: "exact",
+            namespace: "arkade",
+            amountRequired: 0.00001, // Amount should be more than dust amount otherwise it will be rejected
+            amountRequiredFormat: "humanReadable",
+            networkId: "bitcoin",
+            payToAddress: arkadeAddress,
+            description: "Premium content access with BTC via Arkade",
+            tokenSymbol: "BTC",
+            tokenDecimals: 8,
+          },
         ],
       },
     },
@@ -128,7 +140,7 @@ pnpm dev
 
 1. **Request**: Client makes a request to a protected endpoint
 2. **Payment Required**: Server responds with 402 status and available payment options
-3. **Payment Choice**: Client chooses preferred payment method (EVM or Solana)
+3. **Payment Choice**: Client chooses preferred payment method (EVM or Solana or Arkade)
 4. **Payment**: Client creates and signs payment transaction
 5. **Verification**: Server verifies the payment via facilitator
 6. **Access**: Server provides access to protected content
@@ -137,9 +149,10 @@ pnpm dev
 ## Environment Variables
 
 - `FACILITATOR_URL`: URL of the payment facilitator service
-- `NETWORK`: Network to use for simple price configurations (e.g., "base-sepolia", "bsc")
+- `NETWORK`: Network to use for simple price configurations (e.g., "base", "bsc", "polygon", "sei", "solana" or "bitcoin")
 - `EVM_ADDRESS`: Your Ethereum address for receiving EVM payments
 - `SOLANA_ADDRESS`: Your Solana address for receiving Solana payments
+- `ARKADE_ADDRESS`: Your Arkade address for receiving Arkade payments
 
 ## Supported Networks & Tokens
 
@@ -149,6 +162,9 @@ pnpm dev
 
 ### Solana
 - **Mainnet**: USDC (EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v)
+
+### Arkade
+- **Mainnet**: BTC
 
 ## Architecture Benefits
 

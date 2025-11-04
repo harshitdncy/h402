@@ -7,7 +7,7 @@ const EvmSignatureRegex = /^0x[0-9a-fA-F]{130}$/;
 const HexRegex = /^0x[0-9a-fA-F]*$/; // For general hex validation
 
 // Base Hex schema for reuse
-const HexSchema = z.string().regex(HexRegex);
+export const HexSchema = z.string().regex(HexRegex);
 
 // Parameter schemas
 const EvmAuthorizationParametersSchema = z.object({

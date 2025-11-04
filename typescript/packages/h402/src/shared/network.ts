@@ -8,7 +8,7 @@ import {
  * Converts a network name to its corresponding chain ID
  *
  * @param network - The network name to convert to a chain ID
- * @returns The chain ID for the specified network (number for EVM, string for Solana)
+ * @returns The chain ID for the specified network (number for EVM, string for Solana/Arkade)
  * @throws Error if the network is not supported
  */
 export function getNetworkId(network: Network): number | string {
@@ -17,6 +17,9 @@ export function getNetworkId(network: Network): number | string {
   }
   if (network === "solana") {
     return "mainnet"; // Solana mainnet identifier
+  }
+  if (network === "bitcoin") {
+    return "bitcoin"; // Bitcoin mainnet identifier
   }
   throw new Error(`Unsupported network: ${network}`);
 }

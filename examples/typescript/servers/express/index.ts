@@ -1,12 +1,21 @@
 import { config } from "dotenv";
 import express from "express";
-import { paymentMiddleware, Resource, createRouteConfigFromPrice, Network } from "@bit-gpt/h402-express";
+import {
+  paymentMiddleware,
+  Resource,
+  createRouteConfigFromPrice,
+  Network,
+  isArkadeNetwork,
+  isEVMNetwork,
+  isSolanaNetwork,
+} from "@bit-gpt/h402-express";
 
 config();
 
 const facilitatorUrl = process.env.FACILITATOR_URL as Resource;
 const evmAddress = process.env.EVM_ADDRESS as `0x${string}`;
 const solanaAddress = process.env.SOLANA_ADDRESS as string;
+const arkadeAddress = process.env.ARKADE_ADDRESS as string;
 const network = process.env.NETWORK as Network;
 
 if (!facilitatorUrl || !network) {
@@ -14,20 +23,25 @@ if (!facilitatorUrl || !network) {
   process.exit(1);
 }
 
-if (
-  !evmAddress && !solanaAddress
-) {
-  console.error("Missing required environment variables: EVM_ADDRESS or SOLANA_ADDRESS");
+if (!evmAddress && !solanaAddress && !arkadeAddress) {
+  console.error(
+    "Missing required environment variables: EVM_ADDRESS or SOLANA_ADDRESS or ARKADE_ADDRESS",
+  );
   process.exit(1);
 }
 
-if (network === "solana" && !solanaAddress) {
+if (isSolanaNetwork(network) && !solanaAddress) {
   console.error("Missing required environment variable: SOLANA_ADDRESS");
   process.exit(1);
 }
 
-if (network !== "solana" && !evmAddress) {
+if (isEVMNetwork(network) && !evmAddress) {
   console.error("Missing required environment variable: EVM_ADDRESS");
+  process.exit(1);
+}
+
+if (isArkadeNetwork(network) && !arkadeAddress) {
+  console.error("Missing required environment variable: ARKADE_ADDRESS");
   process.exit(1);
 }
 
@@ -38,8 +52,13 @@ console.log("Server is running");
 app.use(
   paymentMiddleware(
     {
-      // Use createRouteConfigFromPrice to construct the RouteConfig
-      "/weather": createRouteConfigFromPrice("$0.0002", network, evmAddress, solanaAddress),
+      // Use createRouteConfigFromPrice to construct the RouteConfig. Note: This doesn't work with Arkade Network
+      "/weather": createRouteConfigFromPrice(
+        "$0.0001",
+        network,
+        evmAddress,
+        solanaAddress,
+      ),
       // Example of advanced configuration with multiple payment options
       "/premium/*": {
         paymentRequirements: [
@@ -78,6 +97,17 @@ app.use(
             description: "Premium content access with USDC on Solana",
             tokenDecimals: 6,
             tokenSymbol: "USDC",
+          },
+          {
+            scheme: "exact",
+            namespace: "arkade",
+            amountRequired: 0.00001, // Amount should be more than dust amount otherwise it will be rejected
+            amountRequiredFormat: "humanReadable",
+            networkId: "bitcoin",
+            payToAddress: arkadeAddress,
+            description: "Premium content access with BTC via Arkade",
+            tokenSymbol: "BTC",
+            tokenDecimals: 8,
           },
         ],
       },

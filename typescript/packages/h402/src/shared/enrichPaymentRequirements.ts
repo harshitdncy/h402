@@ -50,6 +50,13 @@ export async function enrichPaymentRequirements(
           tokenDecimals: decimals,
           tokenSymbol: symbol || "UNKNOWN",
         };
+      } else if (req.namespace === "arkade") {
+        // Arkade only supports BTC/satoshi offchain (no token addresses)
+        return {
+          ...req,
+          tokenDecimals: 8, // satoshis
+          tokenSymbol: "BTC",
+        };
       }
 
       // Return unchanged for unknown namespaces

@@ -56,7 +56,7 @@ pnpm dev
 1. **Request**: Client makes a request to a proxy endpoint
 2. **Interception**: Proxy server intercepts the request and checks for payment requirements
 3. **Payment Required**: Server responds with 402 status and available payment options
-4. **Payment Choice**: Client chooses preferred payment method (EVM or Solana)
+4. **Payment Choice**: Client chooses preferred payment method (EVM or Solana or Arkade)
 5. **Payment**: Client creates and signs payment transaction
 6. **Verification**: Server verifies the payment via facilitator
 7. **Access**: Server provides access to protected content
@@ -70,6 +70,9 @@ pnpm dev
 
 ### Solana
 - **Mainnet**: USDC (EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v)
+
+### Arkade
+- **Mainnet**: BTC
 
 ## Architecture Benefits
 

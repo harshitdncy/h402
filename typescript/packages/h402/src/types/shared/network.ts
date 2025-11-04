@@ -7,11 +7,14 @@ export const EVMNetworkSchema = z.enum([
 
 export const SolanaNetworkSchema = z.enum(["solana"]);
 
+export const ArkadeNetworkSchema = z.enum(["bitcoin"]);
+
 // Combined network schema
-export const NetworkSchema = z.union([EVMNetworkSchema, SolanaNetworkSchema]);
+export const NetworkSchema = z.union([EVMNetworkSchema, SolanaNetworkSchema, ArkadeNetworkSchema]);
 
 export type EVMNetwork = z.infer<typeof EVMNetworkSchema>;
 export type SolanaNetwork = z.infer<typeof SolanaNetworkSchema>;
+export type ArkadeNetwork = z.infer<typeof ArkadeNetworkSchema>;
 export type Network = z.infer<typeof NetworkSchema>;
 
 // Network categorization
@@ -26,9 +29,12 @@ export const SupportedEVMNetworks: EVMNetwork[] = [
 
 export const SupportedSolanaNetworks: SolanaNetwork[] = ["solana"];
 
+export const SupportedArkadeNetworks: ArkadeNetwork[] = ["bitcoin"];
+
 export const SupportedNetworks: Network[] = [
   ...SupportedEVMNetworks,
   ...SupportedSolanaNetworks,
+  ...SupportedArkadeNetworks,
 ];
 
 // EVM-specific mappings
@@ -69,6 +75,10 @@ export const isSolanaNetwork = (network: Network): network is SolanaNetwork => {
   return SupportedSolanaNetworks.includes(network as SolanaNetwork);
 };
 
+export const isArkadeNetwork = (network: Network): network is ArkadeNetwork => {
+  return SupportedArkadeNetworks.includes(network as ArkadeNetwork);
+};
+
 // Network metadata (optional - for display purposes)
 export const NetworkMetadata = {
   // EVM Networks
@@ -80,11 +90,16 @@ export const NetworkMetadata = {
   sei: { name: "Sei", type: "evm" },
   // Solana Networks
   solana: { name: "Solana", type: "solana" },
+  // Arkade Networks (Bitcoin)
+  bitcoin: { name: "Bitcoin Mainnet", type: "arkade" },
 } as const;
 
 // Helper to get network type
-export const getNetworkType = (network: Network): "evm" | "solana" => {
-  return isEVMNetwork(network) ? "evm" : "solana";
+export const getNetworkType = (network: Network): "evm" | "solana" | "arkade" => {
+  if (isEVMNetwork(network)) return "evm";
+  if (isSolanaNetwork(network)) return "solana";
+  if (isArkadeNetwork(network)) return "arkade";
+  throw new Error(`Unknown network type: ${network}`);
 };
 
 // Check if a networkId/chainId corresponds to a supported EVM network

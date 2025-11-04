@@ -10,22 +10,15 @@ npm install @bit-gpt/h402-axios
 
 ## Quick Start
 
-### EVM (BSC) Example
+### EVM (Base) Example
 
 ```typescript
-import { createWalletClient, http } from "viem";
-import { privateKeyToAccount } from "viem/accounts";
-import { withPaymentInterceptor } from "h402-axios";
+import { withPaymentInterceptor, createEvmClient } from "h402-axios";
 import axios from "axios";
-import { bsc } from "viem/chains";
+import { base } from "viem/chains";
 
-// Create a wallet client
-const account = privateKeyToAccount("0xYourPrivateKey");
-const evmClient = createWalletClient({
-  account,
-  transport: http(),
-  chain: bsc,
-});
+// Create an EVM client
+const evmClient = createEvmClient(evmPrivateKey, base);
 
 // Create an Axios instance with payment handling
 const api = withPaymentInterceptor(
@@ -43,13 +36,11 @@ console.log(response.data);
 ### Solana Example
 
 ```typescript
-import { withPaymentInterceptor } from "h402-axios";
+import { withPaymentInterceptor, createSolanaClient } from "h402-axios";
 import axios from "axios";
 
-// Create a Solana client (implementation depends on your Solana wallet setup)
-const solanaClient = {
-  // Your Solana client implementation
-};
+// Create a Solana client
+const solanaClient = createSolanaClient("YourPrivateKey");
 
 // Create an Axios instance with payment handling
 const api = withPaymentInterceptor(
@@ -57,6 +48,28 @@ const api = withPaymentInterceptor(
     baseURL: "https://api.example.com",
   }),
   { solanaClient }
+);
+
+// Make a request that may require payment
+const response = await api.get("/paid-endpoint");
+console.log(response.data);
+```
+
+### Arkade Example
+
+```typescript
+import { withPaymentInterceptor, createArkadeClient } from "h402-axios";
+import axios from "axios";
+
+// Create a Arkade client
+const arkadeClient = createArkadeClient("YourPrivateKey");
+
+// Create an Axios instance with payment handling
+const api = withPaymentInterceptor(
+  axios.create({
+    baseURL: "https://api.example.com",
+  }),
+  { arkadeClient }
 );
 
 // Make a request that may require payment
@@ -77,7 +90,8 @@ const api = withPaymentInterceptor(
   }),
   { 
     evmClient: yourEvmClient,
-    solanaClient: yourSolanaClient 
+    solanaClient: yourSolanaClient,
+    arkadeClient: yourArkadeClient
   }
 );
 
@@ -89,7 +103,7 @@ const response = await api.get("/paid-endpoint");
 ## Features
 
 - Automatic handling of 402 Payment Required responses
-- Support for BSC (Binance Smart Chain) and Solana blockchains
+- Support for BSC (Binance Smart Chain), Solana blockchains and Bitcoin Arkade
 - Intelligent payment method selection with stablecoin prioritization
 - Automatic retry of requests with payment headers
 - Payment verification and header generation
@@ -108,6 +122,7 @@ Adds a response interceptor to an Axios instance to handle 402 Payment Required 
 - `paymentClient`: An object containing wallet clients for different blockchains:
   - `evmClient?`: EVM wallet client (viem WalletClient) for BSC
   - `solanaClient?`: Solana wallet client
+  - `arkadeClient?`: Arkade wallet client
 - `paymentRequirementsSelector?`: Optional function to customize payment requirements selection (defaults to `selectPaymentRequirements`)
 
 #### Returns
@@ -123,9 +138,9 @@ The modified Axios instance with the payment interceptor that will:
 #### Payment Selection Logic
 
 When multiple payment options are available, the interceptor prioritizes:
-1. **Namespace compatibility**: Matches available wallet clients (EVM vs Solana)
+1. **Namespace compatibility**: Matches available wallet clients (EVM vs Solana vs Arkade)
 2. **Stablecoin preference**: Prioritizes USDT/USDC over native tokens (BNB/SOL)
-3. **Network compatibility**: Ensures the payment network matches your wallet configuration (BSC for EVM)
+3. **Network compatibility**: Ensures the payment network matches your wallet configuration (BSC for EVM, Solana and Bitcoin for Arkade)
 
 ## Additional Exports
 

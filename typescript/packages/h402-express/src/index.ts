@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { Address, getAddress } from "viem";
 import { utils as evmUtils } from "@bit-gpt/h402/schemes/exact/evm";
 import { utils as solanaUtils } from "@bit-gpt/h402/schemes/exact/solana";
+import { utils as arkadeUtils } from "@bit-gpt/h402/schemes/exact/arkade";
 import {
   computeRoutePatterns,
   findMatchingPaymentRequirements,
@@ -13,6 +14,7 @@ import {
   FacilitatorConfig,
   EvmPaymentPayload,
   SolanaPaymentPayload,
+  ArkadePaymentPayload,
   Resource,
   settleResponseHeader,
   RoutesConfig,
@@ -29,28 +31,47 @@ import { VerifyResponse, SettleResponse } from "@bit-gpt/h402/types";
  *
  * @example
  * ```typescript
+ * import express from "express";
+ * import { createRouteConfigFromPrice, paymentMiddleware } from "@bit-gpt/h402-express";
+ *
+ * const app = express();
+
  * // Simple configuration - All endpoints protected by $0.01 USDT on BSC
  * app.use(paymentMiddleware(
  *   {
- *     '*': '$0.01' // All routes protected by $0.01 USDT on BSC
+ *     '*': createRouteConfigFromPrice("$0.1", "bsc", "0xYourEVMAddress") // All routes protected by $0.01 USDT on BSC. Note: This doesn't work with Arkade Network
  *   }
  * ));
  *
  * // Advanced configuration - Multiple payment options per route
  * app.use(paymentMiddleware(
  *   {
- *     '/weather/*': '$0.001', // Simple price for weather endpoints
+ *     '/weather/*': createRouteConfigFromPrice("$0.1", "bsc", "0xYourEVMAddress"), // Simple price for weather endpoints
  *     '/premium/*': {
  *       paymentRequirements: [
- *         {
+ *       {
  *           scheme: "exact",
  *           namespace: "evm",
  *           tokenAddress: "0x55d398326f99059ff775485246999027b3197955", // USDT on BSC
  *           amountRequired: 0.01,
  *           amountRequiredFormat: "humanReadable",
  *           networkId: "56",
- *           payToAddress: "0x123...",
- *           description: "Premium API access with USDT on BSC"
+ *           payToAddress: evmAddress,
+ *           description: "Premium content access with USDT on BSC",
+ *           tokenDecimals: 18,
+ *           tokenSymbol: "USDT",
+ *         },
+ *         {
+ *           scheme: "exact",
+ *           namespace: "evm",
+ *           tokenAddress: "0xfde4C96c8593536E31F229EA8f37b2ADa2699bb2", // USDT on Base
+ *           amountRequired: 0.01, 
+ *           amountRequiredFormat: "humanReadable", 
+ *           networkId: "8453", 
+ *           payToAddress: evmAddress,
+ *           description: "Premium content access with USDT on Base",
+ *           tokenDecimals: 6,
+ *           tokenSymbol: "USDT",
  *         },
  *         {
  *           scheme: "exact",
@@ -59,9 +80,22 @@ import { VerifyResponse, SettleResponse } from "@bit-gpt/h402/types";
  *           amountRequired: 0.01,
  *           amountRequiredFormat: "humanReadable",
  *           networkId: "mainnet",
- *           payToAddress: "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM",
- *           description: "Premium API access with USDC on Solana"
- *         }
+ *           payToAddress: solanaAddress, // Example Solana address
+ *           description: "Premium content access with USDC on Solana",
+ *           tokenDecimals: 6,
+ *           tokenSymbol: "USDC",
+ *         },
+ *         {
+ *           scheme: "exact",
+ *           namespace: "arkade",
+ *           amountRequired: 0.00001, // Amount should be more than dust amount otherwise it will be rejected
+ *           amountRequiredFormat: "humanReadable",
+ *           networkId: "bitcoin",
+ *           payToAddress: arkadeAddress,
+ *           description: "Premium content access with BTC via Arkade",
+ *           tokenSymbol: "BTC",
+ *           tokenDecimals: 8,
+ *         },
  *       ]
  *     }
  *   }
@@ -116,8 +150,16 @@ export function paymentMiddleware(
         }
         // Additional validation could be added here using @solana/web3.js
         validatedPayToAddress = requirement.payToAddress;
+      } else if (requirement.namespace === "arkade") {
+        // Validate Arkade address using SDK's validation
+        if (!arkadeUtils.isValidArkadeAddress(requirement.payToAddress)) {
+          throw new Error("Invalid Arkade address format");
+        }
+        validatedPayToAddress = requirement.payToAddress;
       } else {
-        throw new Error(`Unsupported namespace: ${requirement.namespace}`);
+        // TypeScript knows this is exhaustive, so this should never happen
+        const exhaustiveCheck: never = requirement;
+        throw new Error(`Unsupported namespace: ${(exhaustiveCheck as any).namespace}`);
       }
 
       return {
@@ -179,12 +221,14 @@ export function paymentMiddleware(
     }
 
     // Verify payment
-    let decodedPayment: EvmPaymentPayload | SolanaPaymentPayload;
+    let decodedPayment: EvmPaymentPayload | SolanaPaymentPayload | ArkadePaymentPayload;
     try {
       if (namespace === "evm") {
         decodedPayment = evmUtils.decodePaymentPayload(payment);
       } else if (namespace === "solana") {
         decodedPayment = solanaUtils.decodePaymentPayload(payment);
+      } else if (namespace === "arkade") {
+        decodedPayment = arkadeUtils.decodePaymentPayload(payment);
       } else {
         throw new Error(`Unsupported namespace: ${namespace}`);
       }
@@ -361,5 +405,7 @@ export function paymentMiddleware(
   };
 }
 
-export type { Money, Network, MiddlewareConfig, Resource, RouteConfig } from "@bit-gpt/h402/types";
+export type { Money, Network, MiddlewareConfig, Resource, RouteConfig} from "@bit-gpt/h402/types";
 export { createRouteConfigFromPrice } from "@bit-gpt/h402/shared";
+export { isEVMNetwork, isSolanaNetwork, isArkadeNetwork } from "@bit-gpt/h402/types";
+

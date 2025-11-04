@@ -2,6 +2,7 @@ import { z } from "zod";
 import { NetworkSchema } from "../shared/index.js";
 import { ExactEvmPayloadSchema } from "./evmPayload.js";
 import { ExactSolanaPayloadSchema } from "./solanaPayload.js";
+import { ExactArkadePayloadSchema } from "./arkadePayload.js";
 
 // Constants
 const MixedAddressRegex =
@@ -22,6 +23,21 @@ export const ErrorReasons = [
   "invalid_exact_solana_payload_authorization_value",
   "invalid_exact_solana_payload_signature",
   "invalid_exact_solana_payload_recipient_mismatch",
+  "invalid_exact_arkade_payload_txId",
+  "invalid_exact_arkade_payload_tx_input_invalid",
+  "invalid_exact_arkade_payload_tx_recipient_mismatch",
+  "invalid_exact_arkade_payload_tx_amount_mismatch",
+  "invalid_exact_arkade_payload_tx_amount_less_than_dust",
+  "invalid_exact_arkade_payload_tx_output_not_found",
+  "invalid_exact_arkade_payload_signer_pubkey",
+  "invalid_exact_arkade_payload_txId_not_found",
+  "invalid_exact_arkade_payload_psbt_empty",
+  "invalid_exact_arkade_payload_tx_sender_pubkey_not_found",
+  "invalid_exact_arkade_payload_tx_input_missing_witness",
+  "invalid_exact_arkade_payload_tx_input_missing_tapleaf",
+  "invalid_exact_arkade_payload_tx_input_unsigned",
+  "invalid_exact_arkade_payload_signed_message_signature_mismatch",
+  "invalid_exact_arkade_payload_signedMessage",
   "invalid_network",
   "invalid_payload",
   "invalid_payment_requirements",
@@ -34,16 +50,14 @@ export const ErrorReasons = [
 ] as const;
 
 // h402PaymentRequirements
-const NamespaceSchema = z.enum(["evm", "solana"]);
+const NamespaceSchema = z.enum(["evm", "solana", "arkade"]);
 const AmountFormatSchema = z.enum(["humanReadable", "smallestUnit"]);
 
 // Helper function to validate bigint or number
 const BigintOrNumberSchema = z.union([z.bigint(), z.number()]);
 
-// Base Payment Requirements Schema
-export const BasePaymentRequirementsSchema = z.object({
-  namespace: NamespaceSchema,
-  tokenAddress: z.string(),
+// Common fields shared by all namespaces
+const CommonPaymentRequirementsSchema = z.object({
   tokenDecimals: z.number().int().optional(),
   tokenSymbol: z.string().optional(),
   amountRequired: BigintOrNumberSchema,
@@ -61,12 +75,51 @@ export const BasePaymentRequirementsSchema = z.object({
   requiredDeadlineSeconds: z.number().int().optional(),
 });
 
-// Enriched Payment Requirements Schema
-export const EnrichedPaymentRequirementsSchema =
-  BasePaymentRequirementsSchema.extend({
-    tokenDecimals: z.number().int(), // Required after enrichment
-    tokenSymbol: z.string(), // Required after enrichment
-  });
+// Namespace-specific schemas
+export const EvmPaymentRequirementsSchema = CommonPaymentRequirementsSchema.extend({
+  namespace: z.literal("evm"),
+  tokenAddress: z.string(), // Required for EVM
+});
+
+export const SolanaPaymentRequirementsSchema = CommonPaymentRequirementsSchema.extend({
+  namespace: z.literal("solana"),
+  tokenAddress: z.string(), // Required for Solana
+});
+
+export const ArkadePaymentRequirementsSchema = CommonPaymentRequirementsSchema.extend({
+  namespace: z.literal("arkade"),
+  tokenAddress: z.string().optional(), // Optional for Arkade (BTC only, can be omitted)
+});
+
+// Base Payment Requirements Schema (discriminated union)
+export const BasePaymentRequirementsSchema = z.discriminatedUnion("namespace", [
+  EvmPaymentRequirementsSchema,
+  SolanaPaymentRequirementsSchema,
+  ArkadePaymentRequirementsSchema,
+]);
+
+// Enriched namespace-specific schemas
+export const EvmEnrichedPaymentRequirementsSchema = EvmPaymentRequirementsSchema.extend({
+  tokenDecimals: z.number().int(), // Required after enrichment
+  tokenSymbol: z.string(), // Required after enrichment
+});
+
+export const SolanaEnrichedPaymentRequirementsSchema = SolanaPaymentRequirementsSchema.extend({
+  tokenDecimals: z.number().int(),
+  tokenSymbol: z.string(),
+});
+
+export const ArkadeEnrichedPaymentRequirementsSchema = ArkadePaymentRequirementsSchema.extend({
+  tokenDecimals: z.number().int(), // Always 8 for BTC
+  tokenSymbol: z.string(), // Always "BTC"
+});
+
+// Enriched Payment Requirements Schema (discriminated union)
+export const EnrichedPaymentRequirementsSchema = z.discriminatedUnion("namespace", [
+  EvmEnrichedPaymentRequirementsSchema,
+  SolanaEnrichedPaymentRequirementsSchema,
+  ArkadeEnrichedPaymentRequirementsSchema,
+]);
 
 // Main export schema
 export const PaymentRequirementsSchema = BasePaymentRequirementsSchema;
@@ -102,8 +155,12 @@ export const EvmPaymentPayloadSchema = createPaymentPayloadSchema(
 export const SolanaPaymentPayloadSchema = createPaymentPayloadSchema(
   ExactSolanaPayloadSchema
 );
+export const ArkadePaymentPayloadSchema = createPaymentPayloadSchema(
+  ExactArkadePayloadSchema
+);
 export type EvmPaymentPayload = z.infer<typeof EvmPaymentPayloadSchema>;
 export type SolanaPaymentPayload = z.infer<typeof SolanaPaymentPayloadSchema>;
+export type ArkadePaymentPayload = z.infer<typeof ArkadePaymentPayloadSchema>;
 
 // h402VerifyResponse
 export const VerifyResponseSchema = z.object({

@@ -1,5 +1,6 @@
 export * as evm from "./evm/index.js";
 export * as solana from "./solana/index.js";
+export * as arkade from "./arkade/index.js";
 
 export * from "./toJsonSafe.js";
 export * from "./parseMoney.js";
@@ -11,3 +12,4 @@ export * from "./network.js";
 export * from "./encoding.js";
 export * from "./parsePaymentRequirements.js";
 export * from "./client.js";
+export * from "./amount.js";
