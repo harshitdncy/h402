@@ -44,6 +44,7 @@ import { solana } from "../../../shared/index.js";
 import { getFacilitator } from "../../../shared/next.js";
 import { decodeTransactionFromPayload } from "../../../shared/solana/transaction.js";
 import { convertAmountToSmallestUnit } from "../../../shared/solana/amount.js";
+import { getTokenDecimals } from "../../../shared/solana/tokenMetadata.js";
 
 /**
  * Verify a Solana payment for the exact scheme
@@ -175,7 +176,15 @@ async function verifyPaymentAmount(
   }
 
   const payToAddress = address(paymentRequirements.payToAddress);
-  const requiredAmount = BigInt(paymentRequirements.amountRequired.toString());
+  let tokenDecimals = paymentRequirements.tokenDecimals;
+  if(!tokenDecimals && paymentRequirements.tokenAddress) {
+    tokenDecimals = await getTokenDecimals(paymentRequirements.tokenAddress);
+  }
+  const requiredAmount = convertAmountToSmallestUnit(
+    paymentRequirements.amountRequired,
+    tokenDecimals || 9,
+    paymentRequirements.amountRequiredFormat
+  );
 
   // Check if this is a native SOL transfer or SPL token transfer
   if (paymentRequirements.tokenAddress === "11111111111111111111111111111111") {
@@ -625,9 +634,13 @@ async function validateTransferInstruction(
       };
     }
 
+    let tokenDecimals = paymentRequirements.tokenDecimals;
+    if(!tokenDecimals && paymentRequirements.tokenAddress) {
+      tokenDecimals = await getTokenDecimals(paymentRequirements.tokenAddress);
+    }
     const requiredAmount = convertAmountToSmallestUnit(
       paymentRequirements.amountRequired,
-      paymentRequirements.tokenDecimals || 9,
+      tokenDecimals || 6,
       paymentRequirements.amountRequiredFormat
     );
 
