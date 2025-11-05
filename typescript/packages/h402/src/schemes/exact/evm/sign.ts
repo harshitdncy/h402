@@ -76,6 +76,7 @@ async function createTransactionRequest(
       value,
       gasPrice,
       nonce,
+      chainId: chain.id,
       chain,
     };
   } else {
@@ -92,6 +93,7 @@ async function createTransactionRequest(
       data,
       gasPrice,
       nonce,
+      chainId: chain.id,
       chain,
     };
   }
