@@ -15,10 +15,11 @@ import type {
   PublicClient,
   LocalAccount,
 } from "viem";
-import { base, avalanche, baseSepolia, avalancheFuji, iotex, bsc, polygon, sei } from "viem/chains";
+import { base, avalanche, baseSepolia, avalancheFuji, iotex, bsc, polygon, sei, story, abstract, peaq } from "viem/chains";
 import { privateKeyToAccount } from "viem/accounts";
 import { type Hex } from "viem";
 import { EvmNetworkToChainId } from "../network.js";
+import { eip712WalletActions } from "viem/zksync";
 
 // Create a public client for reading data
 export type SignerWallet<
@@ -62,6 +63,12 @@ export function getPublicClient(
       return createClientPolygon();
     case EvmNetworkToChainId.get("sei")?.toString():
       return createClientSei();
+    case EvmNetworkToChainId.get("story")?.toString():
+      return createClientStory();
+    case EvmNetworkToChainId.get("abstract")?.toString():
+      return createClientAbstract();
+    case EvmNetworkToChainId.get("peaq")?.toString():
+      return createClientPeaq();
     default:
       throw new Error(`Unsupported network ID: ${networkId}`);
   }
@@ -196,6 +203,53 @@ export function createClientSei(): ConnectedClient<
   }).extend(publicActions);
 }
 
+/**
+ * Creates a public client configured for the Story
+ *
+ * @returns A public client instance connected to Story
+ */
+export function createClientStory(): ConnectedClient<
+  Transport,
+  typeof story,
+  undefined
+> {
+  return createPublicClient({
+    chain: story,
+    transport: http(),
+  }).extend(publicActions);
+}
+
+/**
+ * Creates a public client configured for the Abstract
+ *
+ * @returns A public client instance connected to Abstract
+ */
+export function createClientAbstract(): ConnectedClient<
+  Transport,
+  typeof abstract,
+  undefined
+> {
+  return createPublicClient({
+    chain: abstract,
+    transport: http(),
+  }).extend(publicActions).extend(eip712WalletActions());
+}
+
+/**
+ * Creates a public client configured for the Peaq
+ *
+ * @returns A public client instance connected to Peaq
+ */
+export function createClientPeaq(): ConnectedClient<
+  Transport,
+  typeof peaq,
+  undefined
+> {
+  return createPublicClient({
+    chain: peaq,
+    transport: http(),
+  }).extend(publicActions);
+}
 
 /**
  * Creates a wallet client configured for the Base with a private key

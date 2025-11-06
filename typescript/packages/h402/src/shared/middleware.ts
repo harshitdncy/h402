@@ -99,14 +99,7 @@ export function getDefaultAsset(network: Network) {
     decimals: network === "bsc" ? 18 : 6,
     eip712: {
       name:
-        network === "bsc"
-          || network === "base"
-          || network === "polygon"
-          || network === "sei"
-          ? "Tether USD"
-          : network === "solana"
-          ? "USD Coin"
-          : "USDC",
+        getTokenSymbol(network),
       version: "2",
     },
   };
@@ -230,7 +223,7 @@ export function createRouteConfigFromPrice(
     mimeType: "application/json",
     payToAddress: payToAddress as any,
     tokenAddress: asset.address as any, // Only for EVM/Solana
-    tokenSymbol: network === "bsc" || network === "base" || network === "polygon" || network === "sei" ? "USDT" : "USDC",
+    tokenSymbol: getTokenSymbol(network),
     tokenDecimals: asset.decimals as any,
     outputSchema: null,
     extra: asset.eip712,
@@ -242,6 +235,27 @@ export function createRouteConfigFromPrice(
   return {
     paymentRequirements: [paymentRequirements],
   };
+}
+
+/**
+ * Gets the token symbol for a given network
+ *
+ * @param network - The network to get the token symbol for
+ * @returns The token symbol (USDT, Bridged USDC, or USDC)
+ */
+export function getTokenSymbol(network: Network): string {
+  switch (network) {
+    case "bsc":
+    case "base":
+    case "polygon":
+    case "sei":
+      return "USDT";
+    case "story":
+    case "abstract":
+      return "Bridged USDC";
+    default:
+      return "USDC";
+  }
 }
 
 /**
@@ -263,6 +277,15 @@ export function getUsdcAddressForChain(chainId: number | string): string {
   }
   if (chainId === 1329) {
     return STABLECOIN_ADDRESSES.USDT_SEI;
+  }
+  if (chainId === 1514) {
+    return STABLECOIN_ADDRESSES.USDC_STORY;
+  }
+  if (chainId === 2741) {
+    return STABLECOIN_ADDRESSES.USDC_ABSTRACT;
+  }
+  if (chainId === 3338) {
+    return STABLECOIN_ADDRESSES.USDC_PEAQ;
   }
   // For Solana (no numeric chain ID), use USDC
   if (chainId === "mainnet") {

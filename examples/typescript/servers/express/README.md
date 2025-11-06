@@ -156,7 +156,7 @@ pnpm dev
 ## Environment Variables
 
 - `FACILITATOR_URL`: URL of the payment facilitator service
-- `NETWORK`: Network to use for simple price configurations (e.g., "base", "bsc", "polygon", "sei", "solana" or "bitcoin")
+- `NETWORK`: Network to use for simple price configurations (e.g., "base", "bsc", "polygon", "sei", "story", "abstract", "peaq", "solana" or "bitcoin")
 - `EVM_ADDRESS`: Your Ethereum address for receiving EVM payments
 - `SOLANA_ADDRESS`: Your Solana address for receiving Solana payments
 - `ARKADE_ADDRESS`: Your Arkade address for receiving Arkade payments
