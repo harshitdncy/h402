@@ -1,4 +1,4 @@
-import { base, bsc, mainnet, polygon, sei } from "viem/chains";
+import { abstract, base, bsc, mainnet, peaq, polygon, sei, story } from "viem/chains";
 import { type Chain } from "viem/chains";
 
 type ChainConfig = {
@@ -45,6 +45,24 @@ const chains: ChainRegistry = {
     nativeTokenDecimals: 18,
     nativeTokenSymbol: "SEI",
   },
+  "1514": {
+    chain: story,
+    rpcEnvVariable: "STORY_RPC_URL",
+    nativeTokenDecimals: 18,
+    nativeTokenSymbol: "IP",
+  },
+  "2741": {
+    chain: abstract,
+    rpcEnvVariable: "ABSTRACT_RPC_URL",
+    nativeTokenDecimals: 18,
+    nativeTokenSymbol: "ETH",
+  },
+  "3338": {
+    chain: peaq,
+    rpcEnvVariable: "PEAQ_RPC_URL",
+    nativeTokenDecimals: 18,
+    nativeTokenSymbol: "PEAQ",
+  }
 } as const;
 
 function getChain(chainId: string): Chain {

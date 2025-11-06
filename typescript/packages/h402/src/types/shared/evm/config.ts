@@ -1,6 +1,10 @@
 import { type Address } from "viem";
 
 export const config: Record<string, ChainConfig> = {
+  "56": {
+    usdcAddress: "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d",
+    usdcName: "USDC",
+  },
   "84532": {
     usdcAddress: "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
     usdcName: "USDC",
@@ -20,6 +24,26 @@ export const config: Record<string, ChainConfig> = {
   "4689": {
     usdcAddress: "0xcdf79194c6c285077a58da47641d4dbe51f63542",
     usdcName: "Bridged USDC",
+  },
+  "137": {
+    usdcAddress: "0x3c499c542cef5e3811e1192ce70d8cc03d5c3359",
+    usdcName: "USD Coin",
+  },
+  "1329": {
+    usdcAddress: "0xe15fc38f6d8c56af07bbcbe3baf5708a2bf42392",
+    usdcName: "USDC",
+  },
+  "1514": {
+    usdcAddress: "0xF1815bd50389c46847f0Bda824eC8da914045D14",
+    usdcName: "Bridged USDC",
+  },
+  "2741": {
+    usdcAddress: "0x84a71ccd554cc1b02749b35d22f684cc8ec987e1",
+    usdcName: "Bridged USDC",
+  },
+  "3338": {
+    usdcAddress: "0xbbA60da06c2c5424f03f7434542280FCAd453d10",
+    usdcName: "USDC",
   },
 };
 

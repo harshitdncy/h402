@@ -2,7 +2,7 @@ import { z } from "zod";
 
 // Define network types
 export const EVMNetworkSchema = z.enum([
-  "base", "avalanche", "iotex", "bsc", "polygon", "sei"
+  "base", "avalanche", "iotex", "bsc", "polygon", "sei", "story", "abstract", "peaq"
 ]);
 
 export const SolanaNetworkSchema = z.enum(["solana"]);
@@ -25,6 +25,9 @@ export const SupportedEVMNetworks: EVMNetwork[] = [
   "bsc",
   "polygon",
   "sei",
+  "story",
+  "abstract",
+  "peaq"
 ];
 
 export const SupportedSolanaNetworks: SolanaNetwork[] = ["solana"];
@@ -45,6 +48,9 @@ export const EvmNetworkToChainId = new Map<EVMNetwork, number>([
   ["bsc", 56],
   ["polygon", 137],
   ["sei", 1329],
+  ["story", 1514],
+  ["abstract", 2741],
+  ["peaq", 3338],
 ]);
 
 export const ChainIdToEvmNetwork = Object.fromEntries(
@@ -88,6 +94,9 @@ export const NetworkMetadata = {
   bsc: { name: "BNB Smart Chain", type: "evm" },
   polygon: { name: "Polygon", type: "evm" },
   sei: { name: "Sei", type: "evm" },
+  story: { name: "Story", type: "evm" },
+  abstract: { name: "Abstract", type: "evm" },
+  peaq: { name: "Peaq", type: "evm" },
   // Solana Networks
   solana: { name: "Solana", type: "solana" },
   // Arkade Networks (Bitcoin)
