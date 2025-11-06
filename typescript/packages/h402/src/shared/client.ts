@@ -3,8 +3,7 @@ import { privateKeyToAccount } from "viem/accounts";
 import { Keypair } from "@solana/web3.js";
 import bs58 from "bs58";
 import { createKeyPairSignerFromBytes } from "@solana/signers";
-import type { TransactionModifyingSigner } from "@solana/signers";
-import type { Transaction } from "@solana/transactions";
+import type { Base64EncodedWireTransaction, Transaction } from "@solana/transactions";
 import type {
   PaymentClient,
   EvmClient,
@@ -16,7 +15,8 @@ import {
   Wallet,
 } from "@arkade-os/sdk";
 import { privateKeyToHex } from "./arkade/key.js";
-import { getArkadeServerUrl } from "./next";
+import { getArkadeServerUrl, getFacilitator } from "./next";
+import { createSolanaRpc, getBase64EncodedWireTransaction } from "@solana/kit";
 
 /**
  * Creates an EVM wallet client with public actions
@@ -71,10 +71,51 @@ export function createSolanaClient(privateKey: string): SolanaClient {
 
       return modifiedTransactions;
     },
-  } satisfies {
-    publicKey: string;
-    signTransaction: TransactionModifyingSigner["modifyAndSignTransactions"];
-  };
+    signAndSendTransaction: async <T extends Transaction>(
+      transactions: readonly T[]
+    ) => {
+      const rpc = createSolanaRpc(`${getFacilitator()}/solana-rpc`);
+      const signer = await createKeyPairSignerFromBytes(
+        solanaKeypair.secretKey
+      );
+      
+      const signatures = await signer.signTransactions(transactions);
+      
+      const modifiedTransactions = transactions.map((transaction, index) => {
+        const signature = signatures[index];
+        if (!signature || Object.keys(signature).length === 0) {
+          throw new Error(`Failed to sign transaction at index ${index}`);
+        }
+        return {
+          ...transaction,
+          signatures: {
+            ...transaction.signatures,
+            ...signature,
+          },
+        };
+      });
+      
+      const signatureBytes = await Promise.all(
+        modifiedTransactions.map(async (transaction, index) => {
+          const wireTransaction = getBase64EncodedWireTransaction(transaction);
+          await rpc
+            .sendTransaction(wireTransaction as Base64EncodedWireTransaction, {
+              encoding: "base64",
+            })
+            .send();
+          
+          const signatureMap = signatures[index];
+          const signatureBytes = Object.values(signatureMap!)[0];
+          if (!signatureBytes) {
+            throw new Error(`Failed to extract signature bytes at index ${index}`);
+          }
+          return signatureBytes;
+        })
+      );
+      
+      return signatureBytes;
+    },
+  }
 }
 
 export function createArkadeClient(privateKey: string): ArkadeClient {
