@@ -18,7 +18,8 @@ jobs:
       group: arc-runners
 
     steps:
-      - run: |
+      - name: Install `gh` cli
+        run: |
           #!/bin/bash -ex
           sudo apt-get update
           sudo apt-get install -y gh
@@ -37,7 +38,8 @@ jobs:
           name: h402-node_modules
           path: typescript/packages/h402/node_modules
 
-      - run: |
+      - name: Install Libraries
+        run: |
           #!/bin/bash -ex
 
           echo '${{ inputs.libraries }}' | \
