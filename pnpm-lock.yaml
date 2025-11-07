@@ -310,15 +310,15 @@ importers:
 
   examples/typescript/servers/hono:
     dependencies:
+      '@bit-gpt/h402-hono':
+        specifier: workspace:*
+        version: link:../../../../typescript/packages/h402-hono
       '@hono/node-server':
         specifier: ^1.13.8
         version: 1.14.4(hono@4.8.1)
       dotenv:
         specifier: ^16.4.7
         version: 16.5.0
-      h402-hono:
-        specifier: workspace:*
-        version: link:../../../../typescript/packages/h402-hono
       hono:
         specifier: ^4.7.1
         version: 4.8.1

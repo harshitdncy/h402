@@ -9,7 +9,7 @@ import {
   isArkadeNetwork,
   isEVMNetwork,
   isSolanaNetwork,
-} from "h402-hono";
+} from "@bit-gpt/h402-hono";
 
 config();
 
@@ -73,9 +73,9 @@ app.use(
             scheme: "exact",
             namespace: "evm",
             tokenAddress: "0xfde4C96c8593536E31F229EA8f37b2ADa2699bb2", // USDT on Base
-            amountRequired: 0.01, 
-            amountRequiredFormat: "humanReadable", 
-            networkId: "8453", 
+            amountRequired: 0.01,
+            amountRequiredFormat: "humanReadable",
+            networkId: "8453",
             payToAddress: evmAddress,
             description: "Premium content access with USDT on Base",
             tokenDecimals: 6,
